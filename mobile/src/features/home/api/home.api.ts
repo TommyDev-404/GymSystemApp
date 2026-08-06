@@ -1,37 +1,81 @@
 import { api } from "../../../lib/axios";
+import { CreateFitnessGoalPayload, UpdateFitnessGoalPayload } from "../types/HomeTypes";
 
-export const getMembersDashboardDataApi = async (
-   memberId: number
- ) => {
-   try {
-     const res = await api.get(
-       `/home/member-stat/${memberId}`
-     );
- 
-     return res.data;
- 
-   } catch (error: any) {
-     throw new Error(
-       error.response?.data?.message ||
-       "Failed to fetch dashboard data"
-     );
-   }
+
+export const getMembersDashboardDataApi = async (memberId: number) => {
+	try {
+		const res = await api.get(`/home/member-stat/${memberId}`);
+
+		return res.data;
+	} catch (error: any) {
+		throw new Error(
+			error.response?.data?.message ||
+			"Failed to fetch dashboard data"
+		);
+	}
  };
 
-export const getMemberRecentActivityApi = async (
-  memberId: number
-) => {
-  try {
-    const res = await api.get(
-      `/home/recent-activity/${memberId}`
-    );
+export const getMemberRecentActivityApi = async (memberId: number) => {
+	try {
+		const res = await api.get(`/home/recent-activity/${memberId}`);
 
-    return res.data;
+		return res.data;
+	} catch (error: any) {
+		throw new Error(
+			error.response?.data?.message ||
+			"Failed to fetch recent activity"
+		);
+	}
+};
 
-  } catch (error: any) {
-    throw new Error(
-      error.response?.data?.message ||
-      "Failed to fetch recent activity"
-    );
-  }
+export const createFitnessGoalApi = async (data: CreateFitnessGoalPayload) => {
+	try {
+		const response = await api.post("/home/create-fitness-goal", data);
+
+		return response.data;
+	} catch (error: any) {
+		throw new Error(
+			error.response?.data?.message ||
+			"Failed to create fitness goal"
+		);
+	}
+};
+
+export const updateFitnessGoalApi = async (id:number, data:UpdateFitnessGoalPayload)=>{
+	try {
+		const response = await api.patch(`/home/update-fitness-goal/${id}`, data);
+
+		return response.data;
+	} catch (error: any) {
+		throw new Error(
+			error.response?.data?.message ||
+			"Failed to update fitness goal"
+		);
+	}
+};
+
+export const getFitnessGoalApi = async (memberId:number)=>{
+	try {
+		const response = await api.get(`/home/member-fitness-goal/${memberId}`);
+
+	 	return response.data;
+	} catch (error: any) {
+		throw new Error(
+			error.response?.data?.message ||
+			"Failed to get weight progress"
+		);
+	}
+};
+
+export const getMemberWeightGoalApi = async (memberId:number )=>{
+  	try {
+		const response = await api.get(`/home/member-weight-goal/${memberId}`);
+
+		return response.data;
+	} catch (error: any) {
+		throw new Error(
+			error.response?.data?.message ||
+			"Failed to get weight progress"
+		);
+	}
 };

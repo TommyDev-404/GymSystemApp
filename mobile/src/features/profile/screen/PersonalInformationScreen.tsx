@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StatusBar, StyleSheet } from "react-native";
 
 import Header from "@/features/profile/components/personal-information/Header";
 import ProfileCard from "@/features/profile/components/personal-information/ProfileCard";
@@ -8,12 +8,14 @@ import ChangePhotoButton from "@/features/profile/components/personal-informatio
 import { EditInfoModal } from "../components/personal-information/EditInfoModal";
 import { useRef, useState } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useAuth } from "@/context/AuthContext";
 
 export default function PersonalInformationScreen() {
+  const { member } = useAuth();
   const sheetRef = useRef<BottomSheetModal>(null);
 
   const [selectedField, setSelectedField] = useState("Username");
-  const [value, setValue] = useState("JohnDoe");
+  const [value, setValue] = useState("");
 
   const openEdit = (field: string, currentValue: string) => {
     setSelectedField(field);
@@ -23,33 +25,25 @@ export default function PersonalInformationScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      
       <Header />
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <ProfileCard />
+        <ProfileCard
+          username={member?.username!}
+        />
 
         <InfoItem
           label="Username"
-          value="JohnDoe"
-          onPress={() => openEdit("Username", "JohnDoe")}
+          value={member?.username ?? ""}
+          onPress={() => openEdit("Username", member?.username ?? "")}
         />
 
         <InfoItem
           label="Email"
-          value="john@email.com"
-          onPress={() => openEdit("Email", "john@email.com")}
-        />
-
-        <InfoItem
-          label="Phone Number"
-          value="09123456789"
-          onPress={() => openEdit("Phone Number", "09123456789")}
-        />
-
-        <InfoItem
-          label="Address"
-          value="Quezon City"
-          onPress={() => openEdit("Address", "Quezon City")}
+          value={member?.email ?? ""}
+          onPress={() => openEdit("Email", member?.email ?? "")}
         />
 
         <ChangePhotoButton />

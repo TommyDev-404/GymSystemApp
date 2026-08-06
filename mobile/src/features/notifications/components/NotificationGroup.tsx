@@ -1,23 +1,31 @@
-import React from "react";
 import { View, Text } from "react-native";
 import { NotificationCard } from "./NotificationCard";
-
-type Props = {
-  label: string;
-  icon: any;
-  color: string;
-  bg: string;
-  items: any[];
-};
+import { useMarkNotificationRead } from "../hook/useNotification";
+import { NotificationGroupType } from "../types/NotifTypes";
+import Toast from "react-native-toast-message";
 
 export function NotificationGroup({
   label,
   icon: Icon,
   color,
   bg,
+  memberId,
   items,
-}: Props) {
-  const unreadCount = items.filter((i) => i.unread).length;
+}: NotificationGroupType) {
+  const { mutate: markAsRead, isPending } = useMarkNotificationRead();
+  const unreadCount = items.filter((i) => i.is_read).length;
+  
+  const handleMarkRead = (notificationId: number) => {
+    markAsRead({ notificationId, memberId }, {
+      onSuccess: (data) => {
+       Toast.show({
+          type: "success",
+          text1: "Success",
+          text2: data.message,
+        });
+      }
+    })
+  };
 
   return (
     <View style={{ paddingHorizontal: 20, marginBottom: 18, paddingTop: 10 }}>
@@ -70,6 +78,7 @@ export function NotificationGroup({
             icon={Icon}
             iconColor={color}
             iconBg={bg}
+            onMarkAsRead={() => handleMarkRead(item.id)}
           />
         ))}
       </View>

@@ -1,110 +1,105 @@
 import AppHeader from "@/components/AppHeader";
 import { router, Tabs } from "expo-router";
-import { House, Dumbbell, QrCode, Bell, User } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { House, Dumbbell, QrCode, Bell, Users } from "lucide-react-native";
+import { useState } from "react";
+import { Pressable, View } from "react-native";
 
 export default function TabLayout() {
+  const [profileOpen, setProfileOpen] = useState(false);
+  const openProfile = () => setProfileOpen(true);
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: true,
-        tabBarShowLabel: true,
-        tabBarActiveTintColor: "#10b981",
-        tabBarInactiveTintColor: "#94a3b8",
-        tabBarStyle: {
-          height: 70,
-          paddingBottom: 10,
-          paddingTop: 8,
-          backgroundColor: "white",
-          borderTopWidth: 1,
-          borderTopColor: "rgba(0,0,0,0.06)",
-        },
-      }}
-    >
-      {/* HOME */}
-      <Tabs.Screen
-        name="home"
-        options={{
-          header: () => <AppHeader />,
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <House size={size} color={color} />
-          ),
+    <>
+      <Tabs
+        screenOptions={{
+          headerShown: true,
+          tabBarShowLabel: true,
+          tabBarActiveTintColor: "#10b981",
+          tabBarInactiveTintColor: "#8e8e93",
+          tabBarLabelStyle: { fontSize: 11, fontWeight: "500", marginTop: -2 },
+          tabBarItemStyle: { paddingTop: 4 },
+          tabBarStyle: {
+            height: 60,
+            backgroundColor: "white",
+            borderTopWidth: 1,
+            borderTopColor: "rgba(0,0,0,0.06)",
+          },
         }}
-      />
+      >
+        <Tabs.Screen
+          name="home"
+          options={{
+            header: () => <AppHeader onProfilePress={openProfile} />,
+            title: "Home",
+            tabBarIcon: ({ color, focused }) => (
+              <House size={focused ? 23 : 22} color={color} strokeWidth={focused ? 2.4 : 2} />
+            ),
+          }}
+        />
 
-      {/* WORKOUT */}
-      <Tabs.Screen
-        name="workout"
-        options={{
-          header: () => <AppHeader isOnWorkout={true}/>,
-          title: "Workout",
-          tabBarIcon: ({ color, size }) => (
-            <Dumbbell size={size} color={color} />
-          ),
-        }}
-      />
+        <Tabs.Screen
+          name="workout"
+          options={{
+            header: () => <AppHeader isOnWorkout onProfilePress={openProfile} />,
+            title: "Workout",
+            tabBarIcon: ({ color, focused }) => (
+              <Dumbbell size={focused ? 23 : 22} color={color} strokeWidth={focused ? 2.4 : 2} />
+            ),
+          }}
+        />
 
-      {/* CHECK-IN (CENTER HIGHLIGHTED) */}
-      <Tabs.Screen
-        name="checkin"
-        options={{
-          title: "Scan",
-          tabBarLabel: "Scan",
-          tabBarIcon: ({ focused }) => (
-            <Pressable
-              onPress={() => router.push("/qr-scanner")}
-              style={{
-                top: -20,
-              }}
-            >
-              <View
-                style={{
-                  width: 58,
-                  height: 58,
-                  borderRadius: 30,
-                  backgroundColor: "#10b981",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  shadowColor: "#10b981",
-                  shadowOpacity: 0.35,
-                  shadowRadius: 10,
-                  shadowOffset: { width: 0, height: 6 },
-                  elevation: 8,
-                }}
-              >
-                <QrCode size={26} color="white" />
-              </View>
-            </Pressable>
-          ),
-          tabBarStyle: { display: "none" }, // 👈 HIDE BOTTOM NAVBAR
-        }}
-      />
+        <Tabs.Screen
+          name="checkin"
+          options={{
+            title: "Scan",
+            tabBarLabel: "Scan",
+            tabBarIcon: () => (
+              <Pressable onPress={() => router.push("/qr-scanner")} style={{ top: -14 }}>
+                <View
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 24,
+                    backgroundColor: "#10b981",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    shadowColor: "#10b981",
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    shadowOffset: { width: 0, height: 4 },
+                    elevation: 6,
+                  }}
+                >
+                  <QrCode size={22} color="white" />
+                </View>
+              </Pressable>
+            ),
+            tabBarStyle: { display: "none" },
+          }}
+        />
 
-      {/* NOTIFICATIONS */}
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          header: () => <AppHeader />,
-          title: "Alerts",
-          tabBarIcon: ({ color, size }) => (
-            <Bell size={size} color={color} />
-          ),
-        }}
-      />
+        <Tabs.Screen
+          name="community" // Community tab
+          options={{
+            header: () => <AppHeader isOnCommunity />,
+            title: "Community",
+            tabBarIcon: ({ color, focused }) => (
+              <Users size={focused ? 23 : 22} color={color} strokeWidth={focused ? 2.4 : 2} />
+            ),
+          }}
+        />
 
-      {/* PROFILE */}
-      <Tabs.Screen
-        name="profile"
-        options={{
-          headerShown: false,
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <User size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+        <Tabs.Screen
+          name="notifications" // now shows Notifications
+          options={{
+            header: () => <AppHeader onProfilePress={openProfile} />,
+            title: "Alerts",
+            tabBarIcon: ({ color, focused }) => (
+              <Bell size={focused ? 23 : 22} color={color} strokeWidth={focused ? 2.4 : 2} />
+            ),
+          }}
+        />
+      </Tabs>
+    </>
   );
 }

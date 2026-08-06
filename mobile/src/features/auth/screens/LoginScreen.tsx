@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import {
   View,
+  Text,
   TextInput,
   TouchableOpacity,
-  Text,
-  StyleSheet,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { router } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
@@ -27,11 +27,10 @@ export default function LoginScreen() {
     try {
       setErrorMessage("");
       setIsLoading(true);
-  
+
       await login(email, password);
-  
+
       router.replace("/(app)/(tabs)/home");
-  
     } catch (error: any) {
       setErrorMessage(error.message);
     } finally {
@@ -41,12 +40,14 @@ export default function LoginScreen() {
 
   return (
     <AuthLayout
-      title="Fitness Gym"
-      subtitle="Welcome back, let’s train 💪"
+      title="JFitness Gym"
+      subtitle="Welcome back, let's train!"
     >
       {/* EMAIL */}
+      <Text style={styles.label}>Email Address</Text>
+
       <TextInput
-        placeholder="Email"
+        placeholder="Enter your email"
         placeholderTextColor="#94a3b8"
         value={email}
         onChangeText={setEmail}
@@ -56,9 +57,11 @@ export default function LoginScreen() {
       />
 
       {/* PASSWORD */}
+      <Text style={styles.label}>Password</Text>
+
       <View style={styles.passwordContainer}>
         <TextInput
-          placeholder="Password"
+          placeholder="Enter your password"
           placeholderTextColor="#94a3b8"
           secureTextEntry={!showPassword}
           value={password}
@@ -71,9 +74,15 @@ export default function LoginScreen() {
           style={styles.eyeButton}
         >
           {showPassword ? (
-            <EyeOff size={20} color="#64748b" />
+            <EyeOff
+              size={20}
+              color="#64748b"
+            />
           ) : (
-            <Eye size={20} color="#64748b" />
+            <Eye
+              size={20}
+              color="#64748b"
+            />
           )}
         </TouchableOpacity>
       </View>
@@ -84,7 +93,7 @@ export default function LoginScreen() {
         </Text>
       ) : null}
 
-      {/* BUTTON */}
+      {/* LOGIN BUTTON */}
       <TouchableOpacity
         style={[
           styles.button,
@@ -95,7 +104,6 @@ export default function LoginScreen() {
       >
         {isLoading ? (
           <ActivityIndicator
-            size="small"
             color="#fff"
           />
         ) : (
@@ -105,22 +113,36 @@ export default function LoginScreen() {
         )}
       </TouchableOpacity>
 
+      {/* FORGOT PASSWORD */}
+      <TouchableOpacity
+        style={styles.forgotContainer}
+        onPress={() =>
+          router.push("/(auth)/forgot-password")
+        }
+      >
+        <Text style={styles.forgotText}>
+          Forgot your password?
+        </Text>
+      </TouchableOpacity>
 
-      {/* LINKS */}
-      <View style={styles.links}>
-        <TouchableOpacity
-          onPress={() => router.push("/(auth)/forgot-password")}
-        >
-          <Text style={styles.linkText}>
-            Forgot password?
-          </Text>
-        </TouchableOpacity>
+      {/* ACTIVATE ACCOUNT */}
+      <View style={styles.activationCard}>
+        <Text style={styles.activationTitle}>
+          Already a gym member?
+        </Text>
+
+        <Text style={styles.activationSubtitle}>
+          Activate your account using your membership code.
+        </Text>
 
         <TouchableOpacity
-          onPress={() => router.push("/(auth)/account-activation")}
+          style={styles.activationButton}
+          onPress={() =>
+            router.push("/(auth)/account-activation")
+          }
         >
-          <Text style={styles.linkTextBold}>
-            Activate membership code
+          <Text style={styles.activationButtonText}>
+            Activate Account
           </Text>
         </TouchableOpacity>
       </View>
@@ -129,47 +151,88 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1e293b",
+    marginBottom: 8,
+    marginLeft: 2,
+  },
+
   input: {
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#e2e8f0",
-    padding: 14,
-    borderRadius: 14,
-    marginBottom: 12,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+    fontSize: 15,
     color: "#0f172a",
+    marginBottom: 18,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    elevation: 2,
   },
-  errorText: {
-    color: "#ef4444",
-    fontSize: 13,
-    marginBottom: 10,
-    textAlign: "center",
-  },
+
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#e2e8f0",
-    borderRadius: 14,
-    marginBottom: 12,
+    borderRadius: 16,
+    marginBottom: 14,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    elevation: 2,
   },
 
   passwordInput: {
     flex: 1,
-    padding: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
     color: "#0f172a",
+    fontSize: 15,
   },
 
   eyeButton: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
+  },
+
+  errorText: {
+    color: "#ef4444",
+    fontSize: 13,
+    textAlign: "center",
+    marginBottom: 12,
   },
 
   button: {
     backgroundColor: "#10b981",
-    padding: 16,
-    borderRadius: 14,
+    borderRadius: 18,
+    paddingVertical: 17,
     alignItems: "center",
     marginTop: 6,
+
+    shadowColor: "#10b981",
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    elevation: 5,
   },
 
   buttonDisabled: {
@@ -178,24 +241,56 @@ const styles = StyleSheet.create({
 
   buttonText: {
     color: "#fff",
+    fontSize: 16,
     fontWeight: "700",
-    fontSize: 15,
   },
 
-  links: {
-    marginTop: 28,
+  forgotContainer: {
     alignItems: "center",
-    gap: 14,
+    marginTop: 18,
   },
 
-  linkText: {
+  forgotText: {
     color: "#64748b",
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: "500",
   },
 
-  linkTextBold: {
-    color: "#10b981",
+  activationCard: {
+    marginTop: 30,
+    backgroundColor: "#f8fafc",
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    alignItems: "center",
+  },
+
+  activationTitle: {
+    fontSize: 16,
     fontWeight: "700",
+    color: "#0f172a",
+  },
+
+  activationSubtitle: {
+    marginTop: 6,
     fontSize: 13,
+    color: "#64748b",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+
+  activationButton: {
+    marginTop: 18,
+    backgroundColor: "#10b981",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 999,
+  },
+
+  activationButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
   },
 });

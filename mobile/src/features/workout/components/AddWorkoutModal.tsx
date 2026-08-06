@@ -17,7 +17,11 @@ interface Props {
   onSave?: (data: any) => void;
 }
 
-export function AddWorkoutModal({ modalRef, onClose, onSave }: Props) {
+export function AddWorkoutModal({
+  modalRef,
+  onClose,
+}: Props) {
+
   const { mutate: addPersonalWorkout, isPending } = useAddPersonalWorkout();
   
   const snapPoints = useMemo(() => ["75%"], []);
@@ -186,24 +190,63 @@ export function AddWorkoutModal({ modalRef, onClose, onSave }: Props) {
 
   return (
     <BottomSheetModal
+
       ref={modalRef}
+
       snapPoints={snapPoints}
-      backdropComponent={renderBackdrop}
+
+      backdropComponent={
+        renderBackdrop
+      }
+
       enablePanDownToClose
-      keyboardBehavior="extend"
+
+
+      // Keyboard handling
+      keyboardBehavior="interactive"
+
+      keyboardBlurBehavior="restore"
+
+      android_keyboardInputMode="adjustResize"
+
     >
+
+
       <BottomSheetScrollView
-        contentContainerStyle={styles.container}
+
+        contentContainerStyle={
+          styles.container
+        }
+
         keyboardShouldPersistTaps="handled"
+
+        showsVerticalScrollIndicator={false}
+
       >
+
+
         {/* HEADER */}
+
         <View style={styles.header}>
+
           <View style={styles.headerLeft}>
-            <Dumbbell size={18} color="#10b981" />
-            <Text style={styles.title}>Add Workout</Text>
+
+            <Dumbbell
+              size={18}
+              color="#10b981"
+            />
+
+            <Text style={styles.title}>
+              Add Workout
+            </Text>
+
           </View>
+
         </View>
 
+
+
+        {/* YOUR INPUTS HERE */}
         {/* WORKOUT INPUTS */}
         <BottomSheetTextInput
           value={name}
@@ -348,7 +391,10 @@ export function AddWorkoutModal({ modalRef, onClose, onSave }: Props) {
             </Text>
           )}
         </Pressable>
+
       </BottomSheetScrollView>
+
+
     </BottomSheetModal>
   );
 }

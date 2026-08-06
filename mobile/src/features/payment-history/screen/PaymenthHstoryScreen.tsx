@@ -1,99 +1,46 @@
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import Header from "@/features/payment-history/components/Header";
 import SummaryCard from "@/features/payment-history/components/SummaryCard";
 import TransactionItem from "@/features/payment-history/components/TransactionItem";
+import { StatusBar } from "react-native";
+import { useFetchPaymentHistory } from "../hook/usePayments";
+import { useAuth } from "@/context/AuthContext";
+import { PaymentStats } from "../types/PaymentTypes";
+import { Loading } from "@/components/Loading";
 
-export const transactions = [
-  {
-    id: "TXN-20260601",
-    description: "Monthly Membership — Premium Plan",
-    amount: 2500,
-    date: "Jun 1, 2026",
-    status: "paid",
-    method: "GCash",
-    receipt: "#RCT-8821",
-  },
-  {
-    id: "TXN-20260501",
-    description: "Monthly Membership — Premium Plan",
-    amount: 2500,
-    date: "May 1, 2026",
-    status: "paid",
-    method: "Credit Card ••4521",
-    receipt: "#RCT-7654",
-  },
-  {
-    id: "TXN-20260415",
-    description: "Personal Training Session — Marcus Rivera",
-    amount: 1200,
-    date: "Apr 15, 2026",
-    status: "paid",
-    method: "Credit Card ••4521",
-    receipt: "#RCT-6332",
-  },
-  {
-    id: "TXN-20260701-DUE",
-    description: "Monthly Membership — Premium Plan",
-    amount: 2500,
-    date: "Jul 1, 2026",
-    status: "upcoming",
-    method: "Auto-charge",
-    receipt: null,
-  },
-];
 
-export const summary = {
-  totalPaid: 9050,
-  totalTransactions: 5,
-  currentPlan: "Premium Plan",
-  nextDue: "Jul 1, 2026",
-};
+export default function PaymentHistoryScreen() {
+  const { member } = useAuth();
+  const { data: paymentData, isLoading } = useFetchPaymentHistory(member?.memberId!);
+  
+  const transactions = paymentData?.payments ?? [];
+  const stats = paymentData?.stats ?? {} as PaymentStats;
 
-export const statusConfig = {
-  paid: {
-    label: "Paid",
-    color: "#10b981",
-    bg: "#d1fae5",
-    icon: "check-circle",
-  },
-  upcoming: {
-    label: "Due Soon",
-    color: "#f59e0b",
-    bg: "#fef3c7",
-    icon: "clock",
-  },
-  failed: {
-    label: "Failed",
-    color: "#ef4444",
-    bg: "#fef2f2",
-    icon: "alert-circle",
-  },
-};
+  if (isLoading) return <Loading />;
 
-export default function PaymentHistoryScreen({ onBack }: any) {
   return (
     <SafeAreaView style={styles.container}>
-      <Header
-        onBack={onBack}
-        totalTransactions={summary.totalTransactions}
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+
+      <Header totalTransactions={transactions.length ?? 0}/>
 
       <FlatList
         data={transactions}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ padding: 16 }}
+        
         ListHeaderComponent={() => (
           <View>
-            <SummaryCard summary={summary} />
+            <SummaryCard summary={stats} />
 
             {/* 👇 SECTION TITLE HERE */}
             <Text style={styles.sectionTitle}>Transactions</Text>
           </View>
         )}
-        contentContainerStyle={{ padding: 16 }}
+        
         renderItem={({ item }) => (
-          <TransactionItem txn={item} config={statusConfig} />
+          <TransactionItem txn={item} />
         )}
       />
     </SafeAreaView>

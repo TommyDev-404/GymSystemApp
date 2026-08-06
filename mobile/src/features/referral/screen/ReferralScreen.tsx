@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StatusBar, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Header from "@/features/referral/components/Header";
@@ -55,6 +55,8 @@ export default function ReferralScreen({ onBack }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      
       <Header onBack={onBack} />
 
       <ScrollView>

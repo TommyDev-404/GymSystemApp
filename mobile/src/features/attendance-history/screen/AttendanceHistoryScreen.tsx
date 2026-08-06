@@ -12,13 +12,7 @@ interface Props {
   onBack?: () => void;
 }
 
-const history = [
-  { type: "Gym Check-in", date: "June 24, 2026 • 6:30 AM" },
-  { type: "Gym Check-in", date: "June 23, 2026 • 7:10 AM" },
-  { type: "Workout Completed", date: "June 22, 2026 • 6:45 AM" },
-];
-
-export function AttendanceHistoryScreen({ id, onBack }: Props) {
+export function AttendanceHistoryScreen({ id }: Props) {
 
   const {
     data: attendanceData = [],
@@ -26,8 +20,6 @@ export function AttendanceHistoryScreen({ id, onBack }: Props) {
   } = useGetMemberAttendanceHistory(
     Number(id)
   );
-
-  console.log(attendanceData)
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }}>

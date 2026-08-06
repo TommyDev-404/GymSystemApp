@@ -1,28 +1,47 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Trophy } from "lucide-react-native";
 
-export default function PointsCard({ points }: any) {
+interface PointsCardProps {
+  points: number;
+}
+
+export default function PointsCard({ points }: PointsCardProps) {
+  const MAX_POINTS = 1000;
+  const progress = Math.min(points / MAX_POINTS, 1);
+  const remaining = Math.max(MAX_POINTS - points, 0);
+
   return (
     <View style={styles.card}>
-      <View style={styles.row}>
+      <View style={styles.header}>
         <View>
-          <Text style={styles.small}>Your Points</Text>
-          <Text style={styles.points}>{points.toLocaleString()}</Text>
-          <Text style={styles.sub}>660 pts to Gold Badge 🥇</Text>
+          <Text style={styles.label}>Reward Points</Text>
+          <Text style={styles.points}>{points}</Text>
         </View>
 
         <View style={styles.iconBox}>
-          <Trophy size={28} color="white" />
+          <Trophy size={30} color="#FFFFFF" />
         </View>
       </View>
 
-      <View style={styles.bar}>
-        <View style={styles.fill} />
+      <View style={styles.progressTrack}>
+        <View
+          style={[
+            styles.progressFill,
+            {
+              width: `${progress * 100}%`,
+            },
+          ]}
+        />
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Silver</Text>
-        <Text style={styles.footerText}>Gold — 3,000 pts</Text>
+        <Text style={styles.footerText}>
+          {points}/{MAX_POINTS} pts
+        </Text>
+
+        <Text style={styles.footerText}>
+          {remaining} pts remaining
+        </Text>
       </View>
     </View>
   );
@@ -30,55 +49,73 @@ export default function PointsCard({ points }: any) {
 
 const styles = StyleSheet.create({
   card: {
-    margin: 16,
-    padding: 16,
-    borderRadius: 18,
-    backgroundColor: "#f59e0b",
+    marginHorizontal: 16,
+    marginVertical: 12,
+    padding: 20,
+    borderRadius: 24,
+    backgroundColor: "#F59E0B",
+
+    shadowColor: "#B45309",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  row: {
+
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
   },
-  small: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 12,
+
+  label: {
+    color: "rgba(255,255,255,0.85)",
+    fontSize: 14,
+    fontWeight: "600",
   },
+
   points: {
-    fontSize: 34,
+    color: "#FFFFFF",
+    fontSize: 42,
     fontWeight: "800",
-    color: "white",
+    marginTop: 4,
   },
-  sub: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 12,
-  },
+
   iconBox: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    width: 60,
+    height: 60,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.18)",
     justifyContent: "center",
     alignItems: "center",
   },
-  bar: {
-    height: 8,
-    backgroundColor: "rgba(255,255,255,0.3)",
+
+  progressTrack: {
+    height: 10,
+    backgroundColor: "rgba(255,255,255,0.25)",
     borderRadius: 999,
-    marginTop: 12,
+    overflow: "hidden",
   },
-  fill: {
-    width: "78%",
+
+  progressFill: {
     height: "100%",
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     borderRadius: 999,
   },
+
   footer: {
+    marginTop: 14,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 6,
   },
+
   footerText: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 11,
+    color: "rgba(255,255,255,0.9)",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

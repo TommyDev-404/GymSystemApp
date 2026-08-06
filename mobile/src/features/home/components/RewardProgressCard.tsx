@@ -17,7 +17,7 @@ export function RewardProgressCard({
   );
 
   const remainingPoints = Math.max(
-    maxPoints - points,
+    maxPoints - (points),
     0
   );
 
@@ -68,7 +68,7 @@ export function RewardProgressCard({
             fontWeight: "600",
           }}
         >
-          {points && points.toLocaleString()} / {maxPoints.toLocaleString()}
+          {points ?? 0} / {maxPoints.toLocaleString()}
         </Text>
       </View>
 

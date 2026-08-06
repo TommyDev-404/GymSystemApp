@@ -27,7 +27,7 @@ export function GreetingHeader({ memberName }: { memberName: string}) {
             marginTop: 2,
           }}
         >
-         {memberName}
+         {memberName ?? "Jhon Doe"}
         </Text>
 
         <Text

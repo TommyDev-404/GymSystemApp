@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import { router } from "expo-router";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Index() {
-  const isLoggedIn = false; // replace later with AsyncStorage / Zustand
+  const { member } = useAuth();
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (member) {
       router.replace("/(app)/(tabs)" as any);
     } else {
       router.replace("/(auth)/login" as any);

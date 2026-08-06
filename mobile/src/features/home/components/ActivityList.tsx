@@ -96,7 +96,7 @@ export function ActivityList({ activities }: any) {
         Recent Activity
       </Text>
 
-      {activities.length === 1 ? (
+      {activities.length === 0 ? (
         <EmptyState
           icon={Activity}
           title="No activity yet"

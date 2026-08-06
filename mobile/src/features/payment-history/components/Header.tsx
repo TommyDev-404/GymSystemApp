@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { ArrowLeft } from "lucide-react-native";
 import { router } from "expo-router";
 
-export default function Header({ onBack, totalTransactions }: any) {
+export default function Header({ totalTransactions }: { totalTransactions : number}) {
   return (
     <View style={styles.header}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
@@ -11,7 +11,7 @@ export default function Header({ onBack, totalTransactions }: any) {
 
       <View>
         <Text style={styles.title}>Payment History</Text>
-        <Text style={styles.sub}>{totalTransactions} transactions</Text>
+        <Text style={styles.sub}>{totalTransactions > 0 ? totalTransactions : "No"} transactions</Text>
       </View>
     </View>
   );

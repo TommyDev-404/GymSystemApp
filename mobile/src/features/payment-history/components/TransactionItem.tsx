@@ -1,138 +1,220 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import {
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Download,
-  ChevronRight,
-  LucideIcon,
+	CheckCircle,
+	Clock,
+	AlertCircle,
+	CreditCard,
 } from "lucide-react-native";
+import { toPHP } from "@/utils/moneyConverter";
 
-export default function TransactionItem({ txn, config }: any) {
-   const status = config[txn.status];
-   
-   const iconMap: Record<string, LucideIcon> = {
-      paid: CheckCircle,
-      upcoming: Clock,
-      failed: AlertCircle,
-   };
 
-   const StatusIcon = iconMap[txn.status] ?? CheckCircle;
+export default function TransactionItem({ txn }: any) {
+	const statusConfig:any = {
+		Paid:{
+		color:"#16a34a",
+		bg:"#dcfce7",
+		icon:CheckCircle,
+		},
 
-  return (
-    <View style={styles.card}>
-      <View style={styles.row}>
-        <View style={[styles.iconBox, { backgroundColor: status.bg }]}>
-          <StatusIcon size={18} color={status.color} />
-        </View>
+		Pending:{
+		color:"#f59e0b",
+		bg:"#fef3c7",
+		icon:Clock,
+		},
 
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title}>{txn.description}</Text>
-          <Text style={styles.sub}>
-            {txn.date} · {txn.method}
-          </Text>
-        </View>
+		Failed:{
+		color:"#ef4444",
+		bg:"#fee2e2",
+		icon:AlertCircle,
+		},
+	};
 
-        <View style={{ alignItems: "flex-end" }}>
-          <Text style={styles.amount}>₱{txn.amount}</Text>
-          <View style={[styles.badge, { backgroundColor: status.bg }]}>
-            <Text style={{ color: status.color, fontSize: 10 }}>
-              {status.label}
-            </Text>
-          </View>
-        </View>
-      </View>
+	const config = statusConfig[txn.status] ?? statusConfig.Paid;
+	const StatusIcon = config.icon;
 
-      {txn.status === "paid" && (
-        <View style={styles.footer}>
-          <Text style={styles.receipt}>{txn.receipt}</Text>
+	return (
+		<View style={styles.card}>
+			{/* TOP */}
+			<View style={styles.row}>
+				<View style={styles.planIcon}>
+					<CreditCard
+					size={18}
+					color="#10b981"
+					/>
+				</View>
 
-          <TouchableOpacity style={styles.btn}>
-            <Download size={12} color="#64748b" />
-            <Text style={styles.btnText}>Download</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+				<View style={{flex:1}}>
 
-      {txn.status === "upcoming" && (
-        <View style={styles.footer}>
-          <Text style={styles.receipt}>Auto-charge scheduled</Text>
+					<Text style={styles.plan}>
+					{txn.plan}
+					</Text>
 
-          <TouchableOpacity style={[styles.btn, { backgroundColor: "#10b981" }]}>
-            <Text style={[styles.btnText, { color: "white" }]}>
-              Pay Now
-            </Text>
-            <ChevronRight size={12} color="white" />
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
+					<Text style={styles.method}>
+					{txn.paymentMethod}
+					</Text>
+
+				</View>
+
+				<View style={styles.right}>
+
+
+					<Text style={styles.amount}>
+					{toPHP(txn.amount)}
+					</Text>
+
+
+					<View
+					style={[
+						styles.status,
+						{
+							backgroundColor:config.bg
+						}
+					]}
+					>
+
+					<StatusIcon
+						size={11}
+						color={config.color}
+					/>
+
+					<Text
+						style={[
+							styles.statusText,
+							{
+							color:config.color
+							}
+						]}
+					>
+						{txn.status}
+					</Text>
+
+					</View>
+
+
+				</View>
+			</View>
+
+			{/* BOTTOM */}
+			<View style={styles.footer}>
+				<Text style={styles.label}>Payment Date</Text>
+
+				<Text style={styles.date}>
+					{new Date(txn.datePaid).toLocaleDateString(
+					"en-US",
+					{
+						month:"short",
+						day:"numeric",
+						year:"numeric"
+					}
+					)}
+				</Text>
+			</View>
+		</View>
+	);
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "white",
-    padding: 14,
-    borderRadius: 16,
-    marginBottom: 12,
+
+  card:{
+    backgroundColor:"#fff",
+    borderRadius:14,
+    padding:14,
+    marginBottom:10,
+
+    borderWidth:1,
+    borderColor:"#f1f5f9",
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
+
+
+  row:{
+    flexDirection:"row",
+    alignItems:"center",
   },
-  iconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
+
+
+  planIcon:{
+    width:38,
+    height:38,
+    borderRadius:12,
+
+    backgroundColor:"#ecfdf5",
+
+    alignItems:"center",
+    justifyContent:"center",
+
+    marginRight:10,
   },
-  title: {
-    fontWeight: "600",
-    fontSize: 13,
-    color: "#0f172a",
+
+
+  plan:{
+    fontSize:14,
+    fontWeight:"700",
+    color:"#0f172a",
   },
-  sub: {
-    fontSize: 11,
-    color: "#64748b",
-    marginTop: 2,
+
+
+  method:{
+    marginTop:3,
+    fontSize:12,
+    color:"#64748b",
   },
-  amount: {
-    fontWeight: "700",
-    fontSize: 14,
+
+
+  right:{
+    alignItems:"flex-end",
   },
-  badge: {
-    marginTop: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
+
+
+  amount:{
+    fontSize:15,
+    fontWeight:"800",
+    color:"#0f172a",
   },
-  footer: {
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderColor: "#f1f5f9",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+
+
+  status:{
+    flexDirection:"row",
+    alignItems:"center",
+
+    gap:4,
+
+    paddingHorizontal:8,
+    paddingVertical:3,
+
+    borderRadius:8,
+
+    marginTop:5,
   },
-  receipt: {
-    fontSize: 11,
-    color: "#94a3b8",
+
+
+  statusText:{
+    fontSize:10,
+    fontWeight:"700",
   },
-  btn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "#f1f5f9",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+
+
+  footer:{
+    marginTop:12,
+    paddingTop:10,
+
+    borderTopWidth:1,
+    borderColor:"#f1f5f9",
+
+    flexDirection:"row",
+    justifyContent:"space-between",
   },
-  btnText: {
-    fontSize: 11,
-    color: "#64748b",
+
+
+  label:{
+    fontSize:11,
+    color:"#94a3b8",
   },
+
+
+  date:{
+    fontSize:12,
+    fontWeight:"600",
+    color:"#334155",
+  },
+
 });

@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, ScrollView } from "react-native";
-import { CheckCircle } from "lucide-react-native";
+import { CheckCircle, History } from "lucide-react-native";
+import { EmptyState } from "@/components/EmptyState";
 
 interface Attendance {
   id: number;
@@ -19,9 +20,11 @@ export function AttendanceList({ history }: Props) {
       contentContainerStyle={{
         padding: 20,
         gap: 12,
+        flexGrow: 1,
       }}
     >
-      {history.map((h) => (
+      {history.length > 0 ?
+        history.map((h) => (
         <View
           key={h.id}
           style={{
@@ -135,7 +138,22 @@ export function AttendanceList({ history }: Props) {
           </View>
 
         </View>
-      ))}
+        ))
+      : 
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+         <EmptyState
+            icon={History}
+            title="No attendance records found"
+            subtitle="Your completed gym check-ins will be displayed here."
+          />
+      </View>
+      }
     </ScrollView>
   );
 }

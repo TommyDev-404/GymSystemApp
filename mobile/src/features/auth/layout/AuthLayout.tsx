@@ -4,10 +4,11 @@ import {
   Text,
   StyleSheet,
   StatusBar,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  KeyboardAwareScrollView,
+} from "react-native-keyboard-controller";
 import { Dumbbell } from "lucide-react-native";
 
 type Props = {
@@ -16,27 +17,43 @@ type Props = {
   children: React.ReactNode;
 };
 
-export function AuthLayout({ title, subtitle, children }: Props) {
+export function AuthLayout({
+  title,
+  subtitle,
+  children,
+}: Props) {
   return (
     <SafeAreaView style={styles.container}>
-      {/* STATUS BAR */}
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#fff"
+      />
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scrollContent}
+        bottomOffset={20}
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.wrapper}>
 
           {/* HEADER */}
           <View style={styles.header}>
             <View style={styles.iconCircle}>
-              <Dumbbell size={30} color="#10b981" />
+              <Dumbbell
+                size={30}
+                color="#10b981"
+              />
             </View>
 
-            <Text style={styles.title}>{title}</Text>
-            <Text style={styles.subtitle}>{subtitle}</Text>
+            <Text style={styles.title}>
+              {title}
+            </Text>
+
+            <Text style={styles.subtitle}>
+              {subtitle}
+            </Text>
           </View>
+
 
           {/* CONTENT */}
           <View style={styles.content}>
@@ -44,56 +61,61 @@ export function AuthLayout({ title, subtitle, children }: Props) {
           </View>
 
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-   container: {
-     flex: 1,
-     backgroundColor: "#ffffff",
-   },
- 
-   wrapper: {
-     flex: 1,
-     justifyContent: "center",
-     paddingHorizontal: 24,
-   },
- 
-   header: {
-     alignItems: "center",
-     marginBottom: 30,
-   },
- 
-   iconCircle: {
-     width: 64,
-     height: 64,
-     borderRadius: 32,
-     backgroundColor: "#ecfdf5",
-     justifyContent: "center",
-     alignItems: "center",
-     marginBottom: 12,
-   },
- 
-   title: {
-     fontSize: 26,
-     fontWeight: "800",
-     color: "#0f172a",
-     textAlign: "center",
-   },
- 
-   subtitle: {
-     fontSize: 14,
-     color: "#64748b",
-     marginTop: 6,
-     textAlign: "center",
-     paddingHorizontal: 10,
-   },
- 
-   content: {
-     width: "100%",
-     maxWidth: 420,
-     alignSelf: "center",
-   },
- });
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+
+  wrapper: {
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+
+  header: {
+    alignItems: "center",
+    marginBottom: 36,
+  },
+
+  iconCircle: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: "#ecfdf5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#0f172a",
+    textAlign: "center",
+  },
+
+  subtitle: {
+    marginTop: 8,
+    fontSize: 15,
+    color: "#64748b",
+    textAlign: "center",
+    lineHeight: 22,
+    paddingHorizontal: 10,
+  },
+
+  content: {
+    width: "100%",
+    maxWidth: 420,
+    alignSelf: "center",
+  },
+});

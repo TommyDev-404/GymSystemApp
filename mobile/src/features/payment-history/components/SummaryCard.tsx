@@ -1,14 +1,16 @@
 import { View, Text, StyleSheet } from "react-native";
 import { CreditCard } from "lucide-react-native";
+import { toPHP } from "@/utils/moneyConverter";
+import { PaymentStats } from "../types/PaymentTypes";
 
-export default function SummaryCard({ summary }: any) {
+export default function SummaryCard({ summary }: { summary: PaymentStats }) {
   return (
     <View style={styles.card}>
       <View style={styles.row}>
         <View>
           <Text style={styles.label}>TOTAL PAID (2026)</Text>
           <Text style={styles.amount}>
-            ₱{summary.totalPaid.toLocaleString()}
+            {toPHP(summary.totalPaid.toString())}
           </Text>
         </View>
 
@@ -20,13 +22,13 @@ export default function SummaryCard({ summary }: any) {
       <View style={styles.grid}>
         <View style={styles.box}>
           <Text style={styles.small}>Current Plan</Text>
-          <Text style={styles.bold}>{summary.currentPlan}</Text>
+          <Text style={styles.bold}>{summary.plan}</Text>
         </View>
 
         <View style={styles.box}>
-          <Text style={styles.small}>Next Due</Text>
+          <Text style={styles.small}>Expires</Text>
           <Text style={[styles.bold, { color: "#10b981" }]}>
-            {summary.nextDue}
+            {new Date(summary.expires).toLocaleDateString('en-PH', { month: 'short', day: '2-digit', year: 'numeric'})}
           </Text>
         </View>
       </View>

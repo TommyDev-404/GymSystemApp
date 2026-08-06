@@ -4,12 +4,12 @@ import { LinearGradient } from "expo-linear-gradient";
 
 interface Props {
   plan: string,
-  join_date: string,
+  membership_start: string,
   expiry: string,
   status: string
 }
 
-export function MembershipCard({ plan, join_date, expiry, status }: Props) {
+export function MembershipCard({ plan, membership_start, expiry, status }: Props) {
   return (
     <View style={{ marginHorizontal: 20, borderRadius: 20, overflow: "hidden" }}>
       {/* GRADIENT BACKGROUND */}
@@ -76,7 +76,7 @@ export function MembershipCard({ plan, join_date, expiry, status }: Props) {
                   marginTop: 2,
                 }}
               >
-                {plan} Plan
+                {plan ?? "Standard Plan"}
               </Text>
             </View>
 
@@ -100,7 +100,7 @@ export function MembershipCard({ plan, join_date, expiry, status }: Props) {
                   marginLeft: 4,
                 }}
               >
-                {status}
+                {status ?? "Active"}
               </Text>
             </View>
           </View>
@@ -114,7 +114,7 @@ export function MembershipCard({ plan, join_date, expiry, status }: Props) {
                   fontSize: 11,
                 }}
               >
-                Member since
+                Membership Started
               </Text>
               <Text
                 style={{
@@ -123,7 +123,7 @@ export function MembershipCard({ plan, join_date, expiry, status }: Props) {
                   marginTop: 2,
                 }}
               >
-                {join_date}
+                {membership_start ?? new Date().toLocaleDateString('en-PH', { month: 'short', day: '2-digit', year: 'numeric'})}
               </Text>
             </View>
 
@@ -143,7 +143,7 @@ export function MembershipCard({ plan, join_date, expiry, status }: Props) {
                   marginTop: 2,
                 }}
               >
-                {expiry}
+                {expiry ?? new Date().toLocaleDateString('en-PH', { month: 'short', day: '2-digit', year: 'numeric'})}
               </Text>
             </View>
           </View>

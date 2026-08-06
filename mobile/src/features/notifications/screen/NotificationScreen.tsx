@@ -1,26 +1,28 @@
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  StatusBar,
+	View,
+	Text,
+	Pressable,
+	StatusBar,
+	FlatList,
+	ActivityIndicator,
 } from "react-native";
 import {
-  CreditCard,
-  Trophy,
-  Star,
-  Megaphone,
-  AlertCircle,
-  BellOff,
+	CreditCard,
+	Star,
+	Megaphone,
+	AlertCircle,
+	BellOff,
 } from "lucide-react-native";
 
 import { NotificationGroup } from "@/features/notifications/components/NotificationGroup";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useGetMemberNotifications } from "../hook/useNotification";
+import { useGetMemberNotifications, useMarkAllNotificationRead } from "../hook/useNotification";
 import { useAuth } from "@/context/AuthContext";
 import { EmptyState } from "@/components/EmptyState";
+import { Loading } from "@/components/Loading";
+import { Notification, NotificationGroupType } from "../types/NotifTypes";
+import Toast from "react-native-toast-message";
 
-function formatNotificationGroups(notifications: any[]) {
+function formatNotificationGroups(notifications: Notification[]) {
   const config: any = {
     REWARD: {
       label: "Rewards",
@@ -67,8 +69,9 @@ function formatNotificationGroups(notifications: any[]) {
 
 
     grouped[type].items.push({
+      id: notif.id,
       title: notif.title,
-      body: notif.message,
+      body: notif.description,
       time: notif.created_at,
       unread: !notif.is_read,
     });
@@ -79,111 +82,136 @@ function formatNotificationGroups(notifications: any[]) {
 }
 
 export default function NotificationsScreen() {
-  const { member } = useAuth();
-  const { data: notifications = [], isLoading } = useGetMemberNotifications(member?.memberId!);
+	const { member } = useAuth();
+	const { data: notifications = [], isLoading } = useGetMemberNotifications(member?.memberId!);
+	const { mutate: markAllRead, isPending } = useMarkAllNotificationRead();
 
-  console.log("NOtif: ", notifications)
+	const groups = formatNotificationGroups(notifications) as NotificationGroupType[];
 
-  const groups = formatNotificationGroups(notifications);
-    
-    const totalUnread = notifications.filter(
-      (n:any) => !n.is_read
-    ).length;
+	const totalUnread = notifications.filter(
+		(n:any) => !n.is_read
+	).length;
 
-  return (
-    <>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-    
-      {/* header */}
-      <View
-        style={{
-          paddingVertical: 10,
-        paddingHorizontal: 20,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          backgroundColor: 'white'
-        }}
-      >
-        
-        <View>
-          {totalUnread > 0 ? (
-            <Text
-              style={{
-                fontSize: 14,
-                color: "#64748b",
-              }}
-            >
-              You have{" "}
-              <Text
-                style={{
-                  fontWeight: "700",
-                  color: "#0f172a",
-                }}
-              >
-                {totalUnread}
-              </Text>{" "}
-              unread notification{totalUnread > 1 ? "s" : ""}
-            </Text>
-          ) : (
-            <Text
-              style={{
-                fontSize: 14,
-                color: "#64748b",
-              }}
-            >
-              You're all caught up 🎉
-            </Text>
-          )}
-        </View>
+	const handleMarkAllRead = () => {
+		markAllRead({ memberId: member?.memberId! }, {
+			onSuccess: (data) => {
+				Toast.show({
+					type: "success",
+					text1: "Success",
+					text2: data.message,
+				});
+			}
+		})
+	};
 
-        <Pressable
-          style={{
-            backgroundColor: "#10b981",
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: 12,
-          }}
-        >
-          <Text style={{ fontSize: 12, color: "#fff" }}>
-            Mark all read
-          </Text>
-        </Pressable>
-      </View>
+	if (isLoading) return <Loading/>;
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          flexGrow: 1,
-        }}
-      >
-        {groups.length > 0 ? (
-          groups.map((g, index) => (
-            <NotificationGroup
-              key={index}
-              label={g.label}
-              icon={g.icon}
-              color={g.color}
-              bg={g.bg}
-              items={g.items}
-            />
-          ))
-        ) : (
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <EmptyState
-              icon={BellOff}
-              title="No notifications yet"
-              subtitle="You're all caught up. New updates and alerts will appear here."
-            />
-          </View>
-        )}
-      </ScrollView>
-    </>
-  );
+	return (
+		<>
+			<StatusBar barStyle="dark-content" backgroundColor="#fff" />
+		
+			{/* header */}
+			{notifications.length > 0 &&
+				<View
+					style={{
+						paddingVertical: 10,
+						paddingHorizontal: 20,
+						flexDirection: "row",
+						justifyContent: "space-between",
+						alignItems: "center",
+						backgroundColor: 'white'
+					}}
+				>
+					<View>
+						{totalUnread > 0 ? (
+							<Text
+								style={{
+								fontSize: 14,
+								color: "#64748b",
+								}}
+							>
+								You have{" "}
+								<Text
+								style={{
+									fontWeight: "700",
+									color: "#0f172a",
+								}}
+								>
+								{totalUnread}
+								</Text>{" "}
+								unread notification{totalUnread > 1 ? "s" : ""}
+							</Text>
+						) : (
+							<Text
+								style={{
+								fontSize: 14,
+								color: "#64748b",
+								}}
+							>
+								All notifications have been reviewed.
+							</Text>
+						)}
+					</View>
+
+					{totalUnread > 0 && 
+						<Pressable
+							onPress={handleMarkAllRead}
+							style={{
+								backgroundColor: "#10b981",
+								paddingHorizontal: 12,
+								paddingVertical: 6,
+								borderRadius: 12,
+							}}
+						>
+							{isPending ? (
+								<ActivityIndicator/>
+							): (
+								<Text style={{ fontSize: 12, color: "#fff" }}>
+									Mark all read
+								</Text>
+							)}
+							
+						</Pressable>
+					}
+				</View>
+			}
+
+			<FlatList
+				data={groups}
+				keyExtractor={(_, index) => String(index)}
+				contentContainerStyle={{
+					flexGrow: 1,
+					paddingBottom: 20,
+				}}
+				showsVerticalScrollIndicator={false}
+
+				renderItem={({ item }) => (
+					<NotificationGroup
+						label={item.label}
+						icon={item.icon}
+						color={item.color}
+						bg={item.bg}
+						items={item?.items}
+						memberId={member?.memberId!}
+					/>
+				)}
+
+				ListEmptyComponent={
+					<View
+						style={{
+						flex: 1,
+						alignItems: "center",
+						justifyContent: "center",
+						}}
+					>
+						<EmptyState
+						icon={BellOff}
+						title="No notifications yet"
+						subtitle="You're all caught up. New updates and alerts will appear here."
+						/>
+					</View>
+				}
+			/>
+		</>
+	);
 }

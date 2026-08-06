@@ -21,6 +21,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   createAccount: (member_id: number, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  setMember: (params: MemberInfo) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -70,7 +71,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password
     });
     
-    console.log("Create acc: ", res);
     await AsyncStorage.setItem(TOKEN_KEY, res.token);
     await AsyncStorage.setItem(USER_KEY, JSON.stringify(res.user));
 
@@ -86,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         member,
+        setMember,
         loading,
         login,
         createAccount,

@@ -8,7 +8,6 @@ export const getMembersNotificationsApi = async (
        `/notifications/${memberId}`
      );
  
-      console.log(res.data);
      return res.data;
  
    } catch (error: any) {
@@ -17,4 +16,35 @@ export const getMembersNotificationsApi = async (
        "Failed to fetch notifications data"
      );
    }
- };
+};
+
+export const markNotificationRead = async (
+  notifId: number,
+  memberId: number
+) => {
+  try {
+    const res = await api.patch(`/notifications/${notifId}/read/${memberId}`);
+
+    return res.data;
+
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+      "Failed to mark notifications as read"
+    );
+  }
+};
+
+export const markAllNotificationRead = async (memberId: number) => {
+  try {
+    const res = await api.patch(`/notifications/mark-all-read/${memberId}`);
+
+    return res.data;
+
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+      "Failed to mark notifications as read"
+    );
+  }
+};

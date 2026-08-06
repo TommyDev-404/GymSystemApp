@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "JFitness Gym",
+    "name": "JFitness",
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,16 +8,10 @@
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.mangtommy.frontend"
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false,
       "package": "com.mangtommy.frontend"
     },
     "web": {
@@ -36,7 +30,8 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

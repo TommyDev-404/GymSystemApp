@@ -53,7 +53,7 @@ export function StatsRow({ stats }: any) {
                 marginTop: 6,
               }}
             >
-              {s.value}
+              {s.value ?? 0}
             </Text>
 
             <Text style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>

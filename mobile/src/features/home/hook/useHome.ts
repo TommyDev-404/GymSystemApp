@@ -1,5 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import {
+  useQuery, 
+  useMutation,
+  useQueryClient, } from "@tanstack/react-query";
 import { MemberDashboard } from "../types/HomeTypes";
+
+import {
+  CreateFitnessGoalPayload,
+  UpdateFitnessGoalPayload,
+} from "../types/HomeTypes";
+
 import * as api from "../api/home.api"
 
 export function useGetMemberDashboardData(memberId: number) {
@@ -15,3 +24,101 @@ export function useGetMemberRecentActivity(memberId: number) {
     queryFn: () => api.getMemberRecentActivityApi(memberId),
   });
 }
+
+export const useCreateFitnessGoal = () => {
+
+  const queryClient = useQueryClient();
+
+  return useMutation({
+
+    mutationFn:
+      (data: CreateFitnessGoalPayload) =>
+        api.createFitnessGoalApi(data),
+
+
+    onSuccess: (_, variables) => {
+
+      queryClient.invalidateQueries({
+        queryKey:[
+          "fitness-goal",
+          variables.member_id
+        ]
+      });
+
+    }
+
+  });
+
+};
+
+export const useUpdateFitnessGoal = () => {
+
+  const queryClient = useQueryClient();
+
+
+  return useMutation({
+
+    mutationFn:
+      ({
+        id,
+        data,
+      }:{
+        id:number;
+        data:UpdateFitnessGoalPayload;
+      }) =>
+        api.updateFitnessGoalApi(
+          id,
+          data
+        ),
+
+
+    onSuccess: () => {
+
+      queryClient.invalidateQueries({
+        queryKey:[
+          "fitness-goal"
+        ]
+      });
+
+    }
+
+  });
+
+};
+
+
+
+// =====================
+// GET FITNESS GOAL
+// =====================
+
+export const useGetFitnessGoal = (
+  memberId:number
+)=>{
+
+  return useQuery({
+
+    queryKey:[
+      "fitness-goal",
+      memberId
+    ],
+
+
+    queryFn:()=> 
+      api.getFitnessGoalApi(memberId),
+
+
+    enabled:
+      !!memberId,
+
+
+    staleTime:
+      1000 * 60 * 5,
+
+
+    retry:false,
+
+  });
+
+};
+

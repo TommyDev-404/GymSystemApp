@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 
-export default function ProfileCard() {
+export default function ProfileCard({ username }: { username: string }) {
   return (
     <View style={styles.card}>
       <Image
@@ -11,7 +11,7 @@ export default function ProfileCard() {
       />
 
       <Text style={styles.name}>
-        John Doe
+        {username ?? ""}
       </Text>
 
       <Text style={styles.member}>

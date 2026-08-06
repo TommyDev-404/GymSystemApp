@@ -12,8 +12,10 @@ import React, {
    BottomSheetTextInput,
  } from "@gorhom/bottom-sheet";
  import { X } from "lucide-react-native";
+import { useUpdateProfileMutation } from "../../hook/useProfile";
+import { useAuth } from "@/context/AuthContext";
  
- interface Props {
+interface Props {
    modalRef: React.RefObject<BottomSheetModal | null>;
    title: string;
    label: string;
@@ -22,14 +24,17 @@ import React, {
    onSave: (value: string) => void;
  }
  
- export function EditInfoModal({
+export function EditInfoModal({
    modalRef,
    title,
    label,
    initialValue,
    onClose,
    onSave,
- }: Props) {
+}: Props) {
+  const { setMember, member } = useAuth();
+  const { mutate: updateProfile, isPending } = useUpdateProfileMutation();
+   
    const snapPoints = useMemo(() => ["50%"], []);
  
    const [value, setValue] = useState(initialValue);
@@ -54,9 +59,42 @@ import React, {
    }, []);
  
    const save = useCallback(() => {
-     onSave(value);
-     close();
-   }, [value]);
+    const field = label.toLowerCase();
+  
+    updateProfile(
+      {
+        userId: member?.id!,
+        memberId: member?.memberId!,
+        [field]: value,
+      },
+      {
+        onSuccess: () => {
+  
+          setMember({
+            ...member!,
+            [field]: value,
+          });
+  
+          onSave(value);
+  
+          close();
+        },
+  
+        onError: (error) => {
+          console.log(error.message);
+        },
+      }
+    );
+  
+  }, [
+    value,
+    label,
+    member,
+    updateProfile,
+    setMember,
+    onSave,
+    close,
+  ]);
  
    const renderBackdrop = useCallback((props: any) => {
      return (

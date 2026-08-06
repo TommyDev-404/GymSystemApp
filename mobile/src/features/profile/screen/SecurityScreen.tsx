@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, StyleSheet, View, Text, Pressable } from "react-native";
+import { ScrollView, StyleSheet, View, Text, Pressable, StatusBar } from "react-native";
 import { useRef, useState } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
@@ -26,6 +26,8 @@ export default function SecurityScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      
       <Header />
 
       <ScrollView contentContainerStyle={styles.content}>
