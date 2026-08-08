@@ -69,6 +69,7 @@ interface Props {
   modalRef: React.RefObject<BottomSheetModal | null>;
   postId: number;
   onClose: () => void;
+  enabled: boolean;
   onSend: (comment: string) => void;
   isPending?: boolean;
 }
@@ -83,11 +84,14 @@ type Comment = {
 export function CommentModal({
   modalRef,
   postId,
+  enabled,
   onClose,
   onSend,
   isPending = false,
 }: Props) {
-	const { data: comments = [], isLoading } = useGetComments(postId);
+  const { data: comments = [], isLoading } = useGetComments(postId, {
+    enabled: enabled && !!postId,
+  });
 
 	const snapPoints = useMemo(() => ["50%"], []);
 	const insets = useSafeAreaInsets();

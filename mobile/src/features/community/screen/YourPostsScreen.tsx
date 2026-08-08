@@ -50,14 +50,17 @@ export function YourPostsScreen() {
 
 	const commentModalRef = useRef<BottomSheetModal>(null);
 	const [selectedPost, setSelectedPost] = useState<any>(null);
+	
+	const [commentsOpen, setCommentsOpen] = useState(false);
 
 	const openComments = (post: any) => {
 		setSelectedPost(post);
-
+		setCommentsOpen(true);
+	 
 		setTimeout(() => {
-			commentModalRef.current?.present();
+		  commentModalRef.current?.present();
 		}, 100);
-	};
+	 };
 
 	const handleSendComment = (comment: string) => {
 		if (!selectedPost) return;
@@ -120,6 +123,7 @@ export function YourPostsScreen() {
 			)}
 
 			<CommentModal
+				enabled={commentsOpen}
 				modalRef={commentModalRef}
 				postId={selectedPost?.id}
 				onClose={() => {

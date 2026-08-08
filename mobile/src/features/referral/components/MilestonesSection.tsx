@@ -1,29 +1,43 @@
 import { View, Text, StyleSheet } from "react-native";
 
-export default function MilestonesSection({ data, active }: any) {
+export default function ReferralRulesSection({ data }: any) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Milestones</Text>
+      <Text style={styles.title}>Referral Rules</Text>
 
-      {data.map((m: any) => {
-        const Icon = m.icon;
+      {data.map((rule: any, index: number) => {
+        const Icon = rule.icon;
 
         return (
-          <View key={m.count} style={styles.card}>
-            <View style={[styles.iconBox, { backgroundColor: m.achieved ? m.color + "20" : "#f1f5f9" }]}>
-              <Icon size={18} color={m.achieved ? m.color : "#94a3b8"} />
+          <View key={index} style={styles.card}>
+            
+            <View
+              style={[
+                styles.iconBox,
+                { backgroundColor: rule.color + "20" },
+              ]}
+            >
+              <Icon size={20} color={rule.color} />
             </View>
 
-            <View style={{ flex: 1 }}>
-              <Text style={styles.reward}>{m.reward}</Text>
-              <Text style={styles.desc}>
-                Invite {m.count} friend{m.count > 1 ? "s" : ""}
+
+            <View style={styles.content}>
+              <Text style={styles.ruleTitle}>
+                {rule.title}
+              </Text>
+
+              <Text style={styles.description}>
+                {rule.description}
               </Text>
             </View>
 
-            <Text style={{ color: m.achieved ? "#10b981" : "#94a3b8" }}>
-              {m.achieved ? "Done" : `${m.count - active} left`}
-            </Text>
+
+            <View style={styles.rewardBox}>
+              <Text style={[styles.reward, { color: rule.color }]}>
+                {rule.reward}
+              </Text>
+            </View>
+
           </View>
         );
       })}
@@ -31,9 +45,18 @@ export default function MilestonesSection({ data, active }: any) {
   );
 }
 
+
 const styles = StyleSheet.create({
-  container: { padding: 16 },
-  title: { fontSize: 15, fontWeight: "700", marginBottom: 10 },
+  container: {
+    padding: 16,
+  },
+
+  title: {
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+
   card: {
     flexDirection: "row",
     alignItems: "center",
@@ -42,14 +65,38 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 10,
   },
+
   iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10,
+    marginRight: 12,
   },
-  reward: { fontWeight: "600", fontSize: 13 },
-  desc: { fontSize: 11, color: "#64748b" },
+
+  content: {
+    flex: 1,
+  },
+
+  ruleTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 3,
+  },
+
+  description: {
+    fontSize: 12,
+    color: "#64748b",
+    lineHeight: 17,
+  },
+
+  rewardBox: {
+    marginLeft: 8,
+  },
+
+  reward: {
+    fontSize: 13,
+    fontWeight: "800",
+  },
 });

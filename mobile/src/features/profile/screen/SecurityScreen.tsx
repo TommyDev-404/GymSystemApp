@@ -4,24 +4,17 @@ import { useRef, useState } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 import Header from "@/features/profile/components/security/Header";
-import { EditInfoModal } from "../components/personal-information/EditInfoModal";
 import { ChangePasswordModal } from "../components/security/ChangePassModal";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SecurityScreen() {
+  const { member } = useAuth();
   const sheetRef = useRef<BottomSheetModal>(null);
 
-  const [newPassword, setNewPassword] = useState("");
-
-  // mock last password update (replace with API later)
-  const [lastChanged] = useState("June 20, 2026");
+  const lastChanged = new Date(member?.pass_last_changed!).toLocaleDateString('en-PH', { month: 'short', day: '2-digit', year: 'numeric' });
 
   const openChangePassword = () => {
     sheetRef.current?.present();
-  };
-
-  const handleSave = (value: string) => {
-    setNewPassword(value);
-    console.log("New password set:", value);
   };
 
   return (
@@ -49,13 +42,6 @@ export default function SecurityScreen() {
       <ChangePasswordModal
         modalRef={sheetRef}
         title="Change Password"
-         onClose={() => console.log("closed")}
-         onSave={(data) => {
-         console.log("Password data:", data);
-      
-         // 👉 here you call your API
-         // await api.changePassword(data)
-         }}
       />
     </SafeAreaView>
   );

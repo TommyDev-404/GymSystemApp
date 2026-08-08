@@ -26,6 +26,14 @@ export const useCheckIn = () => {
       queryClient.invalidateQueries({
         queryKey: ["member-recent-activity", variables.member_id]
       });
+
+      queryClient.invalidateQueries({
+        queryKey: ["member-attendance", variables.member_id]
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["member-notifications", variables.member_id]
+      });
     }
   });
 };

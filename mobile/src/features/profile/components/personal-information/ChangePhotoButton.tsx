@@ -1,37 +1,50 @@
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { Pressable, Text, StyleSheet } from "react-native";
 import { Camera } from "lucide-react-native";
 
-export default function ChangePhotoButton() {
+export default function ChangePhotoButton({
+  onPress,
+}: {
+  onPress: () => void;
+}) {
   return (
-    <TouchableOpacity style={styles.button}>
-      <Camera
-        size={18}
-        color="#fff"
-      />
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.button,
+        pressed && styles.pressed,
+      ]}
+    >
+      <Camera size={18} color="#fff" />
 
       <Text style={styles.text}>
-        Change Profile Picture
+        Change Profile Photo
       </Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    marginTop: 12,
+    marginTop: 16,
     backgroundColor: "#10b981",
     borderRadius: 16,
-    paddingVertical: 15,
+
+    paddingVertical: 14,
+    paddingHorizontal: 18,
 
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
-    gap: 8,
+    gap: 10,
+  },
+
+  pressed: {
+    opacity: 0.7,
   },
 
   text: {
     color: "#fff",
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: 14,
   },
 });

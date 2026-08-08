@@ -8,10 +8,13 @@ export const useGetPosts = (memberId: number) => {
   });
 };
 
-export const useGetComments = (post_id: number) => {
+export const useGetComments = (post_id: number, options?: {
+  enabled?: boolean;
+}) => {
   return useQuery({
     queryKey: ["community-comments", post_id],
-    queryFn: () => api.getCommentsApi(post_id)
+    queryFn: () => api.getCommentsApi(post_id),
+    enabled: options?.enabled ?? true,
   });
 };
 

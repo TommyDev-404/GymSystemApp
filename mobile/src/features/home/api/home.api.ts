@@ -67,15 +67,15 @@ export const getFitnessGoalApi = async (memberId:number)=>{
 	}
 };
 
-export const getMemberWeightGoalApi = async (memberId:number )=>{
+export const getFitnessGoalHistoryApi = async (memberId:number )=>{
   	try {
-		const response = await api.get(`/home/member-weight-goal/${memberId}`);
+		const response = await api.get(`/home/member-fitness-goal-history/${memberId}`);
 
 		return response.data;
 	} catch (error: any) {
 		throw new Error(
 			error.response?.data?.message ||
-			"Failed to get weight progress"
+			"Failed to get fitness progress history"
 		);
 	}
 };

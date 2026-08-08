@@ -1,6 +1,6 @@
 import { api } from "../../../lib/axios";
 
-export const updateProfileApi = async (
+export const updateProfileInfoApi = async (
    userId: number,
    data: {
      username?: string;
@@ -9,7 +9,7 @@ export const updateProfileApi = async (
  ) => {
    try {
      const res = await api.patch(
-       `/profile/update/${userId}`,
+       `/profile/update-profile-info/${userId}`,
        data
      );
  
@@ -21,4 +21,36 @@ export const updateProfileApi = async (
        "Failed to update profile"
      );
    }
- };
+};
+ 
+export const updateProfileImageApi = async (
+  userId: number,
+  formData: FormData
+) => {
+
+  try {
+
+    const res = await api.patch(
+      `/profile/update-profile-image/${userId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+
+    return res.data;
+
+
+  } catch (error: any) {
+
+    throw new Error(
+      error.response?.data?.message ||
+      "Failed to update profile"
+    );
+
+  }
+
+};

@@ -39,14 +39,19 @@ export interface WeightGoal {
 
   progress_percentage: number;
   status: string;
+}
 
-  progress:{
-    id:number;
-    previous_weight:number;
-    current_weight:number;
-    target_weight:number;
-    weight_change:number;
-    progress_percentage:number;
-    recorded_at:string;
-  }[];
+export interface FitnessGoalHistory {
+  id:number;
+  previous_weight:number;
+  current_weight:number;
+  target_weight:number;
+  weight_change:number;
+  progress_percentage:number;
+  recorded_at:string;
+}
+
+export interface FitnessGoalHistoryResponse {
+  goal_type: "LOSE_WEIGHT" | "GAIN_WEIGHT";
+  history: FitnessGoalHistory[];
 }

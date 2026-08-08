@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
+  Image,
   PanResponder,
   Pressable,
   ScrollView,
@@ -101,7 +102,6 @@ const communityStats = [
 export function ProfileSidebar({ visible, onRequestClose, onClosed }: any) {
   const { logout, member } = useAuth();
 
-  console.log(member)
   const translateX = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -224,6 +224,7 @@ export function ProfileSidebar({ visible, onRequestClose, onClosed }: any) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 32 }}
         >
+          
           {/* IDENTITY */}
           <View style={{ alignItems: "center", paddingHorizontal: 24 }}>
             <View
@@ -236,23 +237,61 @@ export function ProfileSidebar({ visible, onRequestClose, onClosed }: any) {
                 borderColor: GREEN,
                 alignItems: "center",
                 justifyContent: "center",
+                overflow: "hidden",
               }}
             >
-              <Text style={{ fontSize: 24, fontWeight: "700", color: GREEN }}>
-                {member?.username.split(" ").map((n) => n[0]).join("")}
-              </Text>
+              {member?.profile ? (
+                <Image
+                  source={{
+                    uri: member.profile,
+                  }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                  }}
+                />
+              ) : (
+                <Text
+                  style={{
+                    fontSize: 24,
+                    fontWeight: "700",
+                    color: GREEN,
+                  }}
+                >
+                  {member?.username
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()}
+                </Text>
+              )}
             </View>
 
-            <Text style={{ marginTop: 12, fontSize: 18, fontWeight: "700", color: "#0f172a" }}>
+
+            <Text
+              style={{
+                marginTop: 12,
+                fontSize: 18,
+                fontWeight: "700",
+                color: "#0f172a",
+              }}
+            >
               {member?.username || "Unknown"}
             </Text>
-            <Text style={{ marginTop: 2, fontSize: 13, color: "#94a3b8" }}>
+
+
+            <Text
+              style={{
+                marginTop: 2,
+                fontSize: 13,
+                color: "#94s3b8",
+              }}
+            >
               {member?.email || "No email."}
             </Text>
 
           </View>
 
-         
           {/* MENU */}
           {menuSections.map((section) => (
             <ProfileMenuSection

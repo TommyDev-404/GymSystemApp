@@ -8,8 +8,6 @@ import {
   Calendar,
   Trophy,
   Dumbbell,
-  Activity,
-  Zap,
   UsersRound,
 } from "lucide-react-native";
 
@@ -27,21 +25,14 @@ import { useAuth } from "@/context/AuthContext";
 import { MemberDashboard, WeightGoal } from "../types/HomeTypes";
 import { Loading } from "@/components/Loading";
 
-interface HomeScreenProps {
-  onOpenAI: () => void;
-}
 
-const SAMPLE_STARTING_WEIGHT = 80;
-
-export default function HomeScreen({ onOpenAI }: HomeScreenProps) {
+export default function HomeScreen() {
 	const { member } = useAuth();
 
 	const { data: dashboardData = {} as MemberDashboard, isLoading: dashboardLoading } = useGetMemberDashboardData(member?.memberId!);
 	const { data: recentActivity = [], isLoading: recentLoading } = useGetMemberRecentActivity(member?.memberId!);
 	const { data: memberWeightGoal, isLoading: weightGoalLoading } = useGetFitnessGoal(member?.memberId!);
-
-	console.log("GOAL: ", memberWeightGoal);
-
+	
 	const goalSheetRef = useRef<BottomSheetModal>(null);
 	const updateGoalSheetRef = useRef<BottomSheetModal>(null);
 
@@ -95,7 +86,7 @@ export default function HomeScreen({ onOpenAI }: HomeScreenProps) {
 		[member?.memberId]
 	);
 
-	if (dashboardLoading || recentLoading) return <Loading />;
+	if (dashboardLoading || recentLoading || weightGoalLoading ) return <Loading />;
 
 	return (
 		<>
@@ -124,11 +115,17 @@ export default function HomeScreen({ onOpenAI }: HomeScreenProps) {
 						goalWeight={goal.target_weight}
 						percentage={goal.progress_percentage}
 						onPress={() => updateGoalSheetRef.current?.present()}
-					/>
+						onHistoryPress={() =>
+							router.push({
+								pathname:"/(app)/fitness-history",
+								params:{
+									goalId:String(goal.id)
+								}
+							})
+						}
+				 	/>
 				) : (
-				<GoalStatusCard
-					onPress={() => goalSheetRef.current?.present()}
-				/>
+					<GoalStatusCard onPress={() => goalSheetRef.current?.present()}/>
 				)}
 
 				<RewardProgressCard points={dashboardData?.points} />

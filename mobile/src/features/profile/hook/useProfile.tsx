@@ -1,8 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as api from "@/features/profile/api/profile.api";
 
-
-export const useUpdateProfileMutation = () => {
+export const useUpdateProfileInfo = () => {
    const queryClient = useQueryClient();
  
   return useMutation({
@@ -17,7 +16,7 @@ export const useUpdateProfileMutation = () => {
       username?: string;
       email?: string;
     }) =>
-      api.updateProfileApi(
+      api.updateProfileInfoApi(
         userId,
         {
           username,
@@ -32,12 +31,30 @@ export const useUpdateProfileMutation = () => {
              variables.memberId,
            ],
          });
-   
        },
 
     onError: (error) => {
       console.log("Update profile failed:", error);
     },
+  });
+
+};
+
+export const useUpdateProfileImage = () => {
+
+  return useMutation({
+    mutationFn: ({
+      userId,
+      formData,
+    }: {
+      userId: number;
+      formData: FormData;
+    }) =>
+      api.updateProfileImageApi(
+        userId,
+        formData
+      ),
+
   });
 
 };

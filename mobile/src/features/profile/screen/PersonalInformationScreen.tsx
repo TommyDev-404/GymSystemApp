@@ -9,18 +9,88 @@ import { EditInfoModal } from "../components/personal-information/EditInfoModal"
 import { useRef, useState } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useAuth } from "@/context/AuthContext";
+import * as ImagePicker from "expo-image-picker";
+import { Alert } from "react-native";
+import { useUpdateProfileImage } from "../hook/useProfile";
+import Toast from "react-native-toast-message";
 
 export default function PersonalInformationScreen() {
-  const { member } = useAuth();
+  const { member, setMember } = useAuth();
+  const { mutate: updateProfile, isPending } = useUpdateProfileImage();
+
   const sheetRef = useRef<BottomSheetModal>(null);
 
   const [selectedField, setSelectedField] = useState("Username");
   const [value, setValue] = useState("");
+  const [profileImage, setProfileImage] = useState<string | null>(member?.profile ?? null);
 
   const openEdit = (field: string, currentValue: string) => {
     setSelectedField(field);
     setValue(currentValue);
     sheetRef.current?.present();
+  };
+
+  const handleChangePhoto = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  
+    if (!permission.granted) {
+      Alert.alert(
+        "Permission required",
+        "Please allow access to your photos to change your profile picture."
+      );
+  
+      return;
+    }
+  
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+  
+    if (!result.canceled) {
+      const imageUri = result.assets[0].uri;
+
+      setProfileImage(imageUri);
+  
+      console.log("Selected image:", imageUri);
+  
+      const formData = new FormData();
+  
+      formData.append("image", {
+        uri: imageUri,
+        name: "profile.jpg",
+        type: "image/jpeg",
+      } as any);
+  
+      updateProfile({
+        userId: member?.id!,
+        formData,
+      },
+      {
+        onSuccess: (data) => {
+          setMember({
+            ...member!,
+            profile: data.image,
+          });
+
+          Toast.show({
+            type: "success",
+            text1: "Profile Updated",
+            text2: data.message
+          });
+        },
+
+        onError: (error) => {
+          Toast.show({
+            type: "error",
+            text1: "Update Failed",
+            text2: error.message,
+          });
+        },
+      });
+    }
   };
 
   return (
@@ -32,6 +102,8 @@ export default function PersonalInformationScreen() {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <ProfileCard
           username={member?.username!}
+          image={profileImage ?? ""}
+          uploading={isPending}
         />
 
         <InfoItem
@@ -46,7 +118,9 @@ export default function PersonalInformationScreen() {
           onPress={() => openEdit("Email", member?.email ?? "")}
         />
 
-        <ChangePhotoButton />
+        <ChangePhotoButton
+          onPress={handleChangePhoto}
+        />
       </ScrollView>
 
       <EditInfoModal

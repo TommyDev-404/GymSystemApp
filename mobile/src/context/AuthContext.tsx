@@ -8,11 +8,13 @@ import {
   type ReactNode,
 } from "react";
 
-interface MemberInfo {
+export interface MemberInfo {
   id: number;
   memberId: number,
   username: string;
   email: string;
+  profile: string;
+  pass_last_changed: string
 }
 
 interface AuthContextType {

@@ -8,6 +8,8 @@ import { useFetchPaymentHistory } from "../hook/usePayments";
 import { useAuth } from "@/context/AuthContext";
 import { PaymentStats } from "../types/PaymentTypes";
 import { Loading } from "@/components/Loading";
+import { EmptyState } from "@/components/EmptyState";
+import { Receipt } from "lucide-react-native";
 
 
 export default function PaymentHistoryScreen() {
@@ -17,6 +19,7 @@ export default function PaymentHistoryScreen() {
   const transactions = paymentData?.payments ?? [];
   const stats = paymentData?.stats ?? {} as PaymentStats;
 
+  console.log(transactions)
   if (isLoading) return <Loading />;
 
   return (
@@ -42,6 +45,16 @@ export default function PaymentHistoryScreen() {
         renderItem={({ item }) => (
           <TransactionItem txn={item} />
         )}
+
+        ListEmptyComponent={
+          <View style={styles.emptyWrapper}>
+            <EmptyState
+              icon={Receipt}
+              title="No transactions found"
+              subtitle="Your payment history and membership transactions will appear here."
+            />
+          </View>
+        } 
       />
     </SafeAreaView>
   );
@@ -52,7 +65,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f8fafc",
   },
-
+  emptyWrapper: {
+    height: 300, // adjust depending on your layout
+    justifyContent: "center",
+    alignItems: "center",
+  },
   sectionTitle: {
     fontSize: 14,
     fontWeight: "700",

@@ -34,11 +34,14 @@ export function CommunityScreen() {
   const { mutate: createComment, isPending } = useCreateComment();
 
   const commentModalRef = useRef<BottomSheetModal>(null);
+
   const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
 
   const openComments = (post: any) => {
     setSelectedPost(post);
-
+    setCommentsOpen(true);
+  
     setTimeout(() => {
       commentModalRef.current?.present();
     }, 100);
@@ -53,68 +56,73 @@ export function CommunityScreen() {
       comment,
     });
   };
+  
 
   if (isLoading) return <Loading/>;
   
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: "#f8fafc",
-      }}
-      edges={["bottom"]}
-    >
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#f8fafc"
-      />
-
-      <FlatList
-        data={posts}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={{
-          paddingTop: 14,
-          paddingBottom: 24,
-          flexGrow: 1,
+    <>
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: "#f8fafc",
         }}
-        showsVerticalScrollIndicator={false}
+        edges={["bottom"]}
+      >
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="#f8fafc"
+        />
 
-        renderItem={({ item }) => (
-          <PostCard
-            post={item}
-            onCommentPress={() => openComments(item)}
-          />
-        )}
+        <FlatList
+          data={posts}
+          keyExtractor={(item) => String(item.id)}
+          contentContainerStyle={{
+            paddingTop: 14,
+            paddingBottom: 24,
+            flexGrow: 1,
+          }}
+          showsVerticalScrollIndicator={false}
 
-        ListEmptyComponent={
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <EmptyState
-              icon={MessageSquareDashed}
-              title="No posts yet"
-              subtitle="Be the first to share something with the community. Your post could inspire others!"
+          renderItem={({ item }) => (
+            <PostCard
+              post={item}
+              onCommentPress={() => openComments(item)}
             />
-          </View>
-        }
-      />
+          )}
+
+          ListEmptyComponent={
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <EmptyState
+                icon={MessageSquareDashed}
+                title="No posts yet"
+                subtitle="Be the first to share something with the community. Your post could inspire others!"
+              />
+            </View>
+          }
+        />
+      </SafeAreaView>
 
       {posts && posts.length > 0 && 
         <CommentModal
           modalRef={commentModalRef}
           postId={selectedPost?.id}
+          enabled={commentsOpen}
           onClose={() => {
+            setCommentsOpen(false);
             setSelectedPost(null);
           }}
           onSend={handleSendComment}
           isPending={isPending}
         />
       }
-    </SafeAreaView>
+    </>
   );
 }
 

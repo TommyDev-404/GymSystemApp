@@ -11,8 +11,7 @@ import React, {
    BottomSheetBackdrop,
    BottomSheetTextInput,
  } from "@gorhom/bottom-sheet";
- import { X } from "lucide-react-native";
-import { useUpdateProfileMutation } from "../../hook/useProfile";
+import { useUpdateProfileInfo } from "../../hook/useProfile";
 import { useAuth } from "@/context/AuthContext";
  
 interface Props {
@@ -33,7 +32,7 @@ export function EditInfoModal({
    onSave,
 }: Props) {
   const { setMember, member } = useAuth();
-  const { mutate: updateProfile, isPending } = useUpdateProfileMutation();
+  const { mutate: updateProfile, isPending } = useUpdateProfileInfo();
    
    const snapPoints = useMemo(() => ["50%"], []);
  
@@ -74,13 +73,12 @@ export function EditInfoModal({
             ...member!,
             [field]: value,
           });
-  
+          
           onSave(value);
-  
           close();
         },
   
-        onError: (error) => {
+        onError: (error: any) => {
           console.log(error.message);
         },
       }
