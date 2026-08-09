@@ -2,7 +2,7 @@ import {
   useQuery, 
   useMutation,
   useQueryClient, } from "@tanstack/react-query";
-import { FitnessGoalHistory, FitnessGoalHistoryResponse, MemberDashboard } from "../types/HomeTypes";
+import { FitnessGoalHistory, MemberDashboard, WeightGoal } from "../types/HomeTypes";
 
 import {
   CreateFitnessGoalPayload,
@@ -29,7 +29,7 @@ export const useGetFitnessGoal = (
   memberId:number
 )=>{
 
-  return useQuery({
+  return useQuery<WeightGoal>({
 
     queryKey:[
       "fitness-goal",
@@ -59,7 +59,7 @@ export const useGetFitnessGoalHistory = (
   memberId: number
 ) => {
 
-  return useQuery <FitnessGoalHistoryResponse>({
+  return useQuery <FitnessGoalHistory[]>({
 
     queryKey:[
       "fitness-goal-history",

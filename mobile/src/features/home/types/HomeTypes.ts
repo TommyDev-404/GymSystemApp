@@ -42,16 +42,12 @@ export interface WeightGoal {
 }
 
 export interface FitnessGoalHistory {
-  id:number;
+  id: number;
+  goal_type: "LOSE_WEIGHT" | "GAIN_WEIGHT";
   previous_weight:number;
   current_weight:number;
   target_weight:number;
   weight_change:number;
   progress_percentage:number;
   recorded_at:string;
-}
-
-export interface FitnessGoalHistoryResponse {
-  goal_type: "LOSE_WEIGHT" | "GAIN_WEIGHT";
-  history: FitnessGoalHistory[];
 }

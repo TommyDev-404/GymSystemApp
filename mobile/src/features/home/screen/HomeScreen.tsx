@@ -18,7 +18,7 @@ import { RewardProgressCard } from "@/features/home/components/RewardProgressCar
 import { QuickActionsGrid } from "@/features/home/components/QuickActionsGrid";
 import { ActivityList } from "@/features/home/components/ActivityList";
 import { ProgressCard } from "../components/ProgressCard";
-import { GoalStatusCard } from "../components/SetGoalCard";
+import { GoalStatusCard } from "../components/GoalStatusCard";
 import { GoalBottomSheet } from "../components/GoalBottomSheet";
 import { useGetFitnessGoal, useGetMemberDashboardData, useGetMemberRecentActivity } from "../hook/useHome";
 import { useAuth } from "@/context/AuthContext";
@@ -123,6 +123,9 @@ export default function HomeScreen() {
 								}
 							})
 						}
+						 onNewGoalPress={() => {
+							goalSheetRef.current?.present();
+						}}
 				 	/>
 				) : (
 					<GoalStatusCard onPress={() => goalSheetRef.current?.present()}/>
@@ -143,19 +146,6 @@ export default function HomeScreen() {
 				buttonText="Save Goal"
 				onClose={() => {}}
 				mode="CREATE"
-			/>
-
-			{/* Update existing goal/progress */}
-			<GoalBottomSheet
-				modalRef={updateGoalSheetRef}
-				title="Update Goal 📈"
-				subtitle="Keep your fitness journey updated"
-				buttonText="Update"
-				initialCurrentWeight={goal?.current_weight}
-				initialGoalWeight={goal?.target_weight}
-				goalId={goal?.id}
-				onClose={() => {}}
-				mode="UPDATE"
 			/>
 		</>
 	);

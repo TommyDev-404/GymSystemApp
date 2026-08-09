@@ -1,34 +1,42 @@
 import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-} from "react-native";
-
-import {
-  TrendingDown,
-  TrendingUp,
-  Target,
-  ChevronRight,
-} from "lucide-react-native";
-
-
-const GREEN = "#10b981";
-const GREEN_DARK = "#059669";
-const RED = "#ef4444";
-
-interface ProgressCardProps {
+	View,
+	Text,
+	Pressable,
+	StyleSheet,
+ } from "react-native";
+ 
+ import {
+	TrendingDown,
+	TrendingUp,
+	Target,
+	ChevronRight,
+	Plus,
+ } from "lucide-react-native";
+ 
+ import { PieChart } from "react-native-gifted-charts";
+ 
+ const GREEN = "#10B981";
+ const GREEN_DARK = "#059669";
+ const RED = "#EF4444";
+ 
+ const SLATE_200 = "#E2E8F0";
+ const SLATE_400 = "#94A3B8";
+ const SLATE_700 = "#334155";
+ const SLATE_900 = "#0F172A";
+ 
+ interface ProgressCardProps {
 	goalType: "LOSE_WEIGHT" | "GAIN_WEIGHT";
 	currentWeight: number;
 	startingWeight: number;
 	goalWeight: number;
 	percentage: number;
+ 
 	onPress: () => void;
 	onHistoryPress: () => void;
-}
-
-
-export function ProgressCard({
+	onNewGoalPress: () => void;
+ }
+ 
+ export function ProgressCard({
 	goalType,
 	currentWeight,
 	startingWeight,
@@ -36,421 +44,911 @@ export function ProgressCard({
 	percentage,
 	onPress,
 	onHistoryPress,
-}: ProgressCardProps) {
-
+	onNewGoalPress,
+ }: ProgressCardProps) {
 	const isLoseWeight = goalType === "LOSE_WEIGHT";
-	const weightChange = isLoseWeight ? startingWeight - currentWeight : currentWeight - startingWeight;
-	const remainingWeight = Math.abs(currentWeight - goalWeight);
-	const isProgressPositive = weightChange > 0;
-	const progressValue = Math.min(100, Math.max(0, percentage || 0));
-
-	return (
-		<View style={styles.card}>
-			{/* HEADER */}
-			<View style={styles.header}>
-				<View style={styles.headerLeft}>
-					<View style={styles.iconBadge}>
-						<Target color={GREEN} size={17}/>
-					</View>
-
-					<View>
-						<Text style={styles.title}>Body Progress</Text>
-
-						<View
-							style={[
-								styles.goalBadge,
-								isLoseWeight
-									? styles.lossBadge
-									: styles.gainBadge,
-							]}
-						>
-							<Text
-								style={[
-									styles.goalBadgeText,
-									isLoseWeight
-									? styles.lossText
-									: styles.gainText,
-								]}
-							>
-								{isLoseWeight
-									? "Lose Weight"
-									: "Gain Weight"}
-							</Text>
-						</View>
-					</View>
-
-				</View>
-
-				<Pressable
-					onPress={onHistoryPress}
-					style={styles.historyButton}
-				>
-
-					<Text style={styles.historyText}>
-						History
-					</Text>
-
-					<ChevronRight
-						size={16}
-						color="#64748B"
-					/>
-
-				</Pressable>
-			</View>
-
-			{/* STATS */}
-			<View style={styles.statsRow}>
-				<StatBlock
-					label="Start"
-					value={startingWeight}
-				/>
-
-				<View style={styles.dividerWrap}>
-					<View style={styles.divider}/>
-				</View>
-
-				<StatBlock
-					label="Current"
-					value={currentWeight}
-					emphasized
-				/>
-
-				<View style={styles.dividerWrap}>
-					<View style={styles.divider}/>
-				</View>
-
-				<StatBlock
-					label="Goal"
-					value={goalWeight}
-					align="right"
-				/>
-			</View>
-
-			{/* PROGRESS */}
-			<View style={styles.progressSection}>
-				<View style={styles.progressBarRow}>
-					<View style={styles.trackBg}>
-						<View
-							style={[
-								styles.trackFill,
-								{
-									width:`${progressValue}%`,
-								},
-							]}
-						/>
-					</View>
-
-					<Text style={styles.progressPercentage}>
-						{progressValue}%
-					</Text>
-				</View>
-
-				<View style={styles.progressFooter}>
-					<View style={styles.trendRow}>
-						{isProgressPositive ? (
-							<TrendingUp
-								color={GREEN}
-								size={15}
-							/>
-						) : (
-							<TrendingDown
-								color={RED}
-								size={15}
-							/>
-						)}
-
-						<Text style={styles.trendText}>
-							{Math.abs(weightChange).toFixed(1)}
-							{" kg "}
-
-							{
-								isLoseWeight
-									? isProgressPositive
-									? "lost"
-									: "gained"
-									: isProgressPositive
-									? "gained"
-									: "lost"
-							}
-						</Text>
-					</View>
-
-					{
-						remainingWeight > 0 && (
-
-						<Text style={styles.remainingText}>
-							{remainingWeight.toFixed(1)}
-							{" kg to go"}
-						</Text>
-
-						)
-					}
-				</View>
-			</View>
-
-			{/* UPDATE BUTTON */}
-			<Pressable
-				onPress={onPress}
-				style={({pressed})=>[
-					styles.cta,
-					pressed && {
-						backgroundColor:GREEN_DARK,
-					},
-				]}
-			>
-				<Text style={styles.ctaText}>
-					Update Goal
-				</Text>
-			</Pressable>
-		</View>
+ 
+	const rawProgress = Number(percentage) || 0;
+ 
+	const chartProgress = Math.min(
+	  100,
+	  Math.max(0, Math.abs(rawProgress))
 	);
-}
-
-function StatBlock({
-  label,
-  value,
-  align="left",
-  emphasized=false,
-}:{
-  label:string;
-  value:number;
-  align?: "left" | "right" | "center";
-  emphasized?:boolean;
-}){
-
-  const alignItems =
-    align === "right"
-      ? "flex-end"
-      : align === "center"
-        ? "center"
-        : "flex-start";
-
-
-  return (
-    <View style={{alignItems}}>
-
-      <Text style={styles.statLabel}>
-        {label}
-      </Text>
-
-
-      <Text
-        style={[
-          styles.statValue,
-          emphasized &&
-            styles.statValueEmphasized,
-        ]}
-      >
-
-        {value}
-
-        <Text style={styles.statUnit}>
-          {" kg"}
-        </Text>
-
-      </Text>
-
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-	card:{
-		marginHorizontal:20,
-		backgroundColor:"#fff",
-		borderRadius:24,
-		borderWidth:1,
-		borderColor:"#f1f5f9",
-		overflow:"hidden",
-		elevation:2,
+ 
+	const isMovingAway = rawProgress < 0;
+	const isGoalReached = rawProgress >= 100;
+ 
+	const weightChange = isLoseWeight
+	  ? startingWeight - currentWeight
+	  : currentWeight - startingWeight;
+ 
+	const isProgressPositive = weightChange > 0;
+ 
+	const remainingWeight = Math.abs(
+	  currentWeight - goalWeight
+	);
+ 
+	const displayPercentage =
+	  rawProgress > 0
+		 ? `+${rawProgress.toFixed(0)}%`
+		 : `${rawProgress.toFixed(0)}%`;
+ 
+	const progressDescription = isMovingAway
+	  ? "moving away from goal"
+	  : isGoalReached
+	  ? "goal reached"
+	  : "moving toward goal";
+ 
+	const chartData = [
+	  {
+		 value: chartProgress,
+		 color: isMovingAway ? RED : GREEN,
+	  },
+	  {
+		 value: Math.max(
+			100 - chartProgress,
+			0.01
+		 ),
+		 color: SLATE_200,
+	  },
+	];
+ 
+	return (
+	  <View style={styles.card}>
+ 
+		 {/* HEADER */}
+ 
+		 <View style={styles.header}>
+ 
+			<View style={styles.headerLeft}>
+ 
+			  <View
+				 style={[
+					styles.iconBadge,
+					isMovingAway &&
+					  styles.iconBadgeDanger,
+				 ]}
+			  >
+				 <Target
+					size={18}
+					color={
+					  isMovingAway
+						 ? RED
+						 : GREEN
+					}
+					strokeWidth={2.2}
+				 />
+			  </View>
+ 
+			  <View>
+ 
+				 <Text style={styles.title}>
+					Weight Goal Progress
+				 </Text>
+ 
+				 <View
+					style={[
+					  styles.goalBadge,
+					  isLoseWeight
+						 ? styles.lossBadge
+						 : styles.gainBadge,
+					]}
+				 >
+					<Text
+					  style={[
+						 styles.goalBadgeText,
+						 isLoseWeight
+							? styles.lossText
+							: styles.gainText,
+					  ]}
+					>
+					  {isLoseWeight
+						 ? "Lose Weight"
+						 : "Gain Weight"}
+					</Text>
+				 </View>
+ 
+			  </View>
+ 
+			</View>
+ 
+		 </View>
+ 
+ 
+		 {/* HALF DONUT */}
+ 
+		 <View style={styles.gaugeContainer}>
+ 
+			<PieChart
+			  data={chartData}
+ 
+			  donut
+			  semiCircle
+ 
+			  radius={112}
+			  innerRadius={88}
+ 
+			  innerCircleColor="#FFFFFF"
+ 
+			  showValuesAsLabels={false}
+			  showText={false}
+ 
+			  isAnimated
+			  animationDuration={700}
+ 
+			  centerLabelComponent={() => (
+				 <View style={styles.centerLabel}>
+ 
+					<Text
+					  style={[
+						 styles.percentage,
+ 
+						 isMovingAway &&
+							styles.negativePercentage,
+ 
+						 isGoalReached &&
+							styles.completedPercentage,
+					  ]}
+					>
+					  {displayPercentage}
+					</Text>
+ 
+					<Text
+					  style={[
+						 styles.completedText,
+ 
+						 isMovingAway &&
+							styles.negativeCompletedText,
+ 
+						 isGoalReached &&
+							styles.goalReachedText,
+					  ]}
+					>
+					  {progressDescription}
+					</Text>
+ 
+				 </View>
+			  )}
+			/>
+ 
+ 
+			{/* WEIGHT LABELS */}
+ 
+			<View style={styles.weightLabels}>
+ 
+			  {/* START */}
+ 
+			  <View style={styles.weightPoint}>
+ 
+				 <View style={styles.dot} />
+ 
+				 <Text style={styles.weightLabel}>
+					START
+				 </Text>
+ 
+				 <Text style={styles.weightValue}>
+					{startingWeight}
+ 
+					<Text style={styles.unit}>
+					  {" kg"}
+					</Text>
+				 </Text>
+ 
+			  </View>
+ 
+ 
+			  {/* CURRENT */}
+ 
+			  <View style={styles.currentWeightPoint}>
+ 
+				 <View
+					style={[
+					  styles.dot,
+					  isMovingAway
+						 ? styles.currentDotDanger
+						 : styles.currentDot,
+					]}
+				 />
+ 
+				 <Text style={styles.weightLabel}>
+					CURRENT
+				 </Text>
+ 
+				 <Text
+					style={[
+					  styles.weightValue,
+					  isMovingAway
+						 ? styles.currentValueDanger
+						 : styles.currentValue,
+					]}
+				 >
+					{currentWeight}
+ 
+					<Text style={styles.unit}>
+					  {" kg"}
+					</Text>
+				 </Text>
+ 
+			  </View>
+ 
+ 
+			  {/* GOAL */}
+ 
+			  <View
+				 style={[
+					styles.weightPoint,
+					styles.goalPoint,
+				 ]}
+			  >
+ 
+				 <View
+					style={[
+					  styles.dot,
+					  styles.goalDot,
+					]}
+				 />
+ 
+				 <Text style={styles.weightLabel}>
+					GOAL
+				 </Text>
+ 
+				 <Text style={styles.weightValue}>
+					{goalWeight}
+ 
+					<Text style={styles.unit}>
+					  {" kg"}
+					</Text>
+				 </Text>
+ 
+			  </View>
+ 
+			</View>
+ 
+		 </View>
+ 
+ 
+		 {/* SUMMARY */}
+ 
+		 <View style={styles.summary}>
+ 
+			<View style={styles.trendRow}>
+ 
+			  {isProgressPositive ? (
+ 
+				 <View style={styles.trendIcon}>
+ 
+					<TrendingUp
+					  size={15}
+					  color={GREEN}
+					  strokeWidth={2.3}
+					/>
+ 
+				 </View>
+ 
+			  ) : (
+ 
+				 <View style={styles.trendIconRed}>
+ 
+					<TrendingDown
+					  size={15}
+					  color={RED}
+					  strokeWidth={2.3}
+					/>
+ 
+				 </View>
+ 
+			  )}
+ 
+			  <View>
+ 
+				 <Text
+					style={[
+					  styles.summaryValue,
+ 
+					  isMovingAway &&
+						 styles.summaryNegative,
+ 
+					  isGoalReached &&
+						 styles.summaryPositive,
+					]}
+				 >
+					{displayPercentage}
+				 </Text>
+ 
+				 <Text style={styles.summaryLabel}>
+					{progressDescription}
+				 </Text>
+ 
+			  </View>
+ 
+			</View>
+ 
+ 
+			{/* REMAINING */}
+ 
+			{remainingWeight > 0 &&
+			  !isGoalReached && (
+ 
+			  <View
+				 style={
+					styles.remainingContainer
+				 }
+			  >
+ 
+				 <Text style={styles.remainingValue}>
+					{remainingWeight.toFixed(1)} kg
+				 </Text>
+ 
+				 <Text style={styles.remainingLabel}>
+					to goal
+				 </Text>
+ 
+			  </View>
+ 
+			)}
+ 
+ 
+			{/* COMPLETED */}
+ 
+			{isGoalReached && (
+ 
+			  <View
+				 style={
+					styles.remainingContainer
+				 }
+			  >
+ 
+				 <Text
+					style={[
+					  styles.remainingValue,
+					  styles.goalReachedText,
+					]}
+				 >
+					100%
+				 </Text>
+ 
+				 <Text style={styles.remainingLabel}>
+					completed
+				 </Text>
+ 
+			  </View>
+ 
+			)}
+ 
+		 </View>
+ 
+ 
+		 {/* VIEW PROGRESS */}
+ 
+		 <Pressable
+			onPress={onHistoryPress}
+			style={({ pressed }) => [
+			  styles.cta,
+			  pressed && styles.ctaPressed,
+			]}
+		 >
+ 
+			<Text style={styles.ctaText}>
+			  View Progress
+			</Text>
+ 
+			<ChevronRight
+			  size={17}
+			  color="#FFFFFF"
+			  strokeWidth={2.3}
+			/>
+ 
+		 </Pressable>
+ 
+ 
+		 {/* NEW GOAL PROMPT */}
+ 
+		 {isGoalReached && (
+ 
+			<View style={styles.newGoalSection}>
+ 
+			  <View style={styles.newGoalMessage}>
+ 
+				 <Text style={styles.newGoalTitle}>
+				 🎉 Congratulations!
+				 </Text>
+ 
+				 <Text style={styles.newGoalSubtitle}>
+					You reached your target weight. Ready to set a new goal?
+				 </Text>
+ 
+			  </View>
+ 
+			  <Pressable
+				 onPress={onNewGoalPress}
+				 style={({ pressed }) => [
+					styles.newGoalButton,
+					pressed &&
+					  styles.newGoalButtonPressed,
+				 ]}
+			  >
+ 
+				 <Plus
+					size={15}
+					color={GREEN}
+					strokeWidth={2.5}
+				 />
+ 
+				 <Text style={styles.newGoalButtonText}>
+					New Goal
+				 </Text>
+ 
+			  </Pressable>
+ 
+			</View>
+ 
+		 )}
+ 
+	  </View>
+	);
+ }
+ 
+ const styles = StyleSheet.create({
+ 
+	/* CARD */
+ 
+	card: {
+	  marginHorizontal: 20,
+ 
+	  backgroundColor: "#FFFFFF",
+ 
+	  borderRadius: 22,
+ 
+	  borderWidth: 1,
+	  borderColor: "#F1F5F9",
+ 
+	  overflow: "hidden",
+ 
+	  elevation: 2,
+ 
+	  shadowColor: "#000",
+ 
+	  shadowOffset: {
+		 width: 0,
+		 height: 2,
+	  },
+ 
+	  shadowOpacity: 0.04,
+ 
+	  shadowRadius: 8,
 	},
-
-	header:{
-		flexDirection:"row",
-		justifyContent:"space-between",
-		alignItems:"center",
-		paddingHorizontal:20,
-		paddingTop:20,
+ 
+ 
+	/* HEADER */
+ 
+	header: {
+	  paddingHorizontal: 18,
+	  paddingTop: 18,
 	},
-
-	headerLeft:{
-		flexDirection:"row",
-		alignItems:"center",
-		gap:10,
+ 
+	headerLeft: {
+	  flexDirection: "row",
+	  alignItems: "center",
+	  gap: 10,
 	},
-
-	iconBadge:{
-		width:36,
-		height:36,
-		borderRadius:18,
-		backgroundColor:"#ecfdf5",
-		justifyContent:"center",
-		alignItems:"center",
+ 
+	iconBadge: {
+	  width: 36,
+	  height: 36,
+ 
+	  borderRadius: 18,
+ 
+	  backgroundColor: "#ECFDF5",
+ 
+	  justifyContent: "center",
+	  alignItems: "center",
 	},
-
-	title:{
-		fontSize:16,
-		fontWeight:"700",
-		color:"#0f172a",
+ 
+	iconBadgeDanger: {
+	  backgroundColor: "#FEF2F2",
 	},
-
-	goalBadge:{
-		marginTop:4,
-		paddingHorizontal:8,
-		paddingVertical:3,
-		borderRadius:999,
-		alignSelf:"flex-start",
+ 
+	title: {
+	  fontSize: 15,
+	  fontWeight: "700",
+	  color: SLATE_900,
 	},
-
-	lossBadge:{
-		backgroundColor:"#fef2f2",
+ 
+	goalBadge: {
+	  marginTop: 4,
+ 
+	  paddingHorizontal: 8,
+	  paddingVertical: 3,
+ 
+	  borderRadius: 999,
+ 
+	  alignSelf: "flex-start",
 	},
-
-	gainBadge:{
-		backgroundColor:"#ecfdf5",
+ 
+	lossBadge: {
+	  backgroundColor: "#FEF2F2",
 	},
-
-	goalBadgeText:{
-		fontSize:11,
-		fontWeight:"600",
+ 
+	gainBadge: {
+	  backgroundColor: "#ECFDF5",
 	},
-
-	lossText:{
-		color:RED,
+ 
+	goalBadgeText: {
+	  fontSize: 10,
+	  fontWeight: "600",
 	},
-
-	gainText:{
-		color:GREEN,
+ 
+	lossText: {
+	  color: RED,
 	},
-
-	historyButton:{
-		flexDirection:"row",
-		alignItems:"center",
-		gap:3,
-		paddingHorizontal:10,
-		paddingVertical:6,
-		borderRadius:999,
-		backgroundColor:"#f8fafc",
-		borderWidth:1,
-		borderColor:"#e2e8f0",
+ 
+	gainText: {
+	  color: GREEN,
 	},
-
-	historyText:{
-		fontSize:12,
-		fontWeight:"600",
-		color:"#64748B",
+ 
+ 
+	/* GAUGE */
+ 
+	gaugeContainer: {
+	  height: 205,
+ 
+	  marginTop: 8,
+ 
+	  alignItems: "center",
+ 
+	  overflow: "hidden",
 	},
-
-	statsRow:{
-		flexDirection:"row",
-		alignItems:"center",
-		marginTop:20,
-		paddingHorizontal:20,
+ 
+	centerLabel: {
+	  width: 150,
+ 
+	  alignItems: "center",
+	  justifyContent: "center",
+ 
+	  marginTop: 30,
 	},
-
-	dividerWrap:{
-		flex:1,
-		alignItems:"center",
-		paddingHorizontal:8,
+ 
+	percentage: {
+	  fontSize: 30,
+	  lineHeight: 34,
+ 
+	  fontWeight: "800",
+ 
+	  color: SLATE_900,
 	},
-
-	divider:{
-		width:"100%",
-		height:1,
-		backgroundColor:"#f1f5f9",
+ 
+	negativePercentage: {
+	  color: RED,
 	},
-
-	statLabel:{
-		fontSize:11,
-		color:"#94a3b8",
-		fontWeight:"500",
-		textTransform:"uppercase",
+ 
+	completedPercentage: {
+	  color: GREEN,
 	},
-
-	statValue:{
-		marginTop:2,
-		fontSize:18,
-		fontWeight:"700",
-		color:"#0f172a",
+ 
+	completedText: {
+	  marginTop: 2,
+ 
+	  fontSize: 10,
+ 
+	  fontWeight: "500",
+ 
+	  color: SLATE_400,
+ 
+	  textAlign: "center",
 	},
-
-	statValueEmphasized:{
-		fontSize:24,
+ 
+	negativeCompletedText: {
+	  color: RED,
 	},
-
-	statUnit:{
-		fontSize:12,
-		color:"#94a3b8",
+ 
+	goalReachedText: {
+	  color: GREEN,
 	},
-
-	progressSection:{
-		marginTop:24,
-		paddingHorizontal:20,
+ 
+ 
+	/* WEIGHT LABELS */
+ 
+	weightLabels: {
+	  position: "absolute",
+ 
+	  left: 18,
+	  right: 18,
+ 
+	  bottom: 4,
+ 
+	  flexDirection: "row",
+ 
+	  justifyContent: "space-between",
+ 
+	  alignItems: "flex-start",
 	},
-
-	progressBarRow:{
-		flexDirection:"row",
-		alignItems:"center",
-		gap:10,
+ 
+	weightPoint: {
+	  width: 70,
+ 
+	  alignItems: "flex-start",
 	},
-
-	trackBg:{
-		flex:1,
-		height:10,
-		borderRadius:999,
-		backgroundColor:"#f1f5f9",
-		overflow:"hidden",
+ 
+	currentWeightPoint: {
+	  width: 80,
+ 
+	  alignItems: "center",
 	},
-
-	trackFill:{
-		height:"100%",
-		borderRadius:999,
-		backgroundColor:GREEN,
+ 
+	goalPoint: {
+	  alignItems: "flex-end",
 	},
-
-	progressPercentage:{
-		fontSize:13,
-		fontWeight:"700",
-		color:GREEN,
+ 
+	dot: {
+	  width: 7,
+	  height: 7,
+ 
+	  borderRadius: 999,
+ 
+	  backgroundColor: SLATE_400,
+ 
+	  marginBottom: 4,
 	},
-
-	progressFooter:{
-		flexDirection:"row",
-		justifyContent:"space-between",
-		alignItems:"center",
-		marginTop:10,
+ 
+	currentDot: {
+	  width: 8,
+	  height: 8,
+ 
+	  backgroundColor: GREEN,
 	},
-
-	trendRow:{
-		flexDirection:"row",
-		alignItems:"center",
-		gap:6,
+ 
+	currentDotDanger: {
+	  width: 8,
+	  height: 8,
+ 
+	  backgroundColor: RED,
 	},
-
-	trendText:{
-		fontSize:14,
-		fontWeight:"500",
-		color:"#475569",
+ 
+	goalDot: {
+	  backgroundColor: SLATE_400,
 	},
-
-	remainingText:{
-		fontSize:12,
-		color:"#94a3b8",
+ 
+	weightLabel: {
+	  fontSize: 9,
+ 
+	  fontWeight: "600",
+ 
+	  color: SLATE_400,
+ 
+	  letterSpacing: 0.4,
 	},
-
-	cta:{
-		marginHorizontal:20,
-		marginTop:20,
-		marginBottom:20,
-		backgroundColor:GREEN,
-		paddingVertical:14,
-		borderRadius:16,
+ 
+	weightValue: {
+	  marginTop: 1,
+ 
+	  fontSize: 13,
+ 
+	  fontWeight: "700",
+ 
+	  color: SLATE_700,
 	},
-
-	ctaText:{
-		textAlign:"center",
-		color:"#fff",
-		fontSize:14,
-		fontWeight:"600",
+ 
+	currentValue: {
+	  color: GREEN,
 	},
-});
+ 
+	currentValueDanger: {
+	  color: RED,
+	},
+ 
+	unit: {
+	  fontSize: 9,
+ 
+	  fontWeight: "500",
+ 
+	  color: SLATE_400,
+	},
+ 
+ 
+	/* SUMMARY */
+ 
+	summary: {
+	  flexDirection: "row",
+ 
+	  justifyContent: "space-between",
+ 
+	  alignItems: "center",
+ 
+	  marginHorizontal: 18,
+ 
+	  paddingVertical: 12,
+	  paddingHorizontal: 12,
+ 
+	  borderRadius: 12,
+ 
+	  backgroundColor: "#F8FAFC",
+	},
+ 
+	trendRow: {
+	  flexDirection: "row",
+ 
+	  alignItems: "center",
+ 
+	  gap: 8,
+	},
+ 
+	trendIcon: {
+	  width: 28,
+	  height: 28,
+ 
+	  borderRadius: 8,
+ 
+	  backgroundColor: "#ECFDF5",
+ 
+	  alignItems: "center",
+	  justifyContent: "center",
+	},
+ 
+	trendIconRed: {
+	  width: 28,
+	  height: 28,
+ 
+	  borderRadius: 8,
+ 
+	  backgroundColor: "#FEF2F2",
+ 
+	  alignItems: "center",
+	  justifyContent: "center",
+	},
+ 
+	summaryValue: {
+	  fontSize: 13,
+ 
+	  fontWeight: "700",
+ 
+	  color: SLATE_700,
+	},
+ 
+	summaryPositive: {
+	  color: GREEN,
+	},
+ 
+	summaryNegative: {
+	  color: RED,
+	},
+ 
+	summaryLabel: {
+	  marginTop: 1,
+ 
+	  fontSize: 10,
+ 
+	  color: SLATE_400,
+	},
+ 
+	remainingContainer: {
+	  alignItems: "flex-end",
+	},
+ 
+	remainingValue: {
+	  fontSize: 13,
+ 
+	  fontWeight: "700",
+ 
+	  color: SLATE_700,
+	},
+ 
+	remainingLabel: {
+	  marginTop: 1,
+ 
+	  fontSize: 10,
+ 
+	  color: SLATE_400,
+	},
+ 
+ 
+	/* VIEW PROGRESS */
+ 
+	cta: {
+	  marginHorizontal: 18,
+ 
+	  marginTop: 14,
+	  marginBottom: 18,
+ 
+	  paddingVertical: 12,
+ 
+	  borderRadius: 13,
+ 
+	  backgroundColor: GREEN,
+ 
+	  flexDirection: "row",
+ 
+	  alignItems: "center",
+ 
+	  justifyContent: "center",
+ 
+	  gap: 4,
+	},
+ 
+	ctaPressed: {
+	  backgroundColor: GREEN_DARK,
+	},
+ 
+	ctaText: {
+	  color: "#FFFFFF",
+ 
+	  fontSize: 13,
+ 
+	  fontWeight: "700",
+	},
+ 
+ 
+	/* NEW GOAL */
+ 
+	newGoalSection: {
+	  marginHorizontal: 18,
+ 
+	  marginTop: -6,
+	  marginBottom: 16,
+ 
+	  paddingTop: 12,
+ 
+	  borderTopWidth: 1,
+	  borderTopColor: "#F1F5F9",
+ 
+	  flexDirection: "row",
+ 
+	  alignItems: "center",
+ 
+	  justifyContent: "space-between",
+ 
+	  gap: 12,
+	},
+ 
+	newGoalMessage: {
+	  flex: 1,
+	},
+ 
+	newGoalTitle: {
+	  fontSize: 12,
+ 
+	  fontWeight: "700",
+ 
+	  color: SLATE_900,
+	},
+ 
+	newGoalSubtitle: {
+	  marginTop: 2,
+ 
+	  fontSize: 10,
+ 
+	  lineHeight: 14,
+ 
+	  color: SLATE_400,
+	},
+ 
+	newGoalButton: {
+	  flexDirection: "row",
+ 
+	  alignItems: "center",
+ 
+	  gap: 4,
+ 
+	  paddingHorizontal: 11,
+	  paddingVertical: 8,
+ 
+	  borderRadius: 10,
+ 
+	  backgroundColor: "#ECFDF5",
+ 
+	  borderWidth: 1,
+	  borderColor: "#D1FAE5",
+	},
+ 
+	newGoalButtonPressed: {
+	  backgroundColor: "#D1FAE5",
+	},
+ 
+	newGoalButtonText: {
+	  fontSize: 11,
+ 
+	  fontWeight: "700",
+ 
+	  color: GREEN_DARK,
+	},
+ 
+ });

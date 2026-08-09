@@ -9,10 +9,11 @@ import {
 import {
 	ProgressHistoryCard
 } from "./FitnessProgressCard";
+import { FitnessGoalHistory } from "@/features/home/types/HomeTypes";
 
 
 interface Props{
-	history:any[];
+	history: FitnessGoalHistory[];
 }
 
 

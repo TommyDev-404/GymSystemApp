@@ -9,18 +9,14 @@ import {
 	TrendingUp,
 	TrendingDown,
 } from "lucide-react-native";
+import { FitnessGoalHistory } from "@/features/home/types/HomeTypes";
 
+interface ProgressHistoryListProps {
+	item: FitnessGoalHistory;
+ }
 
-export function ProgressHistoryCard({
-	item
-}:{
-	item:any;
-}){
-
-
-	const isGain =
-		item.weight_change > 0;
-
+export function ProgressHistoryCard({ item }: ProgressHistoryListProps){
+	const isGain = item.weight_change > 0;
 
 	const date =
 		new Date(
