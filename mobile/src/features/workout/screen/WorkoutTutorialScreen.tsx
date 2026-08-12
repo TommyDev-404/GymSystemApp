@@ -19,7 +19,6 @@ import { CategoryFilter } from "@/features/workout/components/tutorial/CategoryF
 import { WorkoutTutorialCard } from "@/features/workout/components/tutorial/WorkoutTutorialCard";
 import { useWorkoutTutorials } from "../hook/useWorkout";
 import { FlatList } from "react-native-gesture-handler";
-import { EmptyWorkout } from "../components/tutorial/EmptyWorkout";
 import { EmptyState } from "@/components/EmptyState";
 
 export function WorkoutTutorialsScreen({ onBack }: any) {

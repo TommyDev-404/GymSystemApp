@@ -1,17 +1,17 @@
-import { useEffect } from "react";
-import { router } from "expo-router";
+
+import { Redirect } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Index() {
-  const { member } = useAuth();
+  const { member, loading } = useAuth();
+   console.log(member);
+  if (loading) {
+    return null;
+  }
 
-  useEffect(() => {
-    if (member) {
-      router.replace("/(app)/(tabs)" as any);
-    } else {
-      router.replace("/(auth)/login" as any);
-    }
-  }, []);
+  if (member) {
+    return <Redirect href="/(app)/(tabs)/home"  />;
+  }
 
-  return null;
+  return <Redirect href="/(auth)/login" />;
 }

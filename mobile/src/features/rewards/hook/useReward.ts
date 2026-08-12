@@ -15,7 +15,7 @@ export function useFetchRedeemedRewards(member_id: number) {
      queryKey: ["redeemed-rewards"],
      queryFn: () => api.getRedeemedRewardsApi(member_id),
    });
- }
+}
 
 export const useRedeemReward = () => {
    const queryClient = useQueryClient();

@@ -21,6 +21,9 @@ import { EmptyState } from "@/components/EmptyState";
 import { Loading } from "@/components/Loading";
 import { Notification, NotificationGroupType } from "../types/NotifTypes";
 import Toast from "react-native-toast-message";
+import { useEffect } from "react";
+import { useSocket } from "@/context/SocketContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 function formatNotificationGroups(notifications: Notification[]) {
   const config: any = {
@@ -82,6 +85,9 @@ function formatNotificationGroups(notifications: Notification[]) {
 }
 
 export default function NotificationsScreen() {
+	const socket = useSocket();
+	const queryClient = useQueryClient();
+
 	const { member } = useAuth();
 	const { data: notifications = [], isLoading } = useGetMemberNotifications(member?.memberId!);
 	const { mutate: markAllRead, isPending } = useMarkAllNotificationRead();
@@ -104,6 +110,20 @@ export default function NotificationsScreen() {
 		})
 	};
 
+	useEffect(() => {
+		const handleIncomingSocket = () => {
+			queryClient.invalidateQueries({
+				queryKey: ["member-notifications", member?.memberId!],
+			});
+		};
+	
+		socket.on("payment:new", handleIncomingSocket);
+		
+		return () => {
+			socket.off("payment:new", handleIncomingSocket);
+		};
+	}, [socket, queryClient]);
+		
 	if (isLoading) return <Loading/>;
 
 	return (

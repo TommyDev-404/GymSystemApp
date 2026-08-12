@@ -24,9 +24,14 @@ import { useGetFitnessGoal, useGetMemberDashboardData, useGetMemberRecentActivit
 import { useAuth } from "@/context/AuthContext";
 import { MemberDashboard, WeightGoal } from "../types/HomeTypes";
 import { Loading } from "@/components/Loading";
+import { useSocket } from "@/context/SocketContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 export default function HomeScreen() {
+	const socket = useSocket();
+	const queryClient = useQueryClient();
+
 	const { member } = useAuth();
 
 	const { data: dashboardData = {} as MemberDashboard, isLoading: dashboardLoading } = useGetMemberDashboardData(member?.memberId!);
@@ -37,11 +42,7 @@ export default function HomeScreen() {
 	const updateGoalSheetRef = useRef<BottomSheetModal>(null);
 
 	const [goal, setGoal] = useState<WeightGoal | null>(null);
-
-	useEffect(() => {
-		setGoal(memberWeightGoal ?? null);
-	}, [memberWeightGoal]);
-
+	
 	const stats = useMemo(
 		() => [
 			{ label: "Day Streak", value: dashboardData?.stats?.dayStreak, icon: Flame, color: "#f97316", bg: "#fff7ed" },
@@ -54,37 +55,62 @@ export default function HomeScreen() {
 	const actions = useMemo(
 		() => [
 			{
-			label: "Refer a Friend",
-			icon: UsersRound,
-			bg: "#dbeafe",
-			color: "#3b82f6",
-			onPress: () =>
-				router.push({
-					pathname: "/(app)/referral",
-					params: { memberId: String(member?.memberId) },
-				}),
+				label: "Refer a Friend",
+				icon: UsersRound,
+				bg: "#dbeafe",
+				color: "#3b82f6",
+				onPress: () =>
+					router.push({
+						pathname: "/(app)/referral",
+						params: { memberId: String(member?.memberId) },
+					}),
 			},
+
 			{
-			label: "Rewards",
-			icon: Trophy,
-			bg: "#fef3c7",
-			color: "#d97706",
-			onPress: () =>
-				router.push({
-					pathname: "/(app)/rewards",
-					params: { memberId: String(member?.memberId) },
-				}),
+				label: "Rewards",
+				icon: Trophy,
+				bg: "#fef3c7",
+				color: "#d97706",
+				onPress: () =>
+					router.push({
+						pathname: "/(app)/rewards",
+						params: { memberId: String(member?.memberId) },
+					}),
 			},
+			
 			{
-			label: "Workout Tutorials",
-			icon: Dumbbell,
-			bg: "#d1fae5",
-			color: "#10b981",
-			onPress: () => router.push({ pathname: "/(app)/workout-tutorial" }),
+				label: "Workout Tutorials",
+				icon: Dumbbell,
+				bg: "#d1fae5",
+				color: "#10b981",
+				onPress: () => router.push({ pathname: "/(app)/workout-tutorial" }),
 			},
 		],
 		[member?.memberId]
 	);
+
+	useEffect(() => {
+		setGoal(memberWeightGoal ?? null);
+	}, [memberWeightGoal]);
+
+	// live socket
+	useEffect(() => {
+		const handleIncomingSocket = () => {
+			queryClient.invalidateQueries({
+				queryKey: ["member-dashboard-stat", member?.memberId],
+			});
+			
+			queryClient.invalidateQueries({
+				queryKey: ["member-recent-activity", member?.memberId],
+			});
+		};
+	
+		socket.on("membership:renew", handleIncomingSocket);
+		
+		return () => {
+			socket.off("membership:renew", handleIncomingSocket);
+		};
+	}, [socket, queryClient]);
 
 	if (dashboardLoading || recentLoading || weightGoalLoading ) return <Loading />;
 

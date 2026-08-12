@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SocketProvider } from "@/context/SocketContext";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import Toast from "react-native-toast-message";
@@ -26,8 +26,8 @@ export default function RootLayout() {
             <AuthProvider>
               <SocketProvider>
                 
-                <Stack screenOptions={{ headerShown: false }}/>
-
+              <RootNavigator/>
+                
                 <Toast />
                 
               </SocketProvider>
@@ -36,5 +36,26 @@ export default function RootLayout() {
         </BottomSheetModalProvider>
       </GestureHandlerRootView>
     </KeyboardProvider>
+  );
+}
+
+
+function RootNavigator() {
+  const { member, loading } = useAuth();
+
+  if (loading) {
+    return null; // or SplashScreen
+  }
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={!member}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={!!member}>
+        <Stack.Screen name="(app)" />
+      </Stack.Protected>
+    </Stack>
   );
 }

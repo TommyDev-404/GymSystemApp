@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ScrollView, StatusBar, View, Pressable } from "react-native";
 import { AlarmClock } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -10,10 +10,15 @@ import { AddWorkoutModal } from "../components/AddWorkoutModal";
 import { useGetPersonalWorkoutHistory, useWorkoutTutorials } from "../hook/useWorkout";
 import { router } from "expo-router";
 import { Loading } from "@/components/Loading";
+import { useSocket } from "@/context/SocketContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function WorkoutScreen() {
+	const socket = useSocket();
+	const queryClient = useQueryClient();
+
 	const { data: personalWorkoutHistory = [], isLoading: historyLoading } = useGetPersonalWorkoutHistory(1);
-	const { data: tutorials = [], isLoading: tutorialsLoading } = useWorkoutTutorials({ limit: 3});
+	const { data: tutorials = [], isLoading: tutorialsLoading } = useWorkoutTutorials({ limit: 3 });
 	
 	const sheetRef = useRef<BottomSheetModal>(null);
 
@@ -24,6 +29,25 @@ export default function WorkoutScreen() {
 	const closeSheet = () => {
 		sheetRef.current?.dismiss();
 	};
+
+	// live socket for real time appearing of tutorials created by admin
+	useEffect(() => {
+	  const handleIncomingSocket = () => {
+		 queryClient.invalidateQueries({
+			queryKey: ["workout-tutorials"],
+		 });
+	  };
+	
+	  socket.on("tutorial:new", handleIncomingSocket);
+	  socket.on("tutorial:update", handleIncomingSocket);
+	  socket.on("tutorial:delete", handleIncomingSocket);
+	  
+	  return () => {
+		 socket.off("tutorial:new", handleIncomingSocket);
+		 socket.off("tutorial:update", handleIncomingSocket);
+		 socket.on("tutorial:delete", handleIncomingSocket);
+	  };
+	}, [socket, queryClient]);
 
 	if (historyLoading || tutorialsLoading) return <Loading />;
 

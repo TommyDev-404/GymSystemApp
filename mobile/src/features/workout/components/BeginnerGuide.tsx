@@ -35,7 +35,7 @@ const programs = [
 export function BeginnerGuide({
   onViewAll,
 }: {
-  onViewAll: () => void;
+  onViewAll?: () => void;
 }) {
   return (
     <View style={{ marginTop: 22 }}>
