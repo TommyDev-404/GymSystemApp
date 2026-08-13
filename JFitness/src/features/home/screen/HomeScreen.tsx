@@ -23,7 +23,7 @@ import { GoalBottomSheet } from "../components/GoalBottomSheet";
 import { useGetFitnessGoal, useGetMemberDashboardData, useGetMemberRecentActivity } from "../hook/useHome";
 import { useAuth } from "@/context/AuthContext";
 import { MemberDashboard, WeightGoal } from "../types/HomeTypes";
-import { Loading } from "@/components/Loading";
+import { Loading } from "@/components/shared/Loading";
 import { useSocket } from "@/context/SocketContext";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -106,11 +106,13 @@ export default function HomeScreen() {
 		};
 	
 		socket.on("membership:renew", handleIncomingSocket);
+		socket.on("membership:upgrade", handleIncomingSocket);
 		
 		return () => {
 			socket.off("membership:renew", handleIncomingSocket);
+			socket.off("membership:upgrade", handleIncomingSocket);
 		};
-	}, [socket, queryClient]);
+	}, [socket, queryClient, member?.memberId]);
 
 	if (dashboardLoading || recentLoading || weightGoalLoading ) return <Loading />;
 
