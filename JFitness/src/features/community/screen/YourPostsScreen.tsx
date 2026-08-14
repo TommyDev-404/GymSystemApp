@@ -28,10 +28,10 @@ import {
  
  import {
 	EmptyState,
- } from "@/components/EmptyState";
+ } from "@/components/shared/EmptyState";
  
 import { useCreateComment, useGetMyPosts } from "../hooks/useCommunity";
-import { Loading } from "@/components/Loading";
+import { Loading } from "@/components/shared/Loading";
 import { router } from "expo-router";
 import { YourPostsHeader } from "../components/YourPostsHeader";
 import { useRef, useState } from "react";

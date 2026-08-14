@@ -17,7 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { X, ImagePlus, Trash2 } from "lucide-react-native";
 import { useCreatePost } from "../hooks/useCommunity";
 import { useAuth } from "@/context/AuthContext";
-import LoadingOverlay from "@/components/LoadingOverlay";
+import LoadingOverlay from "@/components/shared/LoadingOverlay";
 
 const GREEN = "#10b981";
 const suggestedTags = ["Fitness", "NoExcuses", "MorningRun", "LegDay", "PR", "Cardio"];

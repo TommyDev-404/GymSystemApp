@@ -1,4 +1,4 @@
-import AppHeader from "@/components/AppHeader";
+import AppHeader from "@/components/shared/AppHeader";
 import { router, Tabs } from "expo-router";
 import { House, Dumbbell, QrCode, Bell, Users } from "lucide-react-native";
 import { useState } from "react";

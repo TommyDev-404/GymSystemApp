@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-import { Gift, X } from "lucide-react-native";
+import { BadgeCheck, Gift, X } from "lucide-react-native";
 import { RedeemedReward } from "../types/RewardTypes";
 import { useAuth } from "@/context/AuthContext";
 import { useCancelRedeemReward } from "../hook/useReward";
@@ -37,23 +37,43 @@ export default function RedeemedSection({ data }: { data: RedeemedReward[] }) {
 	};
 
 	return (
-		<View style={styles.container}>
-			<Text style={styles.title}>Redeemed</Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
+	<View>
+		<Text style={styles.title}>Redeemed Rewards</Text>
+		<Text style={styles.subtitle}>
+			View your redeemed rewards and track their status
+		</Text>
+	</View>
 
+	<View style={styles.headerIcon}>
+  <BadgeCheck
+			size={19}
+			color="#10B981"
+			strokeWidth={2.2}
+		/>
+        </View>
+      </View>
+      
 			{data.length === 0 ? (
-			<View style={styles.emptyCard}>
-				<View style={styles.emptyIcon}>
-					<Gift size={28} color="#94A3B8" />
-				</View>
-
-				<Text style={styles.emptyTitle}>
-					No Rewards Redeemed
-				</Text>
-
-				<Text style={styles.emptyText}>
-					Your redeemed rewards will appear here.
-				</Text>
-			</View>
+			<View style={styles.emptyState}>
+      <View style={styles.emptyIcon}>
+        <Gift
+          size={30}
+          color="#94A3B8"
+          strokeWidth={1.8}
+        />
+      </View>
+  
+      <Text style={styles.emptyTitle}>
+        No Rewards Redeemed Yet
+      </Text>
+  
+      <Text style={styles.emptyText}>
+        Rewards you redeem will appear here so you can
+        track their status and points used.
+      </Text>
+    </View>
 			) : (
 			<View style={{ gap: 10 }}>
 				{data.map((r: RedeemedReward) => (
@@ -147,10 +167,32 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
+  },
+  
+  subtitle: {
+    marginTop: 3,
+    fontSize: 11,
+    color: "#94A3B8",
+  },
+  headerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    backgroundColor: "#ECFDF5",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#D1FAE5",
+  },
+  
   title: {
     fontSize: 16,
     fontWeight: "700",
-    marginBottom: 12,
     color: "#0f172a",
   },
 
@@ -235,37 +277,51 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-
-  emptyIcon: {
-    width: 60,
-    height: 60,
-
-    borderRadius: 30,
-
-    backgroundColor: "#F1F5F9",
-
-    justifyContent: "center",
+  emptyState: {
     alignItems: "center",
-
-    marginBottom: 12,
+    justifyContent: "center",
+  
+    paddingHorizontal: 30,
+    paddingVertical: 35,
   },
-
-
+  
+  emptyIcon: {
+    width: 64,
+    height: 64,
+  
+    borderRadius: 22,
+  
+    backgroundColor: "#F8FAFC",
+  
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  
+    alignItems: "center",
+    justifyContent: "center",
+  
+    marginBottom: 14,
+  },
+  
   emptyTitle: {
     fontSize: 15,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-
-
-  emptyText: {
-    marginTop: 4,
-
-    fontSize: 12,
-
-    color: "#64748B",
-
+    fontWeight: "800",
+  
+    color: "#334155",
+  
     textAlign: "center",
+  },
+  
+  emptyText: {
+    marginTop: 6,
+  
+    fontSize: 11,
+    lineHeight: 17,
+  
+    color: "#94A3B8",
+  
+    textAlign: "center",
+  
+    maxWidth: 270,
   },
 
     content: {

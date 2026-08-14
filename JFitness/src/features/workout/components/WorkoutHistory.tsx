@@ -16,7 +16,7 @@ import {
   ChevronDown,
 } from "lucide-react-native";
 import { router } from "expo-router";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);

@@ -4,8 +4,12 @@ import {
   Receipt,
   Trophy,
   Activity,
+  Dumbbell,
+  Tag,
+  User,
+  CreditCard,
 } from "lucide-react-native";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 function formatActivityDate(date: string | Date) {
 	const activityDate = new Date(date);
@@ -21,17 +25,32 @@ function formatActivityDate(date: string | Date) {
 }
 
 function getActivityIcon(type: string) {
-  switch(type) {
-    case "CHECK_IN":
-      return Flame;
-    case "PAYMENT":
-      return Receipt;
-    case "REWARD_CLAIM":
-      return Trophy;
-    default:
-      return Activity;
-  }
-}
+	switch (type) {
+	  case "ATTENDANCE":
+		 return Flame;
+ 
+	  case "PAYMENT":
+		 return Receipt;
+ 
+	  case "MEMBERSHIP":
+		 return CreditCard;
+ 
+	  case "REWARD":
+		 return Trophy;
+ 
+	  case "MEMBER":
+		 return User;
+ 
+	  case "PRICING":
+		 return Tag;
+ 
+	  case "WORKOUT":
+		 return Dumbbell;
+ 
+	  default:
+		 return Activity;
+	}
+ }
 
 function getActivityColor(type: string) {
 	switch(type) {

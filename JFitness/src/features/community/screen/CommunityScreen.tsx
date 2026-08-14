@@ -4,18 +4,14 @@ import {
   View,
 } from "react-native";
 
-import {
-  SafeAreaView,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   useRef,
   useState,
 } from "react";
 
-import {
-  BottomSheetModal,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 import { PostCard } from "../components/PostCard";
 import { CommentModal } from "../components/CommentModal";
@@ -23,9 +19,9 @@ import { CommentModal } from "../components/CommentModal";
 import { useGetPosts } from "../hooks/useCommunity";
 import { useAuth } from "@/context/AuthContext";
 import { useCreateComment } from "../hooks/useCommunity"; // example
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { MessageSquareDashed } from "lucide-react-native";
-import { Loading } from "@/components/Loading";
+import { Loading } from "@/components/shared/Loading";
 
 export function CommunityScreen() {
   const { member } = useAuth();

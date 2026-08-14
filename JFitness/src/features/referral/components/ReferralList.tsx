@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import { ReferralRecord } from "../types/ReferralTypes";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { Receipt } from "lucide-react-native";
 
 export default function ReferralList({

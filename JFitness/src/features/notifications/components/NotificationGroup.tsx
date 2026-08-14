@@ -16,15 +16,7 @@ export function NotificationGroup({
   const unreadCount = items.filter((i) => i.is_read).length;
   
   const handleMarkRead = (notificationId: number) => {
-    markAsRead({ notificationId, memberId }, {
-      onSuccess: (data) => {
-       Toast.show({
-          type: "success",
-          text1: "Success",
-          text2: data.message,
-        });
-      }
-    })
+    markAsRead({ notificationId, memberId });
   };
 
   return (

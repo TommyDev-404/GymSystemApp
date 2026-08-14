@@ -19,7 +19,7 @@ import { CategoryFilter } from "@/features/workout/components/tutorial/CategoryF
 import { WorkoutTutorialCard } from "@/features/workout/components/tutorial/WorkoutTutorialCard";
 import { useWorkoutTutorials } from "../hook/useWorkout";
 import { FlatList } from "react-native-gesture-handler";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 export function WorkoutTutorialsScreen({ onBack }: any) {
   const [activeCategory, setActiveCategory] = useState("All");

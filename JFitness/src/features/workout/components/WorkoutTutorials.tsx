@@ -7,7 +7,7 @@ import {
   FlatList,
 } from "react-native";
 import { WorkoutTutorialCard } from "./tutorial/WorkoutTutorialCard";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface Props {
   tutorials: any[];

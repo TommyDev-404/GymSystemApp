@@ -24,14 +24,9 @@ import { useGetFitnessGoal, useGetMemberDashboardData, useGetMemberRecentActivit
 import { useAuth } from "@/context/AuthContext";
 import { MemberDashboard, WeightGoal } from "../types/HomeTypes";
 import { Loading } from "@/components/shared/Loading";
-import { useSocket } from "@/context/SocketContext";
-import { useQueryClient } from "@tanstack/react-query";
 
 
 export default function HomeScreen() {
-	const socket = useSocket();
-	const queryClient = useQueryClient();
-
 	const { member } = useAuth();
 
 	const { data: dashboardData = {} as MemberDashboard, isLoading: dashboardLoading } = useGetMemberDashboardData(member?.memberId!);
@@ -92,27 +87,6 @@ export default function HomeScreen() {
 	useEffect(() => {
 		setGoal(memberWeightGoal ?? null);
 	}, [memberWeightGoal]);
-
-	// live socket
-	useEffect(() => {
-		const handleIncomingSocket = () => {
-			queryClient.invalidateQueries({
-				queryKey: ["member-dashboard-stat", member?.memberId],
-			});
-			
-			queryClient.invalidateQueries({
-				queryKey: ["member-recent-activity", member?.memberId],
-			});
-		};
-	
-		socket.on("membership:renew", handleIncomingSocket);
-		socket.on("membership:upgrade", handleIncomingSocket);
-		
-		return () => {
-			socket.off("membership:renew", handleIncomingSocket);
-			socket.off("membership:upgrade", handleIncomingSocket);
-		};
-	}, [socket, queryClient, member?.memberId]);
 
 	if (dashboardLoading || recentLoading || weightGoalLoading ) return <Loading />;
 

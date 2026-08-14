@@ -12,83 +12,91 @@ import {
 	Megaphone,
 	AlertCircle,
 	BellOff,
+	Flame,
+	User,
+	BadgeCheck,
+	Bell,
 } from "lucide-react-native";
 
 import { NotificationGroup } from "@/features/notifications/components/NotificationGroup";
 import { useGetMemberNotifications, useMarkAllNotificationRead } from "../hook/useNotification";
 import { useAuth } from "@/context/AuthContext";
-import { EmptyState } from "@/components/EmptyState";
-import { Loading } from "@/components/Loading";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { Loading } from "@/components/shared/Loading";
 import { Notification, NotificationGroupType } from "../types/NotifTypes";
 import Toast from "react-native-toast-message";
-import { useEffect } from "react";
-import { useSocket } from "@/context/SocketContext";
-import { useQueryClient } from "@tanstack/react-query";
+
 
 function formatNotificationGroups(notifications: Notification[]) {
-  const config: any = {
-    REWARD: {
-      label: "Rewards",
-      icon: Star,
-      color: "#f59e0b",
-      bg: "#fef3c7",
-    },
-
-    PAYMENT: {
-      label: "Payments",
-      icon: CreditCard,
-      color: "#8b5cf6",
-      bg: "#ede9fe",
-    },
-
-    ANNOUNCEMENT: {
-      label: "Announcements",
-      icon: Megaphone,
-      color: "#3b82f6",
-      bg: "#dbeafe",
-    },
-
-    MEMBERSHIP: {
-      label: "Membership",
-      icon: AlertCircle,
-      color: "#f97316",
-      bg: "#fff7ed",
-    },
-  };
-
-
-  const grouped: any = {};
-
-  notifications.forEach((notif) => {
-
-    const type = notif.type;
-
-    if (!grouped[type]) {
-      grouped[type] = {
-        ...config[type],
-        items: [],
-      };
-    }
-
-
-    grouped[type].items.push({
-      id: notif.id,
-      title: notif.title,
-      body: notif.description,
-      time: notif.created_at,
-      unread: !notif.is_read,
-    });
-
-  });
-
-  return Object.values(grouped);
+	const config: Record<string, any> = {
+	  REWARD: {
+		 label: "Rewards",
+		 icon: Star,
+		 color: "#f59e0b",
+		 bg: "#fef3c7",
+	  },
+ 
+	  PAYMENT: {
+		 label: "Payments",
+		 icon: CreditCard,
+		 color: "#8b5cf6",
+		 bg: "#ede9fe",
+	  },
+ 
+	  MEMBERSHIP: {
+		 label: "Membership",
+		 icon: BadgeCheck,
+		 color: "#f97316",
+		 bg: "#fff7ed",
+	  },
+ 
+	  MEMBER: {
+		 label: "Members",
+		 icon: User,
+		 color: "#3b82f6",
+		 bg: "#dbeafe",
+	  },
+ 
+	  ATTENDANCE: {
+		 label: "Attendance",
+		 icon: Flame,
+		 color: "#ef4444",
+		 bg: "#fee2e2",
+	  }
+	};
+ 
+	const grouped: Record<string, any> = {};
+ 
+	notifications.forEach((notif) => {
+	  const type = notif.category;
+ 
+	  if (!grouped[type]) {
+		 grouped[type] = {
+			...(config[type] ?? {
+			  label: "Other",
+			  icon: Bell,
+			  color: "#64748b",
+			  bg: "#f1f5f9",
+			}),
+			items: [],
+		 };
+	  }
+ 
+	  grouped[type].items.push({
+		 id: notif.id,
+		 title: notif.title,
+		 body: notif.description,
+		 time: notif.created_at,
+		 unread: !notif.is_read,
+	  });
+	});
+ 
+	return Object.values(grouped);
 }
-
+ 
 export default function NotificationsScreen() {
-	const socket = useSocket();
-	const queryClient = useQueryClient();
-
 	const { member } = useAuth();
+
 	const { data: notifications = [], isLoading } = useGetMemberNotifications(member?.memberId!);
 	const { mutate: markAllRead, isPending } = useMarkAllNotificationRead();
 
@@ -109,20 +117,6 @@ export default function NotificationsScreen() {
 			}
 		})
 	};
-
-	useEffect(() => {
-		const handleIncomingSocket = () => {
-			queryClient.invalidateQueries({
-				queryKey: ["member-notifications", member?.memberId!],
-			});
-		};
-	
-		socket.on("payment:new", handleIncomingSocket);
-		
-		return () => {
-			socket.off("payment:new", handleIncomingSocket);
-		};
-	}, [socket, queryClient]);
 		
 	if (isLoading) return <Loading/>;
 
