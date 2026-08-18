@@ -51,11 +51,18 @@ export const useCreateFitnessGoal = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateFitnessGoalPayload) => api.createFitnessGoalApi(data),
+    mutationFn: ({
+      member_id,
+      data
+    }: {
+      member_id: number,
+      data: CreateFitnessGoalPayload
+    }) => api.createFitnessGoalApi(member_id, data),
+
     onSuccess: (_, variables) => {
-		queryClient.invalidateQueries({
-			queryKey:["fitness-goal", variables.member_id]
-		});
+      queryClient.invalidateQueries({
+        queryKey:["fitness-goal", variables.member_id]
+      });
     }
   });
 };

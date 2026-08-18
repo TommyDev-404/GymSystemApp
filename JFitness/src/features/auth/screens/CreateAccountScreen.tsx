@@ -1,179 +1,235 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
-  TextInput,
-  TouchableOpacity,
   Text,
+  TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
-} from "react-native";
-import { Check } from "lucide-react-native";
-import { router, useLocalSearchParams } from "expo-router";
-import { AuthLayout } from "@/features/auth/layout/AuthLayout";
-import * as api from "@/features/auth/api/auth.api";
-import { useAuth } from "@/context/AuthContext";
+} from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useForm, Controller } from 'react-hook-form';
+
+import { AuthLayout } from '@/features/auth/layout/AuthLayout';
+import { useAuth } from '@/context/AuthContext';
+import { theme } from '@/utils/theme';
+import FormField from '@/features/auth/components/FormField';
+import PrimaryButton from '@/features/auth/components/PrimaryButton';
+
+type CreateAccountForm = {
+	username: string;
+	password: string;
+	confirm: string;
+};
 
 export default function CreateAccountScreen() {
-  const { createAccount } = useAuth();
-  const { username, id } = useLocalSearchParams();
+	const { createAccount } = useAuth();
+	const { id } = useLocalSearchParams();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 
-  const handleCreate = async () => {
-    if (!password || password !== confirm) {
-      console.log("Password mismatch");
-      return;
-    }
-  
-    try {
-      setIsLoading(true);
-  
-      await createAccount(Number(id), confirm);
-  
-      router.replace("/(app)/(tabs)/home");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+	const {
+		control,
+		handleSubmit,
+		setError,
+		formState: { errors },
+	} = useForm<CreateAccountForm>({
+		defaultValues: {
+			username: "",
+			password: '',
+			confirm: '',
+		},
+	});
 
-  return (
-    <AuthLayout
-      title="Create Account"
-      subtitle="Set your password to activate your membership"
-    >
-      {/* USERNAME */}
-      <TextInput
-        value={String(username || "")}
-        editable={false}
-        style={[styles.input, styles.disabled]}
-      />
+	const handleCreate = async (data: CreateAccountForm) => {
+		try {
+			setIsLoading(true);
 
-      {/* PASSWORD */}
-      <TextInput
-        placeholder="Password"
-        placeholderTextColor="#94a3b8"
-        secureTextEntry={!showPassword}
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-      />
+			await createAccount(Number(id), data.username, data.confirm);
 
-      {/* CONFIRM PASSWORD */}
-      <TextInput
-        placeholder="Confirm Password"
-        placeholderTextColor="#94a3b8"
-        secureTextEntry={!showPassword}
-        value={confirm}
-        onChangeText={setConfirm}
-        style={styles.input}
-      />
+			router.replace('/(app)/(tabs)/home');
+		} catch (err: any) {
+			setError('root', {
+			message:
+				err?.message ||
+				'Failed to create account. Please try again.',
+			});
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-      {/* CHECKBOX */}
-      <TouchableOpacity
-        style={styles.checkbox}
-        onPress={() => setShowPassword(!showPassword)}
-      >
-        <View style={showPassword ? styles.checkedBox : styles.box}>
-          {showPassword && <Check size={14} color="#fff" />}
-        </View>
+	const errorMessage =
+		errors.root?.message ||
+		errors.password?.message ||
+		errors.confirm?.message;
 
-        <Text style={styles.checkboxText}>Show password</Text>
-      </TouchableOpacity>
+return (
+	<AuthLayout title="Create Account" subtitle="Set your password to activate your membership">
+		{/* Error */}
+		{errorMessage ? (
+			<View style={styles.errorBox}>
+				<Text style={styles.errorText}>
+					{errorMessage}
+				</Text>
+			</View>
+		) : null}
 
-      {/* BUTTON */}
-      <TouchableOpacity
-        style={[
-          styles.button,
-          isLoading && styles.buttonDisabled,
-        ]}
-        onPress={handleCreate}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator
-            size="small"
-            color="#fff"
-          />
-        ) : (
-          <Text style={styles.buttonText}>
-            Create Account
-          </Text>
-        )}
-      </TouchableOpacity>
-    </AuthLayout>
-  );
+		{/* Username */}
+		<Controller
+			control={control}
+			name="username"
+			rules={{
+				required: 'Please enter a username.',
+				minLength: {
+					value: 8,
+					message: 'Username must be unique.',
+				},
+			}}
+			render={({ field: { onChange, value } }) => (
+				<FormField
+					label="USERNAME"
+					value={value}
+					placeholder="Username"
+					onChangeText={onChange}
+					secureTextEntry={!showPassword}
+					autoCapitalize="none"
+				/>
+			)}
+		/>
+
+		{/* Password */}
+		<Controller
+			control={control}
+			name="password"
+			rules={{
+				required: 'Please enter a password.',
+				minLength: {
+					value: 8,
+					message: 'Password must be at least 8 characters.',
+				},
+			}}
+			render={({ field: { onChange, value } }) => (
+				<FormField
+					label="PASSWORD"
+					value={value}
+					onChangeText={onChange}
+					placeholder="Minimum 8 characters"
+					secureTextEntry={!showPassword}
+					autoCapitalize="none"
+				/>
+			)}
+		/>
+
+		{/* Confirm Password */}
+		<Controller
+			control={control}
+			name="confirm"
+			rules={{
+				required: 'Please confirm your password.',
+				validate: (value, formValues) =>
+					value === formValues.password ||
+					'Passwords do not match.',
+			}}
+			render={({ field: { onChange, value } }) => (
+				<FormField
+					label="CONFIRM PASSWORD"
+					value={value}
+					onChangeText={onChange}
+					placeholder="Re-enter your password"
+					secureTextEntry={!showPassword}
+					autoCapitalize="none"
+				/>
+			)}
+		/>
+
+		{/* Show Password */}
+		<TouchableOpacity
+			style={styles.showPasswordRow}
+			onPress={() => setShowPassword((prev) => !prev)}
+			activeOpacity={0.7}
+		>
+			<View
+				style={[
+					styles.checkbox,
+					showPassword && styles.checkboxChecked,
+				]}
+			>
+				{showPassword && (
+					<Text style={styles.checkMark}>✓</Text>
+				)}
+			</View>
+
+			<Text style={styles.checkboxLabel}>
+				Show password
+			</Text>
+		</TouchableOpacity>
+
+		{/* Create Account */}
+		<PrimaryButton
+			title={
+				isLoading
+					? 'Creating account...'
+					: 'Create Account'
+			}
+			onPress={handleSubmit(handleCreate)}
+			loading={isLoading}
+			disabled={isLoading}
+		/>
+	</AuthLayout>
+);
 }
 
 const styles = StyleSheet.create({
-   input: {
-     backgroundColor: "#f8fafc",
-     borderWidth: 1,
-     borderColor: "#e2e8f0",
-     padding: 14,
-     borderRadius: 14,
-     marginBottom: 12,
-     color: "#0f172a",
-   },
- 
-   disabled: {
-     backgroundColor: "#f1f5f9",
-     color: "#64748b",
-    },
-    
-    buttonDisabled: {
-      opacity: 0.7,
-    },
- 
-   checkbox: {
-     flexDirection: "row",
-     alignItems: "center",
-     gap: 10,
-     marginBottom: 10,
-   },
- 
-   box: {
-     width: 18,
-     height: 18,
-     borderRadius: 4,
-     borderWidth: 1,
-     borderColor: "#cbd5e1",
-     backgroundColor: "#fff",
-     justifyContent: "center",
-     alignItems: "center",
-   },
- 
-   checkedBox: {
-     width: 18,
-     height: 18,
-     borderRadius: 4,
-     backgroundColor: "#10b981",
-     borderWidth: 1,
-     borderColor: "#10b981",
-     justifyContent: "center",
-     alignItems: "center",
-   },
- 
-   checkboxText: {
-     fontSize: 13,
-     color: "#64748b",
-   },
- 
-   button: {
-     backgroundColor: "#10b981",
-     padding: 16,
-     borderRadius: 14,
-     alignItems: "center",
-     marginTop: 10,
-   },
- 
-   buttonText: {
-     color: "#fff",
-     fontWeight: "700",
-     fontSize: 15,
-   },
- });
+	errorBox: {
+		backgroundColor: theme.errorBg,
+		borderWidth: 1,
+		borderColor: theme.errorBorder,
+		borderRadius: 14,
+		paddingVertical: 12,
+		paddingHorizontal: 16,
+		marginBottom: 18,
+	},
+
+	errorText: {
+		color: theme.errorText,
+		fontSize: 14,
+		textAlign: 'center',
+	},
+
+	showPasswordRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 12,
+		marginTop: -4,
+		marginBottom: 18,
+		paddingVertical: 4,
+	},
+
+	checkbox: {
+		width: 22,
+		height: 22,
+		borderRadius: 6,
+		borderWidth: 1.5,
+		borderColor: theme.border,
+		backgroundColor: theme.inputBg,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+
+	checkboxChecked: {
+		backgroundColor: theme.primary,
+		borderColor: theme.primary,
+	},
+
+	checkMark: {
+		color: '#0b0d10',
+		fontSize: 13,
+		fontWeight: '800',
+	},
+
+	checkboxLabel: {
+		fontSize: 14,
+		color: theme.textSub,
+		fontWeight: '500',
+	},
+});

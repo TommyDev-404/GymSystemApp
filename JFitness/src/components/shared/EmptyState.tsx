@@ -2,10 +2,12 @@ import {
   View,
   Text,
   Pressable,
+  StyleSheet,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
 import type { LucideIcon } from "lucide-react-native";
+import { theme } from "@/utils/theme";
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -25,71 +27,39 @@ export function EmptyState({
   icon: Icon,
   title,
   subtitle,
-
   actionLabel,
   onActionPress,
-
   style,
-
-  iconColor = "#94a3b8",
-  iconBackground = "#f1f5f9",
+  iconColor = theme.textMuted,
+  iconBackground = theme.surface,
 }: EmptyStateProps) {
   return (
-    <View
-      style={[
-        {
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 20,
-        },
-        style,
-      ]}
-    >
+    <View style={[styles.container, style]}>
       {/* ICON */}
       <View
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: 28,
-          backgroundColor: iconBackground,
-
-          alignItems: "center",
-          justifyContent: "center",
-
-          marginBottom: 12,
-        }}
+        style={[
+          styles.iconContainer,
+          {
+            backgroundColor: iconBackground,
+            borderColor: theme.border,
+          },
+        ]}
       >
         <Icon
-          size={26}
+          size={22}
           color={iconColor}
           strokeWidth={2}
         />
       </View>
 
       {/* TITLE */}
-      <Text
-        style={{
-          fontSize: 14,
-          fontWeight: "700",
-          color: "#334155",
-          textAlign: "center",
-        }}
-      >
+      <Text style={styles.title}>
         {title}
       </Text>
 
       {/* SUBTITLE */}
       {subtitle && (
-        <Text
-          style={{
-            marginTop: 4,
-            fontSize: 12,
-            lineHeight: 18,
-            color: "#94a3b8",
-            textAlign: "center",
-            maxWidth: 260,
-          }}
-        >
+        <Text style={styles.subtitle}>
           {subtitle}
         </Text>
       )}
@@ -98,21 +68,12 @@ export function EmptyState({
       {actionLabel && onActionPress && (
         <Pressable
           onPress={onActionPress}
-          style={{
-            marginTop: 16,
-            backgroundColor: "#10b981",
-            paddingHorizontal: 18,
-            paddingVertical: 8,
-            borderRadius: 999,
-          }}
+          style={({ pressed }) => [
+            styles.action,
+            pressed && styles.actionPressed,
+          ]}
         >
-          <Text
-            style={{
-              color: "#fff",
-              fontSize: 12,
-              fontWeight: "700",
-            }}
-          >
+          <Text style={styles.actionText}>
             {actionLabel}
           </Text>
         </Pressable>
@@ -120,3 +81,65 @@ export function EmptyState({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+
+  iconContainer: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginBottom: 11,
+
+    borderWidth: 1,
+  },
+
+  title: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: theme.text,
+    textAlign: "center",
+  },
+
+  subtitle: {
+    marginTop: 4,
+
+    fontSize: 11,
+    lineHeight: 17,
+
+    color: theme.textMuted,
+    textAlign: "center",
+
+    maxWidth: 260,
+  },
+
+  action: {
+    marginTop: 14,
+
+    backgroundColor: theme.primary,
+
+    paddingHorizontal: 17,
+    paddingVertical: 8,
+
+    borderRadius: 10,
+  },
+
+  actionPressed: {
+    opacity: 0.75,
+  },
+
+  actionText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "700",
+  },
+});

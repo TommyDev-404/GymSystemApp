@@ -1,15 +1,36 @@
-import React, { useMemo, useState, useCallback, useEffect } from "react";
-import { View, Text, Pressable, StyleSheet, Keyboard, ActivityIndicator } from "react-native";
+import React, {
+  useMemo,
+  useState,
+  useCallback,
+} from "react";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import {
   BottomSheetModal,
   BottomSheetScrollView,
   BottomSheetBackdrop,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
-import { X, Dumbbell, Plus, Trash2 } from "lucide-react-native";
-import { useAddPersonalWorkout } from "../hook/useWorkout";
+import {
+  Dumbbell,
+  Plus,
+  Trash2,
+  Clock3,
+  ListChecks,
+} from "lucide-react-native";
 import { useForm } from "react-hook-form";
-import { CreateWorkoutInput, ExerciseInput } from "../types/WorkoutTypes";
+import { useAddPersonalWorkout } from "../hook/useWorkout";
+import {
+  CreateWorkoutInput,
+  ExerciseInput,
+} from "../types/WorkoutTypes";
+import { theme } from "@/utils/theme";
+import { useAuth } from "@/context/AuthContext";
 
 interface Props {
   modalRef: React.RefObject<BottomSheetModal | null>;
@@ -21,19 +42,20 @@ export function AddWorkoutModal({
   modalRef,
   onClose,
 }: Props) {
+  const { member } = useAuth();
+  const {
+    mutate: addPersonalWorkout,
+    isPending,
+  } = useAddPersonalWorkout();
 
-  const { mutate: addPersonalWorkout, isPending } = useAddPersonalWorkout();
-  
-  const snapPoints = useMemo(() => ["75%"], []);
-
+  const snapPoints = useMemo(() => ["85%"], []);
   const [exercises, setExercises] = useState<ExerciseInput[]>([]);
   const [exName, setExName] = useState("");
   const [sets, setSets] = useState("");
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
-  
+
   const {
-    register,
     handleSubmit,
     setError,
     clearErrors,
@@ -44,77 +66,60 @@ export function AddWorkoutModal({
     defaultValues: {
       name: "",
       duration: "",
-      calories: "",
     },
   });
-  
+
   const name = watch("name");
   const duration = watch("duration");
-  const calories = watch("calories");
 
-  useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidHide", () => {
-      modalRef.current?.snapToIndex(0);
-    });
-  
-    return () => showSub.remove();
-  }, []);
- 
   const addExercise = () => {
     if (!exName.trim()) {
       setError("root", {
         type: "required",
-        message: "Exercise name is required",
+        message: "Exercise name is required.",
       });
       return;
     }
-  
+
     if (!sets.trim() || Number(sets) <= 0) {
       setError("root", {
         type: "required",
-        message: "Sets must be greater than 0",
+        message: "Sets must be greater than 0.",
       });
       return;
     }
-  
+
     if (!reps.trim() || Number(reps) <= 0) {
       setError("root", {
         type: "required",
-        message: "Reps must be greater than 0",
+        message: "Reps must be greater than 0.",
       });
       return;
     }
-  
-    if (!weight.trim() || Number(weight) < 0) {
-      setError("root", {
-        type: "required",
-        message: "Weight is required",
-      });
-      return;
-    }
-  
-  
+
     setExercises((prev) => [
       ...prev,
       {
         name: exName.trim(),
         sets: Number(sets),
         reps: Number(reps),
-        weight: Number(weight),
+        weight: weight.trim()
+          ? Number(weight)
+          : 0,
       },
     ]);
-  
-  
+
     setExName("");
     setSets("");
     setReps("");
     setWeight("");
-  
     clearErrors("root");
   };
 
   const removeExercise = (index: number) => {
-    setExercises((prev) => prev.filter((_, i) => i !== index));
+    setExercises((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
   };
 
   const closeModal = () => {
@@ -122,320 +127,508 @@ export function AddWorkoutModal({
     onClose();
   };
 
-  // BACKDROP
-  const renderBackdrop = useCallback((props: any) => {
-    return (
+  const renderBackdrop = useCallback(
+    (props: any) => (
       <BottomSheetBackdrop
         {...props}
         appearsOnIndex={0}
         disappearsOnIndex={-1}
-        opacity={0.6}
+        opacity={0.7}
       />
-    );
-  }, []);
+    ),
+    []
+  );
 
-  const onSubmit = (data: Omit<CreateWorkoutInput, "exercises">) => {
-
+  const onSubmit = (
+    data: Omit<CreateWorkoutInput, "exercises">
+  ) => {
     if (!data.name.trim()) {
       setError("name", {
         type: "required",
-        message: "Workout name is required",
+        message: "Workout name is required.",
       });
       return;
     }
-  
+
     if (!data.duration.trim()) {
       setError("duration", {
         type: "required",
-        message: "Duration is required",
+        message: "Duration is required.",
       });
       return;
     }
-  
-    if (!data.calories.trim()) {
-      setError("calories", {
-        type: "required",
-        message: "Calories burned is required",
-      });
-      return;
-    }
-  
-    if (exercises.length === 0) {
-      setError("name", {
-        type: "required",
-        message: "Please add at least one exercise",
-      });
-      return;
-    }
-    console.log("DATA: ", data);
-  
-    addPersonalWorkout({
-      member_id: 1,
-      data: {
-        name: data.name,
-        duration: data.duration,
-        calories: data.calories,
-        exercises,
+
+    addPersonalWorkout(
+      {
+        member_id: member?.memberId!,
+        data: {
+          name: data.name.trim(),
+          duration: data.duration,
+          exercises,
+        },
       },
-    });
-  
-    closeModal();
-  
-    setExercises([]);
-  
-    setValue("name", "");
-    setValue("duration", "");
-    setValue("calories", "");
+      {
+        onSuccess: () => {
+          closeModal();
+          setExercises([]);
+          setValue("name", "");
+          setValue("duration", "");
+          setExName("");
+          setSets("");
+          setReps("");
+          setWeight("");
+        },
+      }
+    );
   };
 
   return (
     <BottomSheetModal
-
       ref={modalRef}
-
       snapPoints={snapPoints}
-
-      backdropComponent={
-        renderBackdrop
-      }
-
+      backdropComponent={renderBackdrop}
       enablePanDownToClose
-
-
-      // Keyboard handling
       keyboardBehavior="interactive"
-
       keyboardBlurBehavior="restore"
-
       android_keyboardInputMode="adjustResize"
-
+      backgroundStyle={styles.sheetBackground}
+      handleIndicatorStyle={styles.handleIndicator}
     >
-
-
       <BottomSheetScrollView
-
-        contentContainerStyle={
-          styles.container
-        }
-
+        contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
-
+        keyboardDismissMode="interactive"
         showsVerticalScrollIndicator={false}
-
       >
-
-
-        {/* HEADER */}
-
         <View style={styles.header}>
-
           <View style={styles.headerLeft}>
+            <View style={styles.headerIcon}>
+              <Dumbbell
+                size={18}
+                color={theme.primaryLight}
+                strokeWidth={2}
+              />
+            </View>
 
-            <Dumbbell
-              size={18}
-              color="#10b981"
-            />
-
-            <Text style={styles.title}>
-              Add Workout
-            </Text>
-
-          </View>
-
-        </View>
-
-
-
-        {/* YOUR INPUTS HERE */}
-        {/* WORKOUT INPUTS */}
-        <BottomSheetTextInput
-          value={name}
-          onChangeText={(value) => {
-            setValue("name", value);
-            clearErrors("name");
-          }}
-          placeholder="Workout Name"
-          placeholderTextColor="#94a3b8"
-          style={styles.input}
-        />
-
-        {errors.name && (
-          <Text style={styles.errorText}>
-            {errors.name.message}
-          </Text>
-        )}
-
-        <BottomSheetTextInput
-          value={duration}
-          onChangeText={(value) => {
-            setValue("duration", value);
-            clearErrors("duration");
-          }}
-          placeholder="Duration (minutes)"
-          placeholderTextColor="#94a3b8"
-          keyboardType="numeric"
-          style={styles.input}
-        />
-
-        {errors.duration && (
-          <Text style={styles.errorText}>
-            {errors.duration.message}
-          </Text>
-        )}
-
-        <BottomSheetTextInput
-          value={calories}
-          onChangeText={(value) => {
-            setValue("calories", value);
-            clearErrors("calories");
-          }}
-          placeholder="Calories Burned"
-          placeholderTextColor="#94a3b8"
-          keyboardType="numeric"
-          style={styles.input}
-        />
-
-        {errors.calories && (
-          <Text style={styles.errorText}>
-            {errors.calories.message}
-          </Text>
-        )}
-
-        {/* EXERCISE */}
-        <Text style={styles.sectionTitle}>Add Exercise</Text>
-
-        <BottomSheetTextInput
-          value={exName}
-          onChangeText={setExName}
-          placeholder="Exercise Name"
-          placeholderTextColor="#94a3b8"
-          style={styles.input}
-        />
-
-        <View style={styles.row}>
-          <BottomSheetTextInput
-            value={sets}
-            onChangeText={setSets}
-            placeholder="Sets"
-            placeholderTextColor="#94a3b8"
-            keyboardType="numeric"
-            style={[styles.input, styles.flex]}
-          />
-
-          <BottomSheetTextInput
-            value={reps}
-            onChangeText={setReps}
-            placeholder="Reps"
-            placeholderTextColor="#94a3b8"
-            keyboardType="numeric"
-            style={[styles.input, styles.flex]}
-          />
-
-          <BottomSheetTextInput
-            value={weight}
-            onChangeText={setWeight}
-            placeholder="Weight"
-            placeholderTextColor="#94a3b8"
-            keyboardType="numeric"
-            style={[styles.input, styles.flex]}
-          />
-        </View>
-
-        {/* ADD BUTTON */}
-        <Pressable onPress={addExercise} style={styles.addBtn}>
-          <Plus size={16} color="#0f172a" />
-          <Text style={styles.addBtnText}>Add Exercise</Text>
-        </Pressable>
-
-        {/* PREVIEW */}
-        {exercises.map((ex, i) => (
-          <View key={i} style={styles.previewCard}>
-            <View style={styles.previewHeader}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.previewTitle}>{ex.name}</Text>
-                <Text style={styles.previewSub}>
-                  {ex.sets} Sets • {ex.reps} Reps • {ex.weight} kg
-                </Text>
-              </View>
-
-              <Pressable
-                onPress={() => removeExercise(i)}
-                style={styles.deleteBtn}
-              >
-                <Trash2 size={18} color="#ef4444" />
-              </Pressable>
+            <View>
+              <Text style={styles.eyebrow}>
+                WORKOUT TRACKER
+              </Text>
+              <Text style={styles.title}>
+                Add Workout
+              </Text>
             </View>
           </View>
-        ))}
+        </View>
 
-        {errors.name && (
-          <Text style={styles.errorText}>
-            {errors.name.message}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>
+                Workout Details
+              </Text>
+              <Text style={styles.sectionHint}>
+                Record the workout you completed
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.fieldLabel}>
+              Workout Name
+              <Text style={styles.required}> *</Text>
+            </Text>
+
+            <BottomSheetTextInput
+              value={name}
+              onChangeText={(value) => {
+                setValue("name", value);
+                clearErrors("name");
+              }}
+              placeholder="e.g. Chest Day"
+              placeholderTextColor={theme.textMuted}
+              style={styles.input}
+              returnKeyType="next"
+            />
+
+            {errors.name && (
+              <Text style={styles.errorText}>
+                {errors.name.message}
+              </Text>
+            )}
+          </View>
+
+          <View style={styles.field}>
+            <View style={styles.fieldLabelRow}>
+              <Clock3
+                size={13}
+                color={theme.textMuted}
+              />
+
+              <Text style={styles.fieldLabel}>
+                Duration
+              </Text>
+
+              <View style={styles.optionalBadge}>
+                <Text style={styles.optionalText}>
+                  Optional
+                </Text>
+              </View>
+            </View>
+
+            <BottomSheetTextInput
+              value={duration}
+              onChangeText={(value) => {
+                setValue("duration", value);
+                clearErrors("duration");
+              }}
+              placeholder="e.g. 45"
+              placeholderTextColor={theme.textMuted}
+              keyboardType="numeric"
+              style={styles.input}
+              returnKeyType="done"
+            />
+
+            <Text style={styles.inputHint}>
+              Enter the duration in minutes.
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.exerciseTitleContainer}>
+              <View style={styles.sectionIcon}>
+                <ListChecks
+                  size={14}
+                  color={theme.primaryLight}
+                  strokeWidth={2}
+                />
+              </View>
+
+              <View>
+                <View style={styles.titleRow}>
+                  <Text style={styles.sectionTitle}>
+                    Exercises
+                  </Text>
+
+                  <View style={styles.optionalBadge}>
+                    <Text style={styles.optionalText}>
+                      Optional
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={styles.sectionHint}>
+                  Add exercises, sets, reps and weight
+                </Text>
+              </View>
+            </View>
+
+            {exercises.length > 0 && (
+              <View style={styles.countBadge}>
+                <Text style={styles.countText}>
+                  {exercises.length}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <BottomSheetTextInput
+            value={exName}
+            onChangeText={(value) => {
+              setExName(value);
+              clearErrors("root");
+            }}
+            placeholder="Exercise name"
+            placeholderTextColor={theme.textMuted}
+            style={styles.input}
+          />
+
+          <View style={styles.row}>
+            <BottomSheetTextInput
+              value={sets}
+              onChangeText={(value) => {
+                setSets(value);
+                clearErrors("root");
+              }}
+              placeholder="Sets"
+              placeholderTextColor={theme.textMuted}
+              keyboardType="numeric"
+              style={[styles.input, styles.flex]}
+            />
+
+            <BottomSheetTextInput
+              value={reps}
+              onChangeText={(value) => {
+                setReps(value);
+                clearErrors("root");
+              }}
+              placeholder="Reps"
+              placeholderTextColor={theme.textMuted}
+              keyboardType="numeric"
+              style={[styles.input, styles.flex]}
+            />
+
+            <BottomSheetTextInput
+              value={weight}
+              onChangeText={(value) => {
+                setWeight(value);
+                clearErrors("root");
+              }}
+              placeholder="Weight"
+              placeholderTextColor={theme.textMuted}
+              keyboardType="numeric"
+              style={[styles.input, styles.flex]}
+            />
+          </View>
+
+          <Text style={styles.inputHint}>
+            Weight is optional for bodyweight exercises.
           </Text>
-        )}
 
-        {/* SAVE */}
+          <Pressable
+            onPress={addExercise}
+            style={({ pressed }) => [
+              styles.addBtn,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Plus
+              size={16}
+              color={theme.primaryLight}
+              strokeWidth={2.5}
+            />
+
+            <Text style={styles.addBtnText}>
+              Add Exercise
+            </Text>
+          </Pressable>
+
+          {errors.root && (
+            <Text style={styles.errorText}>
+              {errors.root.message}
+            </Text>
+          )}
+
+          {exercises.length > 0 && (
+            <View style={styles.exerciseList}>
+              {exercises.map((ex, i) => (
+                <View
+                  key={`${ex.name}-${i}`}
+                  style={styles.previewCard}
+                >
+                  <View style={styles.previewIcon}>
+                    <Dumbbell
+                      size={14}
+                      color={theme.primaryLight}
+                    />
+                  </View>
+
+                  <View style={styles.previewContent}>
+                    <Text
+                      style={styles.previewTitle}
+                      numberOfLines={1}
+                    >
+                      {ex.name}
+                    </Text>
+
+                    <Text style={styles.previewSub}>
+                      {ex.sets} Sets • {ex.reps} Reps
+                      {ex.weight && ex.weight > 0
+                        ? ` • ${ex.weight} kg`
+                        : ""}
+                    </Text>
+                  </View>
+
+                  <Pressable
+                    onPress={() => removeExercise(i)}
+                    style={styles.deleteBtn}
+                  >
+                    <Trash2
+                      size={15}
+                      color="#EF4444"
+                    />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
         <Pressable
           onPress={handleSubmit(onSubmit)}
           disabled={isPending}
           style={[
             styles.saveBtn,
-            isPending && { opacity: 0.7 },
+            isPending && styles.disabledBtn,
           ]}
         >
           {isPending ? (
-            <ActivityIndicator size="small" color="#ffffff" />
+            <ActivityIndicator
+              size="small"
+              color="#FFFFFF"
+            />
           ) : (
-            <Text style={styles.saveBtnText}>
-              Save Workout
-            </Text>
+            <>
+              <Dumbbell
+                size={16}
+                color="#FFFFFF"
+              />
+
+              <Text style={styles.saveBtnText}>
+                Save Workout
+              </Text>
+            </>
           )}
         </Pressable>
-
       </BottomSheetScrollView>
-
-
     </BottomSheetModal>
   );
 }
 
 const styles = StyleSheet.create({
+  sheetBackground: {
+    backgroundColor: theme.card,
+  },
+
+  handleIndicator: {
+    backgroundColor: theme.textMuted,
+    width: 38,
+  },
+
   container: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 35,
   },
 
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    marginBottom: 24,
   },
 
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 11,
+  },
+
+  headerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+
+  eyebrow: {
+    fontSize: 8,
+    fontWeight: "700",
+    letterSpacing: 1,
+    color: theme.textMuted,
   },
 
   title: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0f172a",
+    marginTop: 2,
+    fontSize: 19,
+    fontWeight: "800",
+    color: theme.text,
+  },
+
+  section: {
+    marginBottom: 22,
+  },
+
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+
+  exerciseTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 9,
+    flex: 1,
+  },
+
+  sectionIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.accentWash,
+  },
+
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
   },
 
   sectionTitle: {
-    marginTop: 16,
-    fontWeight: "600",
-    color: "#0f172a",
+    fontSize: 14,
+    fontWeight: "700",
+    color: theme.text,
+  },
+
+  sectionHint: {
+    marginTop: 3,
+    fontSize: 9,
+    color: theme.textMuted,
+  },
+
+  optionalBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+
+  optionalText: {
+    fontSize: 8,
+    fontWeight: "700",
+    color: theme.textMuted,
+  },
+
+  required: {
+    color: "#EF4444",
+  },
+
+  field: {
+    marginBottom: 5,
+  },
+
+  fieldLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 6,
+  },
+
+  fieldLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: theme.textMuted,
   },
 
   input: {
-    padding: 12,
+    minHeight: 46,
+    paddingHorizontal: 13,
     borderRadius: 12,
-    marginTop: 10,
-    backgroundColor: "#f8fafc",
+    marginTop: 8,
+    backgroundColor: theme.surface,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    color: "#0f172a",
+    borderColor: theme.border,
+    color: theme.text,
+    fontSize: 13,
   },
 
   row: {
@@ -447,71 +640,132 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  inputHint: {
+    marginTop: 6,
+    fontSize: 9,
+    color: theme.textMuted,
+  },
+
   addBtn: {
-    marginTop: 10,
-    padding: 12,
-    backgroundColor: "#f1f5f9",
+    marginTop: 11,
+    minHeight: 44,
     borderRadius: 12,
     alignItems: "center",
-    flexDirection: "row",
     justifyContent: "center",
+    flexDirection: "row",
     gap: 6,
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
   },
 
   addBtnText: {
-    fontWeight: "600",
-    color: "#0f172a",
+    fontSize: 12,
+    fontWeight: "700",
+    color: theme.primaryLight,
+  },
+
+  pressed: {
+    opacity: 0.7,
+  },
+
+  countBadge: {
+    minWidth: 25,
+    height: 25,
+    paddingHorizontal: 7,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+
+  countText: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: theme.primaryLight,
+  },
+
+  exerciseList: {
+    marginTop: 4,
+    gap: 8,
   },
 
   previewCard: {
-    marginTop: 10,
+    minHeight: 54,
     padding: 10,
-    backgroundColor: "#f8fafc",
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+
+  previewIcon: {
+    width: 32,
+    height: 32,
     borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.accentWash,
+    marginRight: 10,
+  },
+
+  previewContent: {
+    flex: 1,
   },
 
   previewTitle: {
-    fontWeight: "600",
-    color: "#0f172a",
+    fontSize: 12,
+    fontWeight: "700",
+    color: theme.text,
   },
 
   previewSub: {
-    fontSize: 12,
-    color: "#64748b",
+    marginTop: 3,
+    fontSize: 10,
+    color: theme.textMuted,
+  },
+
+  deleteBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(239,68,68,0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(239,68,68,0.15)",
   },
 
   saveBtn: {
-    marginTop: 20,
-    backgroundColor: "#10b981",
-    padding: 14,
+    minHeight: 50,
+    marginTop: 0,
     borderRadius: 14,
     alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 7,
+    backgroundColor: theme.primary,
   },
 
   saveBtnText: {
-    color: "white",
-    fontWeight: "600",
-  },
-  
-  previewHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  
-  deleteBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "#fee2e2",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  
-  errorText: {
-    marginTop: 12,
-    color: "#ef4444",
+    color: "#FFFFFF",
     fontSize: 13,
+    fontWeight: "800",
+  },
+
+  disabledBtn: {
+    opacity: 0.65,
+  },
+
+  errorText: {
+    marginTop: 7,
+    color: "#F87171",
+    fontSize: 10,
     textAlign: "center",
-    fontWeight: "500",
+    fontWeight: "600",
   },
 });

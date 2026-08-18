@@ -10,17 +10,27 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { X, ImagePlus, Trash2 } from "lucide-react-native";
+
 import { useCreatePost } from "../hooks/useCommunity";
 import { useAuth } from "@/context/AuthContext";
 import LoadingOverlay from "@/components/shared/LoadingOverlay";
+import { theme } from "@/utils/theme";
+import { AppBackground } from "@/components/shared/AppBackground";
 
-const GREEN = "#10b981";
-const suggestedTags = ["Fitness", "NoExcuses", "MorningRun", "LegDay", "PR", "Cardio"];
+const suggestedTags = [
+  "Fitness",
+  "NoExcuses",
+  "MorningRun",
+  "LegDay",
+  "PR",
+  "Cardio",
+];
 
 export default function ShareProgressScreen() {
   const { member } = useAuth();
@@ -33,14 +43,16 @@ export default function ShareProgressScreen() {
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+      prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag]
     );
   };
 
   const handlePickImage = async () => {
     const { status } =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
-  
+
     if (status !== "granted") {
       Alert.alert(
         "Permission needed",
@@ -48,27 +60,32 @@ export default function ShareProgressScreen() {
       );
       return;
     }
-  
+
     try {
       setPickingImage(true);
-  
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: true,
-        quality: 0.8,
-        selectionLimit: 10,
-      });
-  
+
+      const result =
+        await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsMultipleSelection: true,
+          quality: 0.8,
+          selectionLimit: 10,
+        });
+
       if (!result.canceled) {
-        const newImages = result.assets.map((asset) => asset.uri);
-  
+        const newImages = result.assets.map(
+          (asset) => asset.uri
+        );
+
         setImages((prev) => {
           const unique = [...prev];
-  
+
           newImages.forEach((img) => {
-            if (!unique.includes(img)) unique.push(img);
+            if (!unique.includes(img)) {
+              unique.push(img);
+            }
           });
-  
+
           return unique;
         });
       }
@@ -78,7 +95,9 @@ export default function ShareProgressScreen() {
   };
 
   const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImages((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
   };
 
   const canPost = text.trim().length > 0;
@@ -88,7 +107,7 @@ export default function ShareProgressScreen() {
       const formData = new FormData();
 
       formData.append("content", text);
-      
+
       images.forEach((image, index) => {
         formData.append("files", {
           uri: image,
@@ -96,263 +115,530 @@ export default function ShareProgressScreen() {
           type: "image/jpeg",
         } as any);
       });
-      
-      createPost({
-        member_id: member?.memberId!,
-        formData,
-      },
-      {
-        onSuccess: () => {
-          console.log("Posted successfully.");
-          router.back();
-        }
-      });
 
+      createPost(
+        {
+          member_id: member?.memberId!,
+          formData,
+        },
+        {
+          onSuccess: () => {
+            console.log("Posted successfully.");
+            router.back();
+          },
+        }
+      );
     } catch (err) {
-        console.log(err);
-        Alert.alert("Error", "Unable to create post.");
+      console.log(err);
+      Alert.alert(
+        "Error",
+        "Unable to create post."
+      );
     }
   };
 
+  const initials =
+    member?.username
+      ?.split(" ")
+      .map((name) => name[0])
+      .join("")
+      .toUpperCase() || "U";
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* HEADER */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          borderBottomWidth: 1,
-          borderBottomColor: "#f1f5f9",
-        }}
+    <AppBackground>
+      <SafeAreaView
+        style={styles.container}
+        edges={["top", "bottom"]}
       >
-        <Pressable onPress={() => router.back()} hitSlop={10}>
-          <X size={22} color="#334155" />
-        </Pressable>
-
-        <Text style={{ fontSize: 15, fontWeight: "700", color: "#0f172a" }}>
-          Share Progress
-        </Text>
-
-        <Pressable
-          onPress={handlePost}
-          disabled={!canPost}
-          style={{
-            paddingHorizontal: 16,
-            paddingVertical: 7,
-            borderRadius: 999,
-            backgroundColor: canPost ? GREEN : "#e2e8f0",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 13,
-              fontWeight: "700",
-              color: canPost ? "#fff" : "#94a3b8",
-            }}
-          >
-            Post
-          </Text>
-        </Pressable>
-      </View>
-
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={12}
-      >
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: 24 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* IDENTITY */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-              paddingHorizontal: 16,
-              paddingTop: 16,
-            }}
-          >
-            <View
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 19,
-                backgroundColor: "#ecfdf5",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text style={{ fontSize: 13, fontWeight: "700", color: GREEN }}>YA</Text>
-            </View>
-            <View>
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#0f172a" }}>
-                You
-              </Text>
-              <Text style={{ fontSize: 12, color: "#94a3b8" }}>Posting publicly</Text>
-            </View>
-          </View>
-
-          {/* TEXT INPUT */}
-          <TextInput
-            value={text}
-            onChangeText={setText}
-            placeholder="What did you achieve today?"
-            placeholderTextColor="#94a3b8"
-            multiline
-            autoFocus
-            style={{
-              fontSize: 16,
-              color: "#0f172a",
-              lineHeight: 22,
-              paddingHorizontal: 16,
-              paddingTop: 16,
-              minHeight: 120,
-              textAlignVertical: "top",
-            }}
-          />
-
-          {/* IMAGE PREVIEW */}
-          {images.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingTop: 12,
-              }}
-            >
-              {images.map((image, index) => (
-                <View
-                  key={index}
-                  style={{
-                    marginRight: 12,
-                    position: "relative",
-                  }}
-                >
-                  <Image
-                    source={{ uri: image }}
-                    style={{
-                      width: 140,
-                      height: 140,
-                      borderRadius: 14,
-                      backgroundColor: "#f1f5f9",
-                    }}
-                  />
-
-                  <Pressable
-                    onPress={() => removeImage(index)}
-                    style={{
-                      position: "absolute",
-                      top: 6,
-                      right: 6,
-                      width: 26,
-                      height: 26,
-                      borderRadius: 13,
-                      backgroundColor: "rgba(0,0,0,.55)",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Trash2 size={14} color="#fff" />
-                  </Pressable>
-                </View>
-              ))}
-            </ScrollView>
-          )}
-
+        <View style={styles.header}>
           <Pressable
-            onPress={handlePickImage}
-            disabled={pickingImage}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 8,
-              marginHorizontal: 16,
-              marginTop: 16,
-              paddingVertical: 12,
-              paddingHorizontal: 14,
-              borderRadius: 14,
-              borderWidth: 1,
-              borderColor: "#e2e8f0",
-              borderStyle: "dashed",
-              opacity: pickingImage ? 0.6 : 1,
-            }}
+            onPress={() => router.back()}
+            hitSlop={10}
+            style={({ pressed }) => [
+              styles.closeButton,
+              pressed && styles.pressed,
+            ]}
           >
-            {pickingImage ? (
-              <ActivityIndicator size="small" color={GREEN} />
-            ) : (
-              <ImagePlus size={18} color={GREEN} />
-            )}
-
-            <Text
-              style={{
-                fontSize: 13,
-                fontWeight: "600",
-                color: "#475569",
-              }}
-            >
-              {images.length === 0 ? "Add Photos" : "Add More Photos"}
-            </Text>
+            <X
+              size={19}
+              color={theme.textSub}
+              strokeWidth={2.2}
+            />
           </Pressable>
 
-          {/* TAGS */}
-          <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
-            <Text
-              style={{
-                fontSize: 11,
-                fontWeight: "600",
-                color: "#94a3b8",
-                textTransform: "uppercase",
-                letterSpacing: 0.6,
-                marginBottom: 10,
-              }}
-            >
-              Add tags
-            </Text>
+          <Text style={styles.headerTitle}>
+            Share Progress
+          </Text>
 
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-              {suggestedTags.map((tag) => {
-                const active = selectedTags.includes(tag);
-                return (
-                  <Pressable
-                    key={tag}
-                    onPress={() => toggleTag(tag)}
-                    style={{
-                      paddingHorizontal: 12,
-                      paddingVertical: 7,
-                      borderRadius: 999,
-                      backgroundColor: active ? GREEN : "#f8fafc",
-                      borderWidth: 1,
-                      borderColor: active ? GREEN : "#e2e8f0",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        fontWeight: "600",
-                        color: active ? "#fff" : "#475569",
+          <Pressable
+            onPress={handlePost}
+            disabled={!canPost}
+            style={({ pressed }) => [
+              styles.postButton,
+              canPost
+                ? pressed && styles.postButtonPressed
+                : styles.postButtonDisabled,
+            ]}
+          >
+            <Text
+              style={[
+                styles.postButtonText,
+                !canPost && styles.postButtonTextDisabled,
+              ]}
+            >
+              Post
+            </Text>
+          </Pressable>
+        </View>
+
+        <KeyboardAvoidingView
+          style={styles.keyboardContainer}
+          behavior={
+            Platform.OS === "ios"
+              ? "padding"
+              : undefined
+          }
+          keyboardVerticalOffset={12}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.postCard}>
+              <View style={styles.identityRow}>
+                <View style={styles.avatar}>
+                  {member?.profile ? (
+                    <Image
+                      source={{
+                        uri: member.profile,
                       }}
-                    >
-                      #{tag}
+                      style={styles.avatarImage}
+                    />
+                  ) : (
+                    <Text style={styles.avatarText}>
+                      {initials}
                     </Text>
-                  </Pressable>
-                );
-              })}
+                  )}
+                </View>
+
+                <View style={styles.identityInfo}>
+                  <Text style={styles.username}>
+                    {member?.username || "You"}
+                  </Text>
+
+                  <Text style={styles.postingText}>
+                    Posting publicly
+                  </Text>
+                </View>
+
+                <View style={styles.publicBadge}>
+                  <View style={styles.publicDot} />
+
+                  <Text style={styles.publicText}>
+                    PUBLIC
+                  </Text>
+                </View>
+              </View>
+
+              <TextInput
+                value={text}
+                onChangeText={setText}
+                placeholder="What did you achieve today?"
+                placeholderTextColor={theme.textMuted}
+                multiline
+                autoFocus
+                style={styles.textInput}
+              />
             </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-      
-      <LoadingOverlay
-        visible={isPending}
-        title="Posting..."
-        message="Uploading your progress"
-      />
-    </SafeAreaView>
+
+            {images.length > 0 && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={
+                  styles.imageList
+                }
+              >
+                {images.map((image, index) => (
+                  <View
+                    key={index}
+                    style={styles.imageWrapper}
+                  >
+                    <Image
+                      source={{ uri: image }}
+                      style={styles.previewImage}
+                    />
+
+                    <Pressable
+                      onPress={() =>
+                        removeImage(index)
+                      }
+                      style={styles.removeImageButton}
+                    >
+                      <Trash2
+                        size={14}
+                        color="#ffffff"
+                        strokeWidth={2}
+                      />
+                    </Pressable>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+
+            <Pressable
+              onPress={handlePickImage}
+              disabled={pickingImage}
+              style={({ pressed }) => [
+                styles.addPhotosButton,
+                pressed && styles.addPhotosPressed,
+                pickingImage && styles.pickingImage,
+              ]}
+            >
+              {pickingImage ? (
+                <ActivityIndicator
+                  size="small"
+                  color={theme.primary}
+                />
+              ) : (
+                <ImagePlus
+                  size={18}
+                  color={theme.primary}
+                  strokeWidth={2}
+                />
+              )}
+
+              <Text style={styles.addPhotosText}>
+                {images.length === 0
+                  ? "Add Photos"
+                  : "Add More Photos"}
+              </Text>
+            </Pressable>
+
+            <View style={styles.tagsCard}>
+              <Text style={styles.tagsTitle}>
+                Add tags
+              </Text>
+
+              <View style={styles.tagsContainer}>
+                {suggestedTags.map((tag) => {
+                  const active =
+                    selectedTags.includes(tag);
+
+                  return (
+                    <Pressable
+                      key={tag}
+                      onPress={() => toggleTag(tag)}
+                      style={({ pressed }) => [
+                        styles.tag,
+                        active && styles.activeTag,
+                        pressed &&
+                          !active &&
+                          styles.tagPressed,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.tagText,
+                          active &&
+                            styles.activeTagText,
+                        ]}
+                      >
+                        #{tag}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+
+        <LoadingOverlay
+          visible={isPending}
+          title="Posting..."
+          message="Uploading your progress"
+        />
+      </SafeAreaView>
+    </AppBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "transparent",
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+
+  closeButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.borderStrong,
+  },
+
+  headerTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: theme.text,
+  },
+
+  postButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: theme.primary,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+
+  postButtonPressed: {
+    backgroundColor: theme.primaryDark,
+  },
+
+  postButtonDisabled: {
+    backgroundColor: theme.surface3,
+    borderColor: theme.border,
+  },
+
+  postButtonText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#ffffff",
+  },
+
+  postButtonTextDisabled: {
+    color: theme.textMuted,
+  },
+
+  pressed: {
+    opacity: 0.7,
+  },
+
+  keyboardContainer: {
+    flex: 1,
+  },
+
+  scrollContent: {
+    paddingBottom: 32,
+  },
+
+  postCard: {
+    margin: 16,
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: theme.card,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+
+  identityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+    overflow: "hidden",
+  },
+
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  avatarText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: theme.primaryLight,
+  },
+
+  identityInfo: {
+    flex: 1,
+  },
+
+  username: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: theme.text,
+  },
+
+  postingText: {
+    marginTop: 2,
+    fontSize: 11,
+    color: theme.textMuted,
+  },
+
+  publicBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+
+  publicDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: theme.primaryLight,
+  },
+
+  publicText: {
+    fontSize: 8,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+    color: theme.primaryLight,
+  },
+
+  textInput: {
+    marginTop: 18,
+    minHeight: 130,
+    fontSize: 16,
+    lineHeight: 23,
+    color: theme.text,
+    textAlignVertical: "top",
+    padding: 0,
+  },
+
+  imageList: {
+    paddingHorizontal: 16,
+  },
+
+  imageWrapper: {
+    marginRight: 12,
+    position: "relative",
+  },
+
+  previewImage: {
+    width: 140,
+    height: 140,
+    borderRadius: 14,
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.borderStrong,
+  },
+
+  removeImageButton: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 27,
+    height: 27,
+    borderRadius: 9,
+    backgroundColor: "rgba(0,0,0,0.72)",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
+  },
+
+  addPhotosButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 16,
+    marginTop: 16,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: theme.card,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+    borderStyle: "dashed",
+  },
+
+  addPhotosPressed: {
+    backgroundColor: theme.surface3,
+  },
+
+  pickingImage: {
+    opacity: 0.6,
+  },
+
+  addPhotosText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: theme.textSub,
+  },
+
+  tagsCard: {
+    marginTop: 24,
+    marginHorizontal: 16,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: theme.card,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+
+  tagsTitle: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: theme.textSub,
+    textTransform: "uppercase",
+    letterSpacing: 0.7,
+    marginBottom: 12,
+  },
+
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+
+  tag: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.borderStrong,
+  },
+
+  tagPressed: {
+    backgroundColor: theme.surface3,
+  },
+
+  activeTag: {
+    backgroundColor: theme.primary,
+    borderColor: theme.borderAccent,
+  },
+
+  tagText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: theme.textSub,
+  },
+
+  activeTagText: {
+    color: "#ffffff",
+  },
+});

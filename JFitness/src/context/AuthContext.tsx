@@ -21,7 +21,7 @@ interface AuthContextType {
   member: MemberInfo | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  createAccount: (member_id: number, password: string) => Promise<void>;
+  createAccount: (member_id: number,username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   setMember: (params: MemberInfo) => void;
 }
@@ -55,9 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restoreSession();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (username: string, password: string) => {
     const res = await api.loginApi({
-      email,
+      username,
       password,
     });
 
@@ -67,9 +67,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMember(res.user);
   };
 
-  const createAccount = async (member_id: number, password: string) => {
+  const createAccount = async (member_id: number, username: string, password: string) => {
     const res = await api.completeRegistrationApi({
       member_id,
+      username,
       password
     });
     

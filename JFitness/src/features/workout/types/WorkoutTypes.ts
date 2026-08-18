@@ -1,5 +1,5 @@
 
-export type Workout = {
+export type WorkoutTutorials = {
    id: number;
    name: string;
    category: string;
@@ -12,6 +12,20 @@ export type Workout = {
    created_at: string;
    updated_at: string;
 }
+
+interface WorkoutExercise {
+  name: string;
+  sets: string;
+  weight?: string;
+}
+
+export interface Workout {
+  id?: number | string;
+  name: string;
+  date: string;
+  duration: string;
+  exercises?: WorkoutExercise[];
+}
  
 export type Params = {
    limit?: number;
@@ -20,14 +34,24 @@ export type Params = {
 
 export type ExerciseInput = {
    name: string;
-   sets: number;
-   reps: number;
-   weight: number;
+   sets?: number;
+   reps?: number;
+   weight?: number;
  }
 
 export type CreateWorkoutInput = {
    name: string;
    duration: string;
-   calories: string;
    exercises: ExerciseInput[];
+}
+ 
+export interface WorkoutProgress {
+  value: number;
+  label: string;
+}
+
+export interface WorkoutSummary {
+   totalWorkouts: number;
+   weeklyWorkouts: number;
+   averageDuration: number;
  }

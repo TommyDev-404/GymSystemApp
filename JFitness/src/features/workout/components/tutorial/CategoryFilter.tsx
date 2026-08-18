@@ -1,47 +1,48 @@
 import React from "react";
-import { ScrollView, Pressable, Text } from "react-native";
+import {
+  ScrollView,
+  Pressable,
+  Text,
+  StyleSheet,
+} from "react-native";
+
+import { theme } from "@/utils/theme";
 
 export function CategoryFilter({
   categories,
   activeCategory,
   setActiveCategory,
 }: any) {
-   return (
-      <ScrollView
+  return (
+    <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{
-        paddingHorizontal: 16,
-        paddingVertical: 4,
-        alignItems: "center",
-      }}
+      contentContainerStyle={styles.container}
     >
       {categories.map((cat: any) => {
         const Icon = cat.icon;
         const active = activeCategory === cat.label;
-    
+
         return (
           <Pressable
             key={cat.id}
             onPress={() => setActiveCategory(cat.label)}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-              borderRadius: 999,
-              backgroundColor: active ? cat.color : "#f1f5f9",
-              marginRight: 8,
-            }}
+            style={[
+              styles.filter,
+              active && styles.activeFilter,
+            ]}
           >
-            <Icon size={14} color={active ? "white" : cat.color} />
+            <Icon
+              size={14}
+              color={active ? "#FFFFFF" : theme.primaryLight}
+              strokeWidth={2.2}
+            />
+
             <Text
-              style={{
-                marginLeft: 6,
-                fontSize: 12,
-                fontWeight: "600",
-                color: active ? "white" : "#64748b",
-              }}
+              style={[
+                styles.label,
+                active && styles.activeLabel,
+              ]}
             >
               {cat.label}
             </Text>
@@ -51,3 +52,47 @@ export function CategoryFilter({
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    alignItems: "center",
+  },
+
+  filter: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+
+    borderRadius: 999,
+
+    marginRight: 8,
+
+    backgroundColor: theme.surface,
+
+    borderWidth: 1,
+    borderColor: "rgba(52, 211, 153, 0.25)",
+  },
+
+  activeFilter: {
+    backgroundColor: theme.primary,
+    borderColor: theme.primaryLight,
+  },
+
+  label: {
+    marginLeft: 6,
+
+    fontSize: 11.5,
+    fontWeight: "600",
+
+    color: theme.textSub,
+  },
+
+  activeLabel: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+});

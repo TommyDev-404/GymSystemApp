@@ -1,47 +1,139 @@
-import React from "react";
-import { View, StatusBar, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { WorkoutHistoryHeader } from "@/features/workout/components/history/WorkoutHistoryHeader";
+import { AppBackground } from "@/components/shared/AppBackground";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
+import { WorkoutSummaryCard } from "@/features/workout/components/history/WorkoutSummary";
+import { WorkoutProgressChart } from "@/features/workout/components/history/WorkoutProgressChart";
 import { WorkoutHistoryList } from "@/features/workout/components/history/WorkoutHistoryList";
+import { useAuth } from "@/context/AuthContext";
+import {
+  useGetPersonalWorkoutHistory,
+  useWorkoutProgress,
+  useWorkoutSummary,
+} from "../hook/useWorkout";
+import { theme } from "@/utils/theme";
 
-interface Props {
-  onBack?: () => void;
-}
+const GREEN = theme.primary;
 
-const workouts = [
-  {
-    name: "Push Day A",
-    date: "Today",
-    duration: "52 min",
-    calories: 384,
-    exercises: [
-      { name: "Bench Press", sets: "4×8", weight: "80 kg" },
-      { name: "Incline DB Press", sets: "3×10", weight: "26 kg" },
-    ],
-  },
-  {
-    name: "Leg Day",
-    date: "Yesterday",
-    duration: "65 min",
-    calories: 420,
-    exercises: [
-      { name: "Squat", sets: "5×5", weight: "100 kg" },
-      { name: "Leg Press", sets: "4×10", weight: "150 kg" },
-    ],
-  },
-];
+export function WorkoutHistoryScreen() {
+  const { member } = useAuth();
 
-export function WorkoutHistoryScreen({ onBack }: Props) {
+  const {
+    data: chartData = [],
+    isLoading: chartLoading,
+  } = useWorkoutProgress(member?.memberId!);
+
+  const {
+    data: personalWorkoutHistory = [],
+    isLoading: historyLoading,
+  } = useGetPersonalWorkoutHistory(member?.memberId!);
+
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+  } = useWorkoutSummary(Number(member?.memberId!));
+
+  const isLoading =
+    chartLoading || historyLoading || summaryLoading;
+
+  if (isLoading) {
+    return (
+      <AppBackground>
+        <SafeAreaView style={styles.container}>
+          <ScreenHeader
+            title="Workout History"
+            subtitle="Track your training journey"
+          />
+
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator
+              size="small"
+              color={GREEN}
+            />
+
+            <Text style={styles.loadingText}>
+              Loading your workouts...
+            </Text>
+          </View>
+        </SafeAreaView>
+      </AppBackground>
+    );
+  }
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+    <AppBackground>
+      <SafeAreaView style={styles.container}>
+        <ScreenHeader
+          title="Workout History"
+          subtitle="Track your training journey"
+        />
 
-      <WorkoutHistoryHeader onBack={onBack} />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <View style={styles.section}>
+            <WorkoutSummaryCard
+              totalWorkouts={summary?.totalWorkouts ?? 0}
+              weeklyWorkouts={summary?.weeklyWorkouts ?? 0}
+              averageDuration={summary?.averageDuration ?? 0}
+            />
+          </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <WorkoutHistoryList workouts={workouts} />
-      </ScrollView>
-    </SafeAreaView>
+          <View style={styles.section}>
+            <WorkoutProgressChart
+              chartData={chartData}
+            />
+          </View>
+
+          <View style={styles.section}>
+            <WorkoutHistoryList
+              workouts={personalWorkoutHistory}
+            />
+          </View>
+
+          <View style={styles.bottomSpace} />
+        </ScrollView>
+      </SafeAreaView>
+    </AppBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 30,
+  },
+
+  section: {
+    marginBottom: 24,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  loadingText: {
+    marginTop: 10,
+    fontSize: 12,
+    color: theme.textMuted,
+  },
+
+  bottomSpace: {
+    height: 12,
+  },
+});

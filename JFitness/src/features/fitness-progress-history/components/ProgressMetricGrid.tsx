@@ -1,5 +1,4 @@
 import React from "react";
-
 import {
   View,
   Text,
@@ -12,6 +11,8 @@ import {
   ArrowUp,
 } from "lucide-react-native";
 
+import { theme } from "@/utils/theme";
+
 interface ProgressMetricGridProps {
   startingWeight: number;
   targetWeight: number;
@@ -21,14 +22,8 @@ interface ProgressMetricGridProps {
   isMovingAway: boolean;
 }
 
-const GREEN = "#10B981";
+const GREEN = theme.primary;
 const RED = "#EF4444";
-
-const SLATE_50 = "#F8FAFC";
-const SLATE_100 = "#F1F5F9";
-const SLATE_400 = "#94A3B8";
-const SLATE_500 = "#64748B";
-const SLATE_700 = "#334155";
 
 export function ProgressMetricGrid({
   startingWeight,
@@ -38,9 +33,7 @@ export function ProgressMetricGrid({
   goalType,
   isMovingAway,
 }: ProgressMetricGridProps) {
-
-  const isLoseWeight =
-    goalType === "LOSE_WEIGHT";
+  const isLoseWeight = goalType === "LOSE_WEIGHT";
 
   const changeLabel = isLoseWeight
     ? "Weight Lost"
@@ -48,13 +41,13 @@ export function ProgressMetricGrid({
 
   const changeIcon = isLoseWeight ? (
     <ArrowDown
-      size={17}
+      size={16}
       color={isMovingAway ? RED : GREEN}
       strokeWidth={2.3}
     />
   ) : (
     <ArrowUp
-      size={17}
+      size={16}
       color={isMovingAway ? RED : GREEN}
       strokeWidth={2.3}
     />
@@ -62,13 +55,13 @@ export function ProgressMetricGrid({
 
   const remainingIcon = isLoseWeight ? (
     <ArrowDown
-      size={17}
+      size={16}
       color={isMovingAway ? RED : GREEN}
       strokeWidth={2.3}
     />
   ) : (
     <ArrowUp
-      size={17}
+      size={16}
       color={isMovingAway ? RED : GREEN}
       strokeWidth={2.3}
     />
@@ -84,11 +77,12 @@ export function ProgressMetricGrid({
         value={`${startingWeight.toFixed(1)} kg`}
         icon={
           <Target
-            size={17}
-            color={SLATE_500}
+            size={16}
+            color={theme.textMuted}
             strokeWidth={2}
           />
         }
+        iconColor={theme.textMuted}
       />
 
       {/* TARGET WEIGHT */}
@@ -98,11 +92,12 @@ export function ProgressMetricGrid({
         value={`${targetWeight.toFixed(1)} kg`}
         icon={
           <Target
-            size={17}
-            color={SLATE_500}
+            size={16}
+            color={theme.textMuted}
             strokeWidth={2}
           />
         }
+        iconColor={theme.textMuted}
       />
 
       {/* WEIGHT LOST / GAINED */}
@@ -110,9 +105,10 @@ export function ProgressMetricGrid({
       <MetricCard
         label={changeLabel}
         value={`${Math.abs(weightChange).toFixed(1)} kg`}
-        highlighted
+        highlighted={!isMovingAway}
         danger={isMovingAway}
         icon={changeIcon}
+        iconColor={isMovingAway ? RED : GREEN}
       />
 
       {/* REMAINING */}
@@ -120,9 +116,10 @@ export function ProgressMetricGrid({
       <MetricCard
         label="Remaining"
         value={`${remainingWeight.toFixed(1)} kg`}
-        highlighted
+        highlighted={!isMovingAway}
         danger={isMovingAway}
         icon={remainingIcon}
+        iconColor={isMovingAway ? RED : GREEN}
       />
 
     </View>
@@ -130,14 +127,15 @@ export function ProgressMetricGrid({
 }
 
 
-/* ========================================================= */
-/* METRIC CARD */
-/* ========================================================= */
+/* =========================================================
+   METRIC CARD
+========================================================= */
 
 interface MetricCardProps {
   label: string;
   value: string;
   icon: React.ReactNode;
+  iconColor: string;
   highlighted?: boolean;
   danger?: boolean;
 }
@@ -146,34 +144,33 @@ function MetricCard({
   label,
   value,
   icon,
+  iconColor,
   highlighted = false,
   danger = false,
 }: MetricCardProps) {
-
   return (
     <View
       style={[
         styles.card,
 
-        highlighted &&
-          styles.cardHighlighted,
+        highlighted && styles.cardHighlighted,
 
-        danger &&
-          styles.cardDanger,
+        danger && styles.cardDanger,
       ]}
     >
-
       {/* ICON */}
 
       <View
         style={[
           styles.icon,
 
-          highlighted &&
-            styles.iconHighlighted,
+          highlighted && styles.iconHighlighted,
 
-          danger &&
-            styles.iconDanger,
+          danger && styles.iconDanger,
+
+          {
+            borderColor: `${iconColor}45`,
+          },
         ]}
       >
         {icon}
@@ -191,28 +188,36 @@ function MetricCard({
         style={[
           styles.value,
 
-          highlighted &&
-            styles.valueHighlighted,
+          highlighted && styles.valueHighlighted,
 
-          danger &&
-            styles.valueDanger,
+          danger && styles.valueDanger,
         ]}
       >
         {value}
       </Text>
 
+      {/* CENTERED UNDERLINE */}
+
+      <View
+        style={[
+          styles.accentLine,
+          {
+            backgroundColor: iconColor,
+          },
+        ]}
+      />
     </View>
   );
 }
 
 
-/* ========================================================= */
-/* STYLES */
-/* ========================================================= */
+/* =========================================================
+   STYLES
+========================================================= */
 
 const styles = StyleSheet.create({
 
-  /* GRID */
+  /* ================= GRID ================= */
 
   grid: {
     flexDirection: "row",
@@ -221,7 +226,7 @@ const styles = StyleSheet.create({
   },
 
 
-  /* CARD */
+  /* ================= CARD ================= */
 
   card: {
     width: "48.5%",
@@ -231,68 +236,80 @@ const styles = StyleSheet.create({
 
     borderRadius: 16,
 
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.card,
 
     borderWidth: 1,
-    borderColor: SLATE_100,
+    borderColor: theme.borderStrong,
+
+    overflow: "hidden",
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+
+    elevation: 3,
   },
 
 
-  /* HIGHLIGHTED */
+  /* ================= POSITIVE ================= */
 
   cardHighlighted: {
-    backgroundColor: "#F7FFFB",
-    borderColor: "#D1FAE5",
+    borderColor: theme.borderAccent,
   },
 
 
-  /* DANGER */
+  /* ================= DANGER ================= */
 
   cardDanger: {
-    backgroundColor: "#FFF8F8",
-    borderColor: "#FECACA",
+    borderColor: theme.errorBorder,
   },
 
 
-  /* ICON */
+  /* ================= ICON ================= */
 
   icon: {
-    width: 30,
-    height: 30,
+    width: 32,
+    height: 32,
 
-    borderRadius: 9,
-
-    backgroundColor: SLATE_50,
+    borderRadius: 10,
 
     alignItems: "center",
     justifyContent: "center",
 
     marginBottom: 9,
+
+    backgroundColor: theme.surface,
+
+    borderWidth: 1,
   },
 
 
   iconHighlighted: {
-    backgroundColor: "#ECFDF5",
+    backgroundColor: "rgba(16,185,129,0.08)",
   },
 
 
   iconDanger: {
-    backgroundColor: "#FEF2F2",
+    backgroundColor: "rgba(239,68,68,0.08)",
   },
 
 
-  /* LABEL */
+  /* ================= LABEL ================= */
 
   label: {
     fontSize: 10,
 
-    color: SLATE_400,
+    color: theme.textMuted,
 
     fontWeight: "600",
   },
 
 
-  /* VALUE */
+  /* ================= VALUE ================= */
 
   value: {
     marginTop: 3,
@@ -301,7 +318,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "800",
 
-    color: SLATE_700,
+    color: theme.textSub,
   },
 
 
@@ -312,6 +329,23 @@ const styles = StyleSheet.create({
 
   valueDanger: {
     color: RED,
+  },
+
+
+  /* ================= ACCENT ================= */
+
+  accentLine: {
+    position: "absolute",
+
+    bottom: 0,
+    alignSelf: "center",
+
+    width: 26,
+    height: 2,
+
+    borderRadius: 999,
+
+    opacity: 0.85,
   },
 
 });

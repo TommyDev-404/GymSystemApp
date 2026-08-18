@@ -28,9 +28,9 @@ export const getMemberRecentActivityApi = async (memberId: number) => {
 	}
 };
 
-export const createFitnessGoalApi = async (data: CreateFitnessGoalPayload) => {
+export const createFitnessGoalApi = async (member_id: number, data: CreateFitnessGoalPayload) => {
 	try {
-		const response = await api.post("/home/create-fitness-goal", data);
+		const response = await api.post(`/home/create-fitness-goal/${member_id}`, data);
 
 		return response.data;
 	} catch (error: any) {
@@ -41,9 +41,9 @@ export const createFitnessGoalApi = async (data: CreateFitnessGoalPayload) => {
 	}
 };
 
-export const updateFitnessGoalApi = async (id:number, data:UpdateFitnessGoalPayload)=>{
+export const updateFitnessGoalApi = async (member_id:number, data:UpdateFitnessGoalPayload)=>{
 	try {
-		const response = await api.patch(`/home/update-fitness-goal/${id}`, data);
+		const response = await api.patch(`/home/update-fitness-goal/${member_id}`, data);
 
 		return response.data;
 	} catch (error: any) {

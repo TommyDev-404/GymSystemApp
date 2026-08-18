@@ -1,375 +1,271 @@
 import React from "react";
-
 import {
   View,
   Text,
   StyleSheet,
-  StatusBar,
   ScrollView,
   ActivityIndicator,
 } from "react-native";
 
-import {
-  SafeAreaView,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Scale } from "lucide-react-native";
 
 import {
-  Scale,
-} from "lucide-react-native";
-
-import {
-	useGetFitnessGoal,
+  useGetFitnessGoal,
   useGetFitnessGoalHistory,
 } from "../../home/hook/useHome";
 
-import {
-  useAuth,
-} from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 
-import {
-  BodyProgressHeader,
-} from "../components/Header";
+import { WeighProgressCard } from "../components/WeightProgressCard";
+import { ProgressMetricGrid } from "../components/ProgressMetricGrid";
+import { WeightTrendChart } from "../components/WeightTrendChart";
+import { WeightHistory } from "../components/WeightHistory";
+import { AppBackground } from "@/components/shared/AppBackground";
+import { theme } from "@/utils/theme";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
+import { PageLoader } from "@/components/shared/PageLoader";
 
-import {
-	WeighProgressCard,
-} from "../components/WeightProgressCard";
-
-import {
-  ProgressMetricGrid,
-} from "../components/ProgressMetricGrid";
-
-import {
-  WeightTrendChart,
-} from "../components/WeightTrendChart";
-
-import {
-  WeightHistory,
-} from "../components/WeightHistory";
-
-const GREEN = "#10B981";
-
-const SLATE_50 = "#F8FAFC";
-const SLATE_400 = "#94A3B8";
-const SLATE_500 = "#64748B";
-const SLATE_900 = "#0F172A";
+const GREEN = theme.primary;
 
 export function FitnessGoalHistoryScreen() {
-
   const { member } = useAuth();
 
   const {
     data: history = [],
     isLoading,
-  } = useGetFitnessGoalHistory(
-    Number(member?.memberId!)
-	  );
-	const { data: memberWeightGoal, isLoading: weightGoalLoading } = useGetFitnessGoal(member?.memberId!);
-	
-  const startingWeight = Number(memberWeightGoal?.start_weight ?? 0);
-  const currentWeight = Number(memberWeightGoal?.current_weight ?? 0);
-  const targetWeight = Number(memberWeightGoal?.target_weight ?? 0);
-  const percentage = Number(memberWeightGoal?.progress_percentage ?? 0);
+  } = useGetFitnessGoalHistory(Number(member?.memberId!));
+
+  const {
+    data: memberWeightGoal,
+    isLoading: weightGoalLoading,
+  } = useGetFitnessGoal(member?.memberId!);
+
+  const startingWeight = Number(
+    memberWeightGoal?.start_weight ?? 0
+  );
+
+  const currentWeight = Number(
+    memberWeightGoal?.current_weight ?? 0
+  );
+
+  const targetWeight = Number(
+    memberWeightGoal?.target_weight ?? 0
+  );
+
+  const percentage = Number(
+    memberWeightGoal?.progress_percentage ?? 0
+  );
 
   const isMovingAway = percentage < 0;
+
   const remainingWeight = Math.abs(
-      currentWeight -
-      targetWeight
-    );
-	const weightChange = currentWeight - startingWeight;
+    currentWeight - targetWeight
+  );
+
+  const weightChange = currentWeight - startingWeight;
 
   const chartHistory = [...history].reverse();
-  const chartData =
-    chartHistory.map(
-      (item) => ({
-        value: Number(
-          item.current_weight
-        ),
 
-        label:
-          formatShortDate(
-            item.recorded_at
-          ),
+  const chartData = chartHistory.map((item) => ({
+    value: Number(item.current_weight),
 
-        dataPointText:
-          Number(
-            item.current_weight
-          ).toFixed(1),
-      })
-    );
+    label: formatShortDate(item.recorded_at),
 
-  if (isLoading) {
+    dataPointText: Number(
+      item.current_weight
+    ).toFixed(1),
+  }));
 
+  if (isLoading || weightGoalLoading) {
     return (
-      <SafeAreaView
-        style={styles.container}
-      >
-
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor="#FFFFFF"
-        />
-
-        <BodyProgressHeader />
-
-        <View
-          style={
-            styles.loadingContainer
-          }
-        >
-          <ActivityIndicator
-            size="small"
-            color={GREEN}
-          />
-
-          <Text
-            style={
-              styles.loadingText
-            }
-          >
-            Loading your progress...
-          </Text>
-
-        </View>
-
-      </SafeAreaView>
+      <PageLoader
+        title="Progress Information"
+        subtitle="View and track your progress"
+      />
     );
   }
 
   return (
-    <SafeAreaView
-      style={styles.container}
-    >
+    <AppBackground>
+      <SafeAreaView style={styles.container}>
 
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#FFFFFF"
+      <ScreenHeader
+        title="Progress Information"
+        subtitle="View and track your progress"
       />
 
-      <BodyProgressHeader />
-
-      <ScrollView
-        showsVerticalScrollIndicator={
-          false
-        }
-        contentContainerStyle={
-          styles.scrollContent
-        }
-      >
-
-        {/* PAGE INTRO */}
-
-        <View
-          style={styles.pageHeader}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
+          {/* PAGE INTRO */}
 
-          <View>
+          <View style={styles.pageHeader}>
+            <View style={styles.pageHeaderText}>
+              <Text style={styles.pageTitle}>
+                Body Progress
+              </Text>
 
-            <Text
-              style={styles.pageTitle}
-            >
-              Body Progress
-            </Text>
+              <Text style={styles.pageSubtitle}>
+                Monitor your weight journey
+              </Text>
+            </View>
 
-            <Text
-              style={styles.pageSubtitle}
-            >
-              Monitor your weight journey
-            </Text>
-
+            <View style={styles.scaleBadge}>
+              <Scale
+                size={17}
+                color={GREEN}
+                strokeWidth={2.2}
+              />
+            </View>
           </View>
 
-          <View
-            style={styles.scaleBadge}
-          >
+          {/* CURRENT WEIGHT */}
 
-            <Scale
-              size={19}
-              color={GREEN}
-              strokeWidth={2}
-            />
+          <WeighProgressCard
+            currentWeight={currentWeight}
+            startingWeight={startingWeight}
+            isMovingAway={isMovingAway}
+            goalType={memberWeightGoal?.goal_type!}
+          />
 
+          {/* PROGRESS SUMMARY */}
+
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>
+                Progress Summary
+              </Text>
+
+              <Text style={styles.sectionSubtitle}>
+                Your current goal metrics
+              </Text>
+            </View>
           </View>
 
-        </View>
+          <ProgressMetricGrid
+            startingWeight={startingWeight}
+            targetWeight={targetWeight}
+            remainingWeight={remainingWeight}
+            weightChange={weightChange}
+            goalType={memberWeightGoal?.goal_type!}
+            isMovingAway={isMovingAway}
+          />
 
-        {/* CURRENT WEIGHT */}
+          {/* WEIGHT TREND */}
 
-        <WeighProgressCard
-				  currentWeight={
-					  currentWeight
-				  }
-				  startingWeight={
-					  startingWeight
-				  }
-				  isMovingAway={
-					  isMovingAway
-				  }
-				  goalType={memberWeightGoal?.goal_type!}
-        />
+          <WeightTrendChart
+            chartData={chartData}
+            isMovingAway={isMovingAway}
+            goal={memberWeightGoal}
+          />
 
-        {/* PROGRESS SUMMARY */}
+          {/* WEIGHT HISTORY */}
 
-        <View
-          style={
-            styles.sectionHeader
-          }
-        >
+          <WeightHistory history={history} />
 
-          <View>
-
-            <Text
-              style={
-                styles.sectionTitle
-              }
-            >
-              Progress Summary
-            </Text>
-
-            <Text
-              style={
-                styles.sectionSubtitle
-              }
-            >
-              Your current goal metrics
-            </Text>
-
-          </View>
-
-        </View>
-
-        <ProgressMetricGrid
-				startingWeight={startingWeight}
-				targetWeight={targetWeight}
-				remainingWeight={remainingWeight}
-				weightChange={weightChange}
-				goalType={memberWeightGoal?.goal_type!}
-				isMovingAway={isMovingAway}
-			/>
-
-        {/* WEIGHT TREND */}
-
-        <WeightTrendChart
-          chartData={
-            chartData
-          }
-          isMovingAway={
-            isMovingAway
-          }
-         
-			goal={memberWeightGoal}
-        />
-
-        {/* WEIGHT HISTORY */}
-
-        <WeightHistory
-          history={history}
-        />
-
-        <View
-          style={styles.bottomSpace}
-        />
-
-      </ScrollView>
-
-    </SafeAreaView>
+          <View style={styles.bottomSpace} />
+        </ScrollView>
+      </SafeAreaView>
+    </AppBackground>
   );
 }
 
-function formatShortDate(
-  date?: string
-) {
-
+function formatShortDate(date?: string) {
   if (!date) {
     return "";
   }
 
-  const parsed =
-    new Date(date);
+  const parsed = new Date(date);
 
-  if (
-    Number.isNaN(
-      parsed.getTime()
-    )
-  ) {
+  if (Number.isNaN(parsed.getTime())) {
     return "";
   }
 
-  return parsed.toLocaleDateString(
-    "en-PH",
-    {
-      month: "short",
-      day: "numeric",
-    }
-  );
+  return parsed.toLocaleDateString("en-PH", {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
 
-    backgroundColor: SLATE_50,
+    // Important:
+    // Don't use a light background here.
+    backgroundColor: "transparent",
   },
 
   scrollContent: {
     paddingHorizontal: 20,
-
     paddingTop: 20,
   },
-
   pageHeader: {
-    flexDirection: "row",
-
-    justifyContent:
-      "space-between",
-
-    alignItems: "center",
-
     marginBottom: 18,
+  
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-
+  
+  pageHeaderText: {
+    flex: 1,
+  },
+  
   pageTitle: {
-    fontSize: 25,
-
+    fontSize: 24,
     fontWeight: "800",
-
-    color: SLATE_900,
-
-    letterSpacing: -0.5,
+  
+    color: theme.text,
+  
+    letterSpacing: -0.6,
   },
-
+  
   pageSubtitle: {
-    marginTop: 3,
-
-    fontSize: 12,
-
-    color: SLATE_500,
+    marginTop: 4,
+  
+    fontSize: 11.5,
+    fontWeight: "500",
+  
+    color: theme.textMuted,
   },
-
+  
   scaleBadge: {
-    width: 42,
-    height: 42,
-
-    borderRadius: 14,
-
+    width: 40,
+    height: 40,
+  
+    borderRadius: 12,
+  
     alignItems: "center",
     justifyContent: "center",
-
-    backgroundColor: "#ECFDF5",
+  
+    backgroundColor: "rgba(16,185,129,0.07)",
+  
+    borderWidth: 1,
+    borderColor: "rgba(16,185,129,0.20)",
+  
+    shadowColor: GREEN,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+  
+    elevation: 2,
   },
-
   sectionHeader: {
     marginTop: 24,
-
     marginBottom: 10,
   },
 
   sectionTitle: {
     fontSize: 15,
-
     fontWeight: "700",
 
-    color: SLATE_900,
+    color: theme.text,
   },
 
   sectionSubtitle: {
@@ -377,14 +273,13 @@ const styles = StyleSheet.create({
 
     fontSize: 11,
 
-    color: SLATE_400,
+    color: theme.textMuted,
   },
 
   loadingContainer: {
     flex: 1,
 
     alignItems: "center",
-
     justifyContent: "center",
   },
 
@@ -393,11 +288,10 @@ const styles = StyleSheet.create({
 
     fontSize: 12,
 
-    color: SLATE_500,
+    color: theme.textMuted,
   },
 
   bottomSpace: {
     height: 35,
   },
-
 });

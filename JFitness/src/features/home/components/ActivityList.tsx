@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import {
   Flame,
   Receipt,
@@ -9,174 +9,275 @@ import {
   User,
   CreditCard,
 } from "lucide-react-native";
+import { theme } from "@/utils/theme";
 import { EmptyState } from "@/components/shared/EmptyState";
 
 function formatActivityDate(date: string | Date) {
-	const activityDate = new Date(date);
+  const activityDate = new Date(date);
 
-	return activityDate.toLocaleString("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: true,
-	});
+  return activityDate.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 }
 
 function getActivityIcon(type: string) {
-	switch (type) {
-	  case "ATTENDANCE":
-		 return Flame;
- 
-	  case "PAYMENT":
-		 return Receipt;
- 
-	  case "MEMBERSHIP":
-		 return CreditCard;
- 
-	  case "REWARD":
-		 return Trophy;
- 
-	  case "MEMBER":
-		 return User;
- 
-	  case "PRICING":
-		 return Tag;
- 
-	  case "WORKOUT":
-		 return Dumbbell;
- 
-	  default:
-		 return Activity;
-	}
- }
+  switch (type) {
+    case "ATTENDANCE":
+      return Flame;
+
+    case "PAYMENT":
+      return Receipt;
+
+    case "MEMBERSHIP":
+      return CreditCard;
+
+    case "REWARD":
+      return Trophy;
+
+    case "MEMBER":
+      return User;
+
+    case "PRICING":
+      return Tag;
+
+    case "WORKOUT":
+      return Dumbbell;
+
+    default:
+      return Activity;
+  }
+}
 
 function getActivityColor(type: string) {
-	switch(type) {
-		case "CHECK_IN":
-			return {
-				bg: "#d1fae5",
-				color: "#10b981",
-			};
-		case "PAYMENT":
-			return {
-				bg: "#dbeafe",
-				color: "#2563eb",
-			};
-		case "REWARD_CLAIM":
-			return {
-				bg: "#fef3c7",
-				color: "#d97706",
-			};
-		default:
-			return {
-				bg: "#e2e8f0",
-				color: "#64748b",
-			};
-	}
+  switch (type) {
+    case "CHECK_IN":
+      return {
+        color: "#34D399",
+      };
+
+    case "PAYMENT":
+      return {
+        color: "#60A5FA",
+      };
+
+    case "REWARD_CLAIM":
+      return {
+        color: "#FBBF24",
+      };
+
+    case "MEMBERSHIP":
+      return {
+        color: theme.primary,
+      };
+
+    case "WORKOUT":
+      return {
+        color: "#A78BFA",
+      };
+
+    default:
+      return {
+        color: theme.textMuted,
+      };
+  }
 }
 
 export function ActivityList({ activities }: any) {
-	return (
-		<View style={{ paddingHorizontal: 20 }}>
-			<Text
-				style={{
-					fontSize: 16,
-					fontWeight: "700",
-					marginVertical: 10,
-					color: "#0f172a",
-				}}
-			>
-				Recent Activity
-			</Text>
+  return (
+    <View>
+      <Text style={styles.title}>Recent Activity</Text>
 
-			{activities.length === 0 ? (
-				<EmptyState
-					icon={Activity}
-					title="No activity yet"
-					subtitle="Your check-ins, workouts, payments, and rewards will appear here."
-				/>
-			) : (
-				activities.map((a: any, i: number) => {
-					const Icon = getActivityIcon(a.type);
-					const iconStyle = getActivityColor(a.type);
+      {activities.length === 0 ? (
+        <EmptyState
+          icon={Activity}
+          title="No activity yet"
+          subtitle="Your check-ins, workouts, payments, and rewards will appear here."
+        />
+      ) : (
+        activities.map((a: any, i: number) => {
+          const Icon = getActivityIcon(a.type);
+          const iconStyle = getActivityColor(a.type);
 
-					return (
-						<View
-							key={i}
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-								padding: 14,
-								backgroundColor: "white",
-								borderRadius: 14,
-								marginBottom: 10,
+          return (
+            <View key={i} style={styles.card}>
+              {/* Icon */}
+              <View
+                style={[
+                  styles.iconContainer,
+                  {
+                    borderColor: `${iconStyle.color}45`,
+                    shadowColor: iconStyle.color,
+                  },
+                ]}
+              >
+                <Icon
+                  size={18}
+                  color={iconStyle.color}
+                  strokeWidth={2.2}
+                />
+              </View>
 
-								shadowColor: "#000",
-								shadowOpacity: 0.06,
-								shadowRadius: 8,
-								shadowOffset: {
-								width: 0,
-								height: 3,
-								},
+              {/* Content */}
+              <View style={styles.content}>
+                <Text
+                  style={styles.name}
+                  numberOfLines={1}
+                >
+                  {a.name}
+                </Text>
 
-								elevation: 3,
-							}}
-						>
-							<View
-								style={{
-									width: 40,
-									height: 40,
-									borderRadius: 12,
-									backgroundColor: iconStyle.bg,
-									justifyContent: "center",
-									alignItems: "center",
-								}}
-							>
-								<Icon size={18} color={iconStyle.color}/>
-							</View>
+                <Text
+                  style={styles.action}
+                  numberOfLines={2}
+                >
+                  {a.action}
+                </Text>
 
-							<View
-								style={{
-									flex: 1,
-									marginLeft: 10,
-								}}
-							>
-								<Text
-									style={{
-										fontWeight: "600",
-										fontSize: 14,
-										color: "#0f172a",
-									}}
-								>
-									{a.name}
-								</Text>
+                <Text style={styles.date}>
+                  {formatActivityDate(a.time)}
+                </Text>
+              </View>
 
-								<Text
-									style={{
-										fontSize: 12,
-										color: "#64748b",
-										marginTop: 3,
-									}}
-								>
-									{a.action}
-								</Text>
-
-								<Text
-									style={{
-										fontSize: 11,
-										color: "#94a3b8",
-										marginTop: 5,
-									}}
-								>
-									{formatActivityDate(a.time)}
-								</Text>
-							</View>
-						</View>
-					);
-				})
-			)}
-		</View>
-	);
+              {/* Accent */}
+              <View
+                style={[
+                  styles.accentLine,
+                  {
+                    backgroundColor: iconStyle.color,
+                  },
+                ]}
+              />
+            </View>
+          );
+        })
+      )}
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+
+  title: {
+    marginTop: 10,
+    marginBottom: 12,
+
+    fontSize: 16,
+    fontWeight: "700",
+
+    color: theme.text,
+    letterSpacing: -0.2,
+  },
+
+  /* ================= CARD ================= */
+
+  card: {
+    position: "relative",
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    padding: 14,
+
+    marginBottom: 10,
+
+    borderRadius: 16,
+
+    backgroundColor: theme.card,
+
+    borderWidth: 1,
+    borderColor: theme.primaryLight + "55",
+
+    overflow: "hidden",
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+
+    elevation: 3,
+  },
+
+  /* ================= ICON ================= */
+
+  iconContainer: {
+    width: 42,
+    height: 42,
+
+    borderRadius: 13,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: theme.surface,
+
+    borderWidth: 1,
+
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+
+    elevation: 3,
+  },
+
+  /* ================= CONTENT ================= */
+
+  content: {
+    flex: 1,
+    marginLeft: 11,
+    paddingRight: 8,
+  },
+
+  name: {
+    fontSize: 14,
+    fontWeight: "700",
+
+    color: theme.text,
+  },
+
+  action: {
+    marginTop: 3,
+
+    fontSize: 12,
+    lineHeight: 17,
+
+    color: theme.textSub,
+  },
+
+  date: {
+    marginTop: 5,
+
+    fontSize: 10.5,
+
+    color: theme.textMuted,
+  },
+
+  /* ================= ACCENT ================= */
+
+  accentLine: {
+    position: "absolute",
+
+    bottom: 0,
+    left: "50%",
+
+    marginLeft: -14,
+
+    width: 28,
+    height: 2,
+
+    borderRadius: 999,
+
+    opacity: 0.8,
+  },
+});

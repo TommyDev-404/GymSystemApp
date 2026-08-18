@@ -45,7 +45,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 		};
 	}, [member?.memberId]);
 
-
+	
 	// Global member socket events	
 	useEffect(() => {
 		if (!member?.memberId) return;

@@ -1,17 +1,6 @@
-
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-} from "react-native";
-
-import {
-  Target,
-  ChevronRight,
-  Trophy,
-} from "lucide-react-native";
-
+import { theme } from "@/utils/theme";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Target, ChevronRight, Trophy } from "lucide-react-native";
 import { WeightGoal } from "../types/HomeTypes";
 
 interface GoalStatusCardProps {
@@ -19,10 +8,7 @@ interface GoalStatusCardProps {
   onPress: () => void;
 }
 
-export function GoalStatusCard({
-  goal,
-  onPress,
-}: GoalStatusCardProps) {
+export function GoalStatusCard({ goal, onPress }: GoalStatusCardProps) {
   const achieved = goal?.status === "ACHIEVED";
 
   const heading = !goal
@@ -46,41 +32,31 @@ export function GoalStatusCard({
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.card,
-        pressed && styles.cardPressed,
-      ]}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
     >
       <View style={styles.topRow}>
         <View style={styles.iconContainer}>
           {achieved ? (
-            <Trophy size={17} color="#10B981" />
+            <Trophy size={18} color={theme.primary} strokeWidth={2.2} />
           ) : (
-            <Target size={17} color="#10B981" />
+            <Target size={18} color={theme.primary} strokeWidth={2.2} />
           )}
         </View>
 
         <View style={styles.content}>
           <Text style={styles.heading}>{heading}</Text>
-
-          <Text style={styles.description}>
-            {description}
-          </Text>
+          <Text style={styles.description}>{description}</Text>
         </View>
       </View>
 
       {!!goal && !achieved && (
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
-            <Text style={styles.progressLabel}>
-              Goal Progress
-            </Text>
-
+            <Text style={styles.progressLabel}>Goal Progress</Text>
             <Text style={styles.progressPercentage}>
               {goal.progress_percentage}%
             </Text>
           </View>
-
           <View style={styles.progressTrack}>
             <View
               style={[
@@ -99,7 +75,7 @@ export function GoalStatusCard({
 
       <View style={styles.actionRow}>
         <Text style={styles.actionText}>{buttonLabel}</Text>
-        <ChevronRight size={15} color="#10B981" />
+        <ChevronRight size={16} color={theme.primary} strokeWidth={2.3} />
       </View>
     </Pressable>
   );
@@ -107,100 +83,85 @@ export function GoalStatusCard({
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: 20,
-    padding: 14,
-    borderRadius: 14,
-    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: theme.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: theme.primaryLight + "45",
   },
-
   cardPressed: {
-    opacity: 0.75,
+    opacity: 0.85,
   },
-
   topRow: {
     flexDirection: "row",
     alignItems: "flex-start",
   },
-
   iconContainer: {
-    width: 34,
-    height: 34,
-    borderRadius: 9,
-    backgroundColor: "#ECFDF5",
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    backgroundColor: theme.accentWash,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10,
+    marginRight: 12,
   },
-
   content: {
     flex: 1,
   },
-
   heading: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#0F172A",
+    fontSize: 15,
+    fontWeight: "700",
+    color: theme.text,
   },
-
   description: {
-    marginTop: 3,
-    fontSize: 12,
-    lineHeight: 17,
-    color: "#64748B",
+    marginTop: 4,
+    fontSize: 13,
+    lineHeight: 18,
+    color: theme.textSub,
   },
-
   progressSection: {
-    marginTop: 12,
+    marginTop: 14,
   },
-
   progressHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: 7,
   },
-
   progressLabel: {
-    fontSize: 11,
-    color: "#94A3B8",
+    fontSize: 12,
+    color: theme.textMuted,
     fontWeight: "500",
   },
-
   progressPercentage: {
-    fontSize: 11,
-    color: "#10B981",
+    fontSize: 12,
+    color: theme.primary,
     fontWeight: "700",
   },
-
   progressTrack: {
-    height: 5,
+    height: 6,
     borderRadius: 999,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: theme.surface3,
     overflow: "hidden",
   },
-
   progressFill: {
     height: "100%",
     borderRadius: 999,
-    backgroundColor: "#10B981",
+    backgroundColor: theme.primary,
   },
-
   actionRow: {
-    marginTop: 11,
-    paddingTop: 9,
+    marginTop: 14,
+    paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
+    borderTopColor: theme.border,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
+    gap: 2,
   },
-
   actionText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
-    color: "#10B981",
-    marginRight: 1,
+    color: theme.primary,
   },
 });

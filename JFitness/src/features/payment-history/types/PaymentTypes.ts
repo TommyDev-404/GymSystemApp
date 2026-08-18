@@ -1,10 +1,8 @@
 
- 
  export interface MemberPaymentHistoryData {
    stats: PaymentStats;
    payments: PaymentHistoryItem[];
  }
- 
  
  export interface PaymentStats {
    totalPaid: number;

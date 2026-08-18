@@ -1,6 +1,6 @@
-
-import { View, Text, Image, Pressable } from "react-native";
+import { View, Text, Image, Pressable, StyleSheet } from "react-native";
 import { router } from "expo-router";
+import { theme } from "@/utils/theme";
 
 function getYoutubeVideoId(url: string): string | null {
   try {
@@ -36,7 +36,6 @@ function parseMuscles(value: string) {
 export function WorkoutTutorialCard({ item }: any) {
   const videoId = getYoutubeVideoId(item.video_url);
   const thumb = videoId ? ytThumb(videoId) : "";
-
   const muscles = parseMuscles(item.muscles_targeted);
 
   return (
@@ -49,132 +48,48 @@ export function WorkoutTutorialCard({ item }: any) {
           },
         })
       }
+      style={({ pressed }) => [
+        styles.wrapper,
+        pressed && styles.pressed,
+      ]}
     >
-      <View
-        style={{
-          backgroundColor: "white",
-          borderRadius: 18,
-          overflow: "hidden",
-          elevation: 3,
-          marginBottom: 14,
-        }}
-      >
-        {/* IMAGE */}
-        <View
-          style={{
-            height: 160,
-            position: "relative",
-          }}
-        >
+      <View style={styles.card}>
+        <View style={styles.imageContainer}>
           <Image
             source={{ uri: thumb }}
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
+            style={styles.image}
             resizeMode="cover"
           />
 
-          {/* CLICK HINT */}
-          <View
-            style={{
-              position: "absolute",
-              bottom: 12,
-              alignSelf: "center",
-              backgroundColor: "rgba(0,0,0,0.55)",
-              paddingHorizontal: 14,
-              paddingVertical: 6,
-              borderRadius: 999,
-            }}
-          >
-            <Text
-              style={{
-                color: "white",
-                fontSize: 12,
-                fontWeight: "600",
-              }}
-            >
-              Tap card to view full info
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryText}>
+              {item.category}
             </Text>
           </View>
 
-          {/* CATEGORY BADGE */}
-          <View
-            style={{
-              position: "absolute",
-              top: 12,
-              left: 12,
-              backgroundColor: "rgba(16,185,129,0.9)",
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              borderRadius: 999,
-            }}
-          >
-            <Text
-              style={{
-                color: "white",
-                fontSize: 11,
-                fontWeight: "600",
-              }}
-            >
-              {item.category}
+          <View style={styles.tapHint}>
+            <Text style={styles.tapHintText}>
+              Tap card to view full info
             </Text>
           </View>
         </View>
 
-        {/* CONTENT */}
-        <View
-          style={{
-            padding: 14,
-          }}
-        >
-          {/* TITLE */}
-          <Text
-            numberOfLines={2}
-            style={{
-              fontSize: 16,
-              fontWeight: "700",
-              color: "#0f172a",
-            }}
-          >
+        <View style={styles.content}>
+          <Text numberOfLines={2} style={styles.title}>
             {item.name}
           </Text>
 
-          {/* LEVEL + MUSCLE */}
-          <Text
-            style={{
-              fontSize: 12,
-              color: "#64748b",
-              marginTop: 4,
-            }}
-          >
+          <Text style={styles.details}>
             {item.level}
             {muscles ? ` • ${muscles}` : ""}
           </Text>
 
-          {/* META */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              marginTop: 10,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 12,
-                color: "#64748b",
-              }}
-            >
+          <View style={styles.meta}>
+            <Text style={styles.metaText}>
               🏋️ Workout Tutorial
             </Text>
 
-            <Text
-              style={{
-                fontSize: 12,
-                color: "#64748b",
-              }}
-            >
+            <Text style={styles.metaText}>
               {new Date(item.created_at).toLocaleDateString()}
             </Text>
           </View>
@@ -183,3 +98,107 @@ export function WorkoutTutorialCard({ item }: any) {
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 14,
+  },
+
+  pressed: {
+    opacity: 0.88,
+    transform: [{ scale: 0.99 }],
+  },
+
+  card: {
+    overflow: "hidden",
+    borderRadius: 18,
+    backgroundColor: theme.card,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+
+  imageContainer: {
+    height: 160,
+    position: "relative",
+    backgroundColor: theme.surface,
+  },
+
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+
+  categoryBadge: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: theme.primaryLight,
+  },
+
+  categoryText: {
+    color: "#fff",
+    fontSize: 10.5,
+    fontWeight: "700",
+  },
+
+  tapHint: {
+    position: "absolute",
+    bottom: 12,
+    alignSelf: "center",
+    paddingHorizontal: 13,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: "rgba(0,0,0,0.62)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.16)",
+  },
+
+  tapHintText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+
+  content: {
+    padding: 14,
+  },
+
+  title: {
+    fontSize: 15.5,
+    fontWeight: "700",
+    color: theme.text,
+    letterSpacing: -0.2,
+  },
+
+  details: {
+    marginTop: 5,
+    fontSize: 11.5,
+    color: theme.textMuted,
+  },
+
+  meta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: theme.border,
+  },
+
+  metaText: {
+    fontSize: 10.5,
+    color: theme.textMuted,
+  },
+});

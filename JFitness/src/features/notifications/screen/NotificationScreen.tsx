@@ -25,6 +25,8 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { Loading } from "@/components/shared/Loading";
 import { Notification, NotificationGroupType } from "../types/NotifTypes";
 import Toast from "react-native-toast-message";
+import { AppBackground } from "@/components/shared/AppBackground";
+import { theme } from "@/utils/theme";
 
 
 function formatNotificationGroups(notifications: Notification[]) {
@@ -121,74 +123,81 @@ export default function NotificationsScreen() {
 	if (isLoading) return <Loading/>;
 
 	return (
-		<>
-			<StatusBar barStyle="dark-content" backgroundColor="#fff" />
-		
-			{/* header */}
-			{notifications.length > 0 &&
-				<View
-					style={{
-						paddingVertical: 10,
-						paddingHorizontal: 20,
-						flexDirection: "row",
-						justifyContent: "space-between",
-						alignItems: "center",
-						backgroundColor: 'white'
-					}}
-				>
-					<View>
-						{totalUnread > 0 ? (
-							<Text
-								style={{
-								fontSize: 14,
-								color: "#64748b",
-								}}
-							>
-								You have{" "}
-								<Text
-								style={{
-									fontWeight: "700",
-									color: "#0f172a",
-								}}
-								>
-								{totalUnread}
-								</Text>{" "}
-								unread notification{totalUnread > 1 ? "s" : ""}
-							</Text>
-						) : (
-							<Text
-								style={{
-								fontSize: 14,
-								color: "#64748b",
-								}}
-							>
-								All notifications have been reviewed.
-							</Text>
-						)}
-					</View>
-
-					{totalUnread > 0 && 
-						<Pressable
-							onPress={handleMarkAllRead}
+		<AppBackground>
+			
+			{notifications.length > 0 && (
+			<View
+				style={{
+					paddingVertical: 10,
+					paddingHorizontal: 20,
+					flexDirection: "row",
+					justifyContent: "space-between",
+					alignItems: "center",
+					backgroundColor: "transparent",
+				}}
+			>
+				<View>
+					{totalUnread > 0 ? (
+					<Text
+						style={{
+							fontSize: 14,
+							color: theme.textSub,
+						}}
+					>
+						You have{" "}
+						<Text
 							style={{
-								backgroundColor: "#10b981",
-								paddingHorizontal: 12,
-								paddingVertical: 6,
-								borderRadius: 12,
+							fontWeight: "700",
+							color: theme.text,
 							}}
 						>
-							{isPending ? (
-								<ActivityIndicator/>
-							): (
-								<Text style={{ fontSize: 12, color: "#fff" }}>
-									Mark all read
-								</Text>
-							)}
-							
-						</Pressable>
-					}
+							{totalUnread}
+						</Text>{" "}
+						unread notification{totalUnread > 1 ? "s" : ""}
+					</Text>
+					) : (
+					<Text
+						style={{
+							fontSize: 14,
+							color: theme.textSub,
+						}}
+					>
+						All notifications have been reviewed.
+					</Text>
+					)}
 				</View>
-			}
+
+				{totalUnread > 0 && (
+					<Pressable
+					onPress={handleMarkAllRead}
+					disabled={isPending}
+					style={{
+						backgroundColor: theme.primary,
+						paddingHorizontal: 12,
+						paddingVertical: 6,
+						borderRadius: 12,
+						borderWidth: 1,
+						borderColor: theme.borderAccent,
+						opacity: isPending ? 0.7 : 1,
+					}}
+					>
+					{isPending ? (
+						<ActivityIndicator size="small" color="#fff" />
+					) : (
+						<Text
+							style={{
+							fontSize: 12,
+							fontWeight: "600",
+							color: "#fff",
+							}}
+						>
+							Mark all read
+						</Text>
+					)}
+					</Pressable>
+				)}
+			</View>
+			)}
 
 			<FlatList
 				data={groups}
@@ -226,6 +235,6 @@ export default function NotificationsScreen() {
 					</View>
 				}
 			/>
-		</>
+		</AppBackground>
 	);
 }

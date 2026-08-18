@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import { NotificationCard } from "./NotificationCard";
 import { useMarkNotificationRead } from "../hook/useNotification";
 import { NotificationGroupType } from "../types/NotifTypes";
-import Toast from "react-native-toast-message";
+import { theme } from "@/utils/theme";
 
 export function NotificationGroup({
   label,
@@ -12,17 +12,29 @@ export function NotificationGroup({
   memberId,
   items,
 }: NotificationGroupType) {
-  const { mutate: markAsRead, isPending } = useMarkNotificationRead();
-  const unreadCount = items.filter((i) => i.is_read).length;
-  
+  const { mutate: markAsRead } = useMarkNotificationRead();
+
+  const unreadCount = items.filter((i) => i.unread).length;
+
   const handleMarkRead = (notificationId: number) => {
     markAsRead({ notificationId, memberId });
   };
 
   return (
-    <View style={{ paddingHorizontal: 20, marginBottom: 18, paddingTop: 10 }}>
-      {/* header */}
-      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
+    <View
+      style={{
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        marginBottom: 18,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: 10,
+        }}
+      >
         <View
           style={{
             width: 24,
@@ -32,12 +44,20 @@ export function NotificationGroup({
             alignItems: "center",
             justifyContent: "center",
             marginRight: 8,
+            borderWidth: 1,
+            borderColor: theme.borderAccent,
           }}
         >
           <Icon size={13} color={color} />
         </View>
 
-        <Text style={{ fontSize: 13, fontWeight: "600", color: "#334155" }}>
+        <Text
+          style={{
+            fontSize: 13,
+            fontWeight: "600",
+            color: theme.textSub,
+          }}
+        >
           {label}
         </Text>
 
@@ -51,18 +71,23 @@ export function NotificationGroup({
               backgroundColor: color,
             }}
           >
-            <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}>
+            <Text
+              style={{
+                color: "#fff",
+                fontSize: 10,
+                fontWeight: "700",
+              }}
+            >
               {unreadCount}
             </Text>
           </View>
         )}
       </View>
 
-      {/* items */}
       <View style={{ gap: 10 }}>
-        {items.map((item, i) => (
+        {items.map((item) => (
           <NotificationCard
-            key={i}
+            key={item.id}
             title={item.title}
             body={item.body}
             time={item.time}

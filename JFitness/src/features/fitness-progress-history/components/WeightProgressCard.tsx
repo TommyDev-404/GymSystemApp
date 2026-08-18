@@ -1,5 +1,4 @@
 import React from "react";
-
 import {
   View,
   Text,
@@ -11,24 +10,18 @@ import {
   TrendingUp,
 } from "lucide-react-native";
 
+import { LinearGradient } from "expo-linear-gradient";
+import { theme } from "@/utils/theme";
 
 interface CurrentWeightCardProps {
   currentWeight: number;
   startingWeight: number;
   isMovingAway: boolean;
-
   goalType: "LOSE_WEIGHT" | "GAIN_WEIGHT";
 }
 
-
-const GREEN = "#10B981";
+const GREEN = theme.primary;
 const RED = "#EF4444";
-
-const SLATE_400 = "#94A3B8";
-const SLATE_500 = "#64748B";
-const SLATE_700 = "#334155";
-const SLATE_900 = "#0F172A";
-
 
 export function WeighProgressCard({
   currentWeight,
@@ -36,7 +29,6 @@ export function WeighProgressCard({
   isMovingAway,
   goalType,
 }: CurrentWeightCardProps) {
-
   const weightChange =
     currentWeight - startingWeight;
 
@@ -47,33 +39,46 @@ export function WeighProgressCard({
     weightChange < 0
       ? "lost"
       : weightChange > 0
-      ? "gained"
-      : "no change";
+        ? "gained"
+        : "no change";
 
-
-  /**
-   * Determine icon based on
-   * actual weight movement.
-   */
-  const isWeightLoss =
-    weightChange < 0;
-
+  const isWeightLoss = weightChange < 0;
 
   const GoalIcon =
     goalType === "LOSE_WEIGHT"
       ? TrendingDown
       : TrendingUp;
 
+  const goalColor = isMovingAway ? RED : GREEN;
 
   return (
     <View style={styles.card}>
 
-      {/* HEADER */}
+      {/* ================= BACKGROUND GLOW ================= */}
+
+      <LinearGradient
+        colors={[
+          "rgba(20,184,166,0.09)",
+          "rgba(20,184,166,0.025)",
+          "rgba(11,13,16,0)",
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.backgroundGlow}
+        pointerEvents="none"
+      />
+
+      {/* Decorative top-left glow */}
+      <View
+        style={styles.topGlow}
+        pointerEvents="none"
+      />
+
+      {/* ================= HEADER ================= */}
 
       <View style={styles.header}>
 
-        <View>
-
+        <View style={styles.headerText}>
           <Text style={styles.title}>
             Weight Progress
           </Text>
@@ -81,61 +86,48 @@ export function WeighProgressCard({
           <Text style={styles.subtitle}>
             Your current weight journey
           </Text>
-
         </View>
-
 
         {/* GOAL TYPE */}
 
         <View
           style={[
             styles.goalBadge,
-
-            goalType === "GAIN_WEIGHT"
-              ? styles.goalBadgeGain
-              : styles.goalBadgeLoss,
+            isMovingAway
+              ? styles.goalBadgeDanger
+              : styles.goalBadgeNormal,
           ]}
         >
-
           <GoalIcon
             size={13}
-            color={
-              goalType === "GAIN_WEIGHT"
-                ? GREEN
-                : GREEN
-            }
+            color={goalColor}
             strokeWidth={2.5}
           />
 
           <Text
             style={[
               styles.goalBadgeText,
-
-              goalType === "GAIN_WEIGHT"
-                ? styles.goalBadgeTextGain
-                : styles.goalBadgeTextLoss,
+              {
+                color: goalColor,
+              },
             ]}
           >
             {goalType === "LOSE_WEIGHT"
               ? "LOSE WEIGHT"
               : "GAIN WEIGHT"}
           </Text>
-
         </View>
 
       </View>
 
-
-      {/* CURRENT WEIGHT */}
+      {/* ================= CURRENT WEIGHT ================= */}
 
       <View style={styles.content}>
 
         <Text
           style={[
             styles.weight,
-
-            isMovingAway &&
-              styles.weightDanger,
+            isMovingAway && styles.weightDanger,
           ]}
         >
           {currentWeight.toFixed(1)}
@@ -143,30 +135,23 @@ export function WeighProgressCard({
           <Text style={styles.unit}>
             {" kg"}
           </Text>
-
         </Text>
-
 
         <Text style={styles.currentLabel}>
           Current Weight
         </Text>
 
-
-        {/* CHANGE */}
+        {/* ================= CHANGE ================= */}
 
         {changeType !== "no change" ? (
-
           <View
             style={[
               styles.changeBadge,
-
               isMovingAway &&
                 styles.changeBadgeDanger,
             ]}
           >
-
             {isWeightLoss ? (
-
               <TrendingDown
                 size={14}
                 color={
@@ -176,9 +161,7 @@ export function WeighProgressCard({
                 }
                 strokeWidth={2.5}
               />
-
             ) : (
-
               <TrendingUp
                 size={14}
                 color={
@@ -188,14 +171,11 @@ export function WeighProgressCard({
                 }
                 strokeWidth={2.5}
               />
-
             )}
-
 
             <Text
               style={[
                 styles.changeText,
-
                 isMovingAway &&
                   styles.changeTextDanger,
               ]}
@@ -204,26 +184,20 @@ export function WeighProgressCard({
               {" kg "}
               {changeType}
             </Text>
-
           </View>
-
         ) : (
-
           <View style={styles.noChangeBadge}>
-
             <Text style={styles.noChangeText}>
               No weight change
             </Text>
-
           </View>
-
         )}
 
+        {/* ================= DESCRIPTION ================= */}
 
         <Text
           style={[
             styles.description,
-
             isMovingAway &&
               styles.descriptionDanger,
           ]}
@@ -231,8 +205,8 @@ export function WeighProgressCard({
           {isMovingAway
             ? "Moving away from your goal"
             : goalType === "LOSE_WEIGHT"
-            ? "Progress toward your weight-loss goal"
-            : "Progress toward your weight-gain goal"}
+              ? "Progress toward your weight-loss goal"
+              : "Progress toward your weight-gain goal"}
         </Text>
 
       </View>
@@ -241,63 +215,97 @@ export function WeighProgressCard({
   );
 }
 
-
 const styles = StyleSheet.create({
 
-  card: {
-    backgroundColor: "#FFFFFF",
+  /* ================= CARD ================= */
 
-    borderRadius: 20,
+  card: {
+    position: "relative",
+
+    backgroundColor: theme.card,
+
+    borderRadius: 18,
 
     borderWidth: 1,
-    borderColor: "#F1F5F9",
+    borderColor: theme.borderAccent,
 
-    padding: 20,
+    padding: 17,
 
-    elevation: 2,
+    overflow: "hidden",
 
     shadowColor: "#000",
 
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 6,
     },
 
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
+
+    elevation: 4,
   },
 
+  backgroundGlow: {
+    position: "absolute",
 
-  /* HEADER */
+    top: 0,
+    left: 0,
+    right: 0,
+
+    height: 180,
+  },
+
+  topGlow: {
+    position: "absolute",
+
+    top: -75,
+    left: -70,
+
+    width: 180,
+    height: 180,
+
+    borderRadius: 999,
+
+    backgroundColor:
+      "rgba(20,184,166,0.055)",
+  },
+
+  /* ================= HEADER ================= */
 
   header: {
     flexDirection: "row",
 
+    alignItems: "center",
+
     justifyContent: "space-between",
 
-    alignItems: "center",
+    gap: 10,
   },
 
+  headerText: {
+    flex: 1,
+  },
 
   title: {
     fontSize: 15,
 
     fontWeight: "700",
 
-    color: SLATE_900,
-  },
+    color: theme.text,
 
+    letterSpacing: -0.2,
+  },
 
   subtitle: {
     marginTop: 3,
 
-    fontSize: 11,
+    fontSize: 10.5,
 
-    color: SLATE_400,
+    color: theme.textMuted,
   },
 
-
-  /* GOAL BADGE */
+  /* ================= GOAL BADGE ================= */
 
   goalBadge: {
     flexDirection: "row",
@@ -307,50 +315,44 @@ const styles = StyleSheet.create({
     gap: 4,
 
     paddingHorizontal: 8,
-
     paddingVertical: 5,
 
     borderRadius: 999,
+
+    borderWidth: 1,
   },
 
+  goalBadgeNormal: {
+    backgroundColor:
+      "rgba(16,185,129,0.07)",
 
-  goalBadgeLoss: {
-    backgroundColor: "#ECFDF5",
+    borderColor:
+      "rgba(16,185,129,0.20)",
   },
 
+  goalBadgeDanger: {
+    backgroundColor:
+      "rgba(239,68,68,0.07)",
 
-  goalBadgeGain: {
-    backgroundColor: "#ECFDF5",
+    borderColor:
+      "rgba(239,68,68,0.20)",
   },
-
 
   goalBadgeText: {
-    fontSize: 9,
+    fontSize: 8.5,
 
     fontWeight: "800",
 
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
   },
 
-
-  goalBadgeTextLoss: {
-    color: GREEN,
-  },
-
-
-  goalBadgeTextGain: {
-    color: GREEN,
-  },
-
-
-  /* CONTENT */
+  /* ================= CONTENT ================= */
 
   content: {
     alignItems: "center",
 
-    paddingTop: 18,
+    paddingTop: 20,
   },
-
 
   weight: {
     fontSize: 38,
@@ -359,23 +361,22 @@ const styles = StyleSheet.create({
 
     fontWeight: "800",
 
-    color: SLATE_900,
-  },
+    color: theme.text,
 
+    letterSpacing: -1,
+  },
 
   weightDanger: {
     color: RED,
   },
 
-
   unit: {
-    fontSize: 17,
+    fontSize: 16,
 
     fontWeight: "600",
 
-    color: SLATE_400,
+    color: theme.textMuted,
   },
-
 
   currentLabel: {
     marginTop: 2,
@@ -384,14 +385,13 @@ const styles = StyleSheet.create({
 
     fontWeight: "500",
 
-    color: SLATE_400,
+    color: theme.textMuted,
   },
 
-
-  /* CHANGE */
+  /* ================= CHANGE ================= */
 
   changeBadge: {
-    marginTop: 10,
+    marginTop: 11,
 
     flexDirection: "row",
 
@@ -400,66 +400,77 @@ const styles = StyleSheet.create({
     gap: 5,
 
     paddingHorizontal: 10,
-
     paddingVertical: 5,
 
     borderRadius: 999,
 
-    backgroundColor: "#ECFDF5",
-  },
+    backgroundColor:
+      "rgba(16,185,129,0.07)",
 
+    borderWidth: 1,
+
+    borderColor:
+      "rgba(16,185,129,0.18)",
+  },
 
   changeBadgeDanger: {
-    backgroundColor: "#FEF2F2",
+    backgroundColor:
+      "rgba(239,68,68,0.07)",
+
+    borderColor:
+      "rgba(239,68,68,0.18)",
   },
 
-
   changeText: {
-    fontSize: 12,
+    fontSize: 11,
 
     fontWeight: "700",
 
     color: GREEN,
   },
 
-
   changeTextDanger: {
     color: RED,
   },
 
+  /* ================= NO CHANGE ================= */
 
   noChangeBadge: {
-    marginTop: 10,
+    marginTop: 11,
 
     paddingHorizontal: 10,
-
     paddingVertical: 5,
 
     borderRadius: 999,
 
-    backgroundColor: "#F8FAFC",
+    backgroundColor: theme.surface,
+
+    borderWidth: 1,
+
+    borderColor: theme.border,
   },
 
-
   noChangeText: {
-    fontSize: 11,
+    fontSize: 10.5,
 
     fontWeight: "600",
 
-    color: SLATE_500,
+    color: theme.textMuted,
   },
 
+  /* ================= DESCRIPTION ================= */
 
   description: {
-    marginTop: 5,
+    marginTop: 6,
 
     fontSize: 10,
 
-    color: SLATE_400,
+    lineHeight: 14,
+
+    color: theme.textMuted,
 
     textAlign: "center",
   },
-
 
   descriptionDanger: {
     color: RED,

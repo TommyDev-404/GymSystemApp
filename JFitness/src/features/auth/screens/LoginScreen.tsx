@@ -1,296 +1,232 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
-  ActivityIndicator,
   StyleSheet,
-} from "react-native";
-import { router } from "expo-router";
-import { Eye, EyeOff } from "lucide-react-native";
-
-import { AuthLayout } from "@/features/auth/layout/AuthLayout";
-import { useAuth } from "@/context/AuthContext";
+} from 'react-native';
+import { router } from 'expo-router';
+import { AuthLayout } from '@/features/auth/layout/AuthLayout';
+import { useAuth } from '@/context/AuthContext';
+import { theme } from '@/utils/theme';
+import FormField from '@/features/auth/components/FormField'; // adjust path if needed
+import PrimaryButton from '@/features/auth/components/PrimaryButton'; // adjust path if needed
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+	const { login } = useAuth();
+	const [username, setUsername] = useState('');
+	const [password, setPassword] = useState('');
+	const [showPassword, setShowPassword] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [errorMessage, setErrorMessage] = useState('');
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+	const handleUsernameChange = (text: string) => {
+		setUsername(text);
+		if (errorMessage) setErrorMessage('');
+	};
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+	const handlePasswordChange = (text: string) => {
+		setPassword(text);
+		if (errorMessage) setErrorMessage('');
+	};
 
-  const handleLogin = async () => {
-    try {
-      setErrorMessage("");
-      setIsLoading(true);
+	const handleLogin = async () => {
+		if (!username.trim() || !password.trim()) {
+			setErrorMessage('Please fill in all fields.');
+			return;
+		}
 
-      await login(email, password);
+		try {
+			setErrorMessage('');
+			setIsLoading(true);
 
-      router.replace("/(app)/(tabs)/home");
-    } catch (error: any) {
-      setErrorMessage(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+			await login(username, password);
+			router.replace('/(app)/(tabs)/home');
+		} catch (error: any) {
+			setErrorMessage(error.message || 'Login failed. Please try again.');
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-  return (
-    <AuthLayout
-      title="JFitness Gym"
-      subtitle="Welcome back, let's train!"
-    >
-      {/* EMAIL */}
-      <Text style={styles.label}>Email Address</Text>
+	return (
+		<AuthLayout title="JFitness Gym" subtitle="Welcome back, let's train!">
+			{/* Error */}
+			{errorMessage ? (
+				<View style={styles.errorBox}>
+					<Text style={styles.errorText}>{errorMessage}</Text>
+				</View>
+			) : null}
 
-      <TextInput
-        placeholder="Enter your email"
-        placeholderTextColor="#94a3b8"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
+			{/* Username */}
+			<FormField
+				label="USERNAME"
+				value={username}
+				onChangeText={handleUsernameChange}
+				placeholder="Enter your username"
+				autoCapitalize="none"
+			/>
 
-      {/* PASSWORD */}
-      <Text style={styles.label}>Password</Text>
+			{/* Password */}
+			<FormField
+				label="PASSWORD"
+				value={password}
+				onChangeText={handlePasswordChange}
+				placeholder="Enter your password"
+				secureTextEntry={!showPassword}
+				autoCapitalize="none"
+			/>
 
-      <View style={styles.passwordContainer}>
-        <TextInput
-          placeholder="Enter your password"
-          placeholderTextColor="#94a3b8"
-          secureTextEntry={!showPassword}
-          value={password}
-          onChangeText={setPassword}
-          style={styles.passwordInput}
-        />
+			{/* Show password */}
+			<TouchableOpacity
+				style={styles.showPasswordRow}
+				onPress={() => setShowPassword(!showPassword)}
+				activeOpacity={0.7}
+			>
+				<View style={[styles.checkbox, showPassword && styles.checkboxChecked]}>
+					{showPassword && (
+					<View style={styles.checkIcon}>
+						<Text style={styles.checkMark}>✓</Text>
+					</View>
+					)}
+				</View>
+				<Text style={styles.checkboxLabel}>Show password</Text>
+			</TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => setShowPassword(!showPassword)}
-          style={styles.eyeButton}
-        >
-          {showPassword ? (
-            <EyeOff
-              size={20}
-              color="#64748b"
-            />
-          ) : (
-            <Eye
-              size={20}
-              color="#64748b"
-            />
-          )}
-        </TouchableOpacity>
-      </View>
+			{/* Forgot password */}
+			<TouchableOpacity
+				style={styles.forgotRow}
+				onPress={() => router.push('/(auth)/forgot-password')}
+				activeOpacity={0.7}
+			>
+				<Text style={styles.forgotText}>Forgot your password?</Text>
+			</TouchableOpacity>
 
-      {errorMessage ? (
-        <Text style={styles.errorText}>
-          {errorMessage}
-        </Text>
-      ) : null}
+			{/* Login Button */}
+			<PrimaryButton
+				title={isLoading ? 'Signing in...' : 'Login'}
+				onPress={handleLogin}
+				loading={isLoading}
+				disabled={isLoading}
+			/>
 
-      {/* LOGIN BUTTON */}
-      <TouchableOpacity
-        style={[
-          styles.button,
-          isLoading && styles.buttonDisabled,
-        ]}
-        onPress={handleLogin}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator
-            color="#fff"
-          />
-        ) : (
-          <Text style={styles.buttonText}>
-            Login
-          </Text>
-        )}
-      </TouchableOpacity>
+			{/* Activate Account */}
+			<View style={styles.activationCard}>
+				<View style={styles.activationTextBlock}>
+					<Text style={styles.activationTitle}>Already a gym member?</Text>
+					<Text style={styles.activationSubtitle}>
+					Activate using your membership code
+					</Text>
+				</View>
 
-      {/* FORGOT PASSWORD */}
-      <TouchableOpacity
-        style={styles.forgotContainer}
-        onPress={() =>
-          router.push("/(auth)/forgot-password")
-        }
-      >
-        <Text style={styles.forgotText}>
-          Forgot your password?
-        </Text>
-      </TouchableOpacity>
-
-      {/* ACTIVATE ACCOUNT */}
-      <View style={styles.activationCard}>
-        <Text style={styles.activationTitle}>
-          Already a gym member?
-        </Text>
-
-        <Text style={styles.activationSubtitle}>
-          Activate your account using your membership code.
-        </Text>
-
-        <TouchableOpacity
-          style={styles.activationButton}
-          onPress={() =>
-            router.push("/(auth)/account-activation")
-          }
-        >
-          <Text style={styles.activationButtonText}>
-            Activate Account
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </AuthLayout>
-  );
+				<TouchableOpacity
+					style={styles.activationButton}
+					onPress={() => router.push('/(auth)/account-activation')}
+					activeOpacity={0.85}
+				>
+					<Text style={styles.activationButtonText}>Activate</Text>
+				</TouchableOpacity>
+			</View>
+		</AuthLayout>
+	);
 }
 
 const styles = StyleSheet.create({
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1e293b",
-    marginBottom: 8,
-    marginLeft: 2,
-  },
-
-  input: {
-    backgroundColor: "#fff",
+  errorBox: {
+    backgroundColor: theme.errorBg,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 15,
-    fontSize: 15,
-    color: "#0f172a",
-    marginBottom: 18,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.03,
-    shadowRadius: 5,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    elevation: 2,
-  },
-
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 16,
-    marginBottom: 14,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.03,
-    shadowRadius: 5,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    elevation: 2,
-  },
-
-  passwordInput: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 15,
-    color: "#0f172a",
-    fontSize: 15,
-  },
-
-  eyeButton: {
-    paddingHorizontal: 16,
-  },
-
-  errorText: {
-    color: "#ef4444",
-    fontSize: 13,
-    textAlign: "center",
-    marginBottom: 12,
-  },
-
-  button: {
-    backgroundColor: "#10b981",
-    borderRadius: 18,
-    paddingVertical: 17,
-    alignItems: "center",
-    marginTop: 6,
-
-    shadowColor: "#10b981",
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    elevation: 5,
-  },
-
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-
-  forgotContainer: {
-    alignItems: "center",
-    marginTop: 18,
-  },
-
-  forgotText: {
-    color: "#64748b",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-
-  activationCard: {
-    marginTop: 30,
-    backgroundColor: "#f8fafc",
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    alignItems: "center",
-  },
-
-  activationTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0f172a",
-  },
-
-  activationSubtitle: {
-    marginTop: 6,
-    fontSize: 13,
-    color: "#64748b",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-
-  activationButton: {
-    marginTop: 18,
-    backgroundColor: "#10b981",
-    paddingHorizontal: 24,
+    borderColor: theme.errorBorder,
+    borderRadius: 14,
     paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 18,
+  },
+  errorText: {
+    color: theme.errorText,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  showPasswordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: -4,
+    marginBottom: 8,
+    paddingVertical: 4,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: theme.border,
+    backgroundColor: theme.inputBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
+  },
+  checkIcon: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkMark: {
+    color: '#0b0d10',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    color: theme.textSub,
+    fontWeight: '500',
+  },
+  forgotRow: {
+    alignSelf: 'flex-end',
+    marginBottom: 18,
+    paddingVertical: 4,
+  },
+  forgotText: {
+    color: theme.primary,
+    fontSize: 14,
+    fontWeight: '700',
+  },activationCard: {
+    marginTop: 24,
+    backgroundColor: theme.surface,
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: theme.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  activationTextBlock: {
+    flex: 1,
+  },
+  activationTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.text,
+  },
+  activationSubtitle: {
+    marginTop: 2,
+    fontSize: 12,
+    color: theme.textSub,
+    lineHeight: 16,
+  },
+  activationButton: {
+    backgroundColor: theme.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 999,
   },
-
   activationButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
+    color: '#0b0d10',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

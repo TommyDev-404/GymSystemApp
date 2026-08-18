@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,12 +8,10 @@ import {
   Dimensions,
   FlatList,
   ScrollView,
+  StyleSheet,
 } from "react-native";
-
-import { useState } from "react";
 import { useLocalSearchParams, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import {
   ArrowLeft,
   Play,
@@ -20,10 +19,10 @@ import {
   Target,
   ImageOff,
 } from "lucide-react-native";
-
+import { theme } from "@/utils/theme";
+import { AppBackground } from "@/components/shared/AppBackground";
 
 const { width } = Dimensions.get("window");
-
 
 function parseArray(value: any): string[] {
   try {
@@ -42,7 +41,6 @@ function parseArray(value: any): string[] {
         ? parseArray(item)
         : item
     );
-
   } catch {
     return [];
   }
@@ -52,99 +50,51 @@ function getYoutubeVideoId(url: string) {
   try {
     const urlObj = new URL(url);
 
-    if (
-      urlObj.hostname.includes("youtube.com")
-    ) {
+    if (urlObj.hostname.includes("youtube.com")) {
       return urlObj.searchParams.get("v");
     }
 
-
-    if (
-      urlObj.hostname.includes("youtu.be")
-    ) {
+    if (urlObj.hostname.includes("youtu.be")) {
       return urlObj.pathname.slice(1);
     }
 
-
     return null;
-
   } catch {
     return null;
   }
 }
 
-
-
 export default function WorkoutTutorialDetails() {
-
   const { workout } = useLocalSearchParams();
 
-
-  const [activeImage, setActiveImage] =
-    useState(0);
-
-
-  const [failedImages, setFailedImages] =
-    useState<number[]>([]);
-
-
+  const [activeImage, setActiveImage] = useState(0);
+  const [failedImages, setFailedImages] = useState<number[]>([]);
 
   const data = workout
     ? JSON.parse(workout as string)
     : null;
 
-
-
   if (!data) {
     return (
-      <SafeAreaView
-        style={{
-          flex:1,
-          justifyContent:"center",
-          alignItems:"center",
-        }}
-      >
-        <Text>
-          No workout found
-        </Text>
-      </SafeAreaView>
+      <AppBackground>
+        <SafeAreaView style={styles.emptyScreen}>
+          <Text style={styles.emptyTitle}>
+            No workout found
+          </Text>
+        </SafeAreaView>
+      </AppBackground>
     );
   }
 
+  const muscles = parseArray(data.muscles_targeted);
+  const equipment = parseArray(data.equipment);
+  const images = parseArray(data.demo_images);
 
+  const videoId = getYoutubeVideoId(data.video_url);
 
-  const muscles =
-    parseArray(
-      data.muscles_targeted
-    );
-
-
-  const equipment =
-    parseArray(
-      data.equipment
-    );
-
-
-  const images =
-    parseArray(
-      data.demo_images
-    );
-
-
-
-  const videoId =
-    getYoutubeVideoId(
-      data.video_url
-    );
-
-
-
-  const thumbnail =
-    videoId
-      ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-      : null;
-
-
+  const thumbnail = videoId
+    ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+    : null;
 
   const gallery =
     images.length > 0
@@ -153,523 +103,454 @@ export default function WorkoutTutorialDetails() {
         ? [thumbnail]
         : [];
 
-
-
   return (
-    <SafeAreaView
-      style={{
-        flex:1,
-        backgroundColor:"white",
-      }}
-    >
+    <AppBackground>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.backButtonContainer}>
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => [
+              styles.backButton,
+              pressed && styles.pressed,
+            ]}
+          >
+            <ArrowLeft
+              size={20}
+              color="#fff"
+              strokeWidth={2.2}
+            />
+          </Pressable>
+        </View>
 
-
-      {/* BACK BUTTON */}
-      <View
-        style={{
-          position:"absolute",
-          top:50,
-          left:16,
-          zIndex:10,
-        }}
-      >
-
-        <Pressable
-          onPress={() => router.back()}
-          style={{
-            backgroundColor:
-              "rgba(0,0,0,0.5)",
-
-            padding:10,
-            borderRadius:999,
-          }}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-
-          <ArrowLeft
-            size={20}
-            color="white"
-          />
-
-        </Pressable>
-
-      </View>
-
-
-
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom:100,
-        }}
-      >
-
-
-        {/* IMAGE CAROUSEL */}
-        <View
-          style={{
-            height:320,
-          }}
-        >
-
-          <FlatList
-
-            data={gallery}
-
-            horizontal
-
-            pagingEnabled
-
-            showsHorizontalScrollIndicator={
-              false
-            }
-
-
-            onMomentumScrollEnd={(event)=>{
-
-              const index =
-                Math.round(
-                  event.nativeEvent.contentOffset.x /
-                  width
+          <View style={styles.gallery}>
+            <FlatList
+              data={gallery}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={(event) => {
+                const index = Math.round(
+                  event.nativeEvent.contentOffset.x / width
                 );
 
-
-              setActiveImage(index);
-
-            }}
-
-
-            keyExtractor={(_,index)=>
-              index.toString()
-            }
-
-
-
-            renderItem={({item,index})=>{
-
-
-              const hasError =
-                failedImages.includes(index);
-
-
-
-              if(hasError){
-
-                return (
-                  <View
-                    style={{
-                      width,
-                      height:320,
-                      backgroundColor:"#e2e8f0",
-                      justifyContent:"center",
-                      alignItems:"center",
-                    }}
-                  >
-
-                    <ImageOff
-                      size={45}
-                      color="#94a3b8"
-                    />
-
-                    <Text
-                      style={{
-                        marginTop:10,
-                        color:"#64748b",
-                      }}
-                    >
-                      Image unavailable
-                    </Text>
-
-                  </View>
-                );
-
+                setActiveImage(index);
+              }}
+              keyExtractor={(_, index) =>
+                index.toString()
               }
+              renderItem={({ item, index }) => {
+                const hasError =
+                  failedImages.includes(index);
 
+                if (hasError) {
+                  return (
+                    <View style={styles.imageError}>
+                      <ImageOff
+                        size={42}
+                        color={theme.textMuted}
+                        strokeWidth={1.8}
+                      />
 
-
-              return (
-
-                <Image
-
-                  source={{
-                    uri:item,
-                  }}
-
-
-                  onError={()=>{
-                    setFailedImages(prev =>
-                      prev.includes(index)
-                        ? prev
-                        : [
-                            ...prev,
-                            index,
-                          ]
-                    );
-                  }}
-
-
-                  style={{
-                    width,
-                    height:320,
-                  }}
-
-
-                  resizeMode="cover"
-
-                />
-
-              );
-
-            }}
-
-          />
-
-
-
-          {/* DOT INDICATOR */}
-          {
-            gallery.length > 1 && (
-
-              <View
-                style={{
-                  position:"absolute",
-                  bottom:35,
-                  left:0,
-                  right:0,
-
-                  flexDirection:"row",
-                  justifyContent:"center",
-                  alignItems:"center",
-
-                  gap:6,
-                }}
-              >
-
-                {
-                  gallery.map((_,index)=>(
-
-                    <View
-                      key={index}
-                      style={{
-
-                        width:
-                          activeImage === index
-                            ? 22
-                            : 7,
-
-
-                        height:7,
-
-
-                        borderRadius:10,
-
-
-                        backgroundColor:
-                          activeImage === index
-                            ? "#10b981"
-                            : "#cbd5e1",
-
-                      }}
-                    />
-
-                  ))
+                      <Text style={styles.imageErrorText}>
+                        Image unavailable
+                      </Text>
+                    </View>
+                  );
                 }
 
+                return (
+                  <Image
+                    source={{ uri: item }}
+                    onError={() => {
+                      setFailedImages((prev) =>
+                        prev.includes(index)
+                          ? prev
+                          : [...prev, index]
+                      );
+                    }}
+                    style={styles.image}
+                    resizeMode="cover"
+                  />
+                );
+              }}
+            />
+
+            {gallery.length > 1 && (
+              <View style={styles.pagination}>
+                {gallery.map((_, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.dot,
+                      activeImage === index
+                        ? styles.activeDot
+                        : styles.inactiveDot,
+                    ]}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
+
+          <View style={styles.content}>
+            <View style={styles.titleRow}>
+              <View style={styles.titleContainer}>
+                <Text style={styles.title}>
+                  {data.name}
+                </Text>
+
+                <Text style={styles.category}>
+                  {data.category}
+                  {" • "}
+                  {data.level}
+                </Text>
               </View>
 
-            )
-          }
-
-
-        </View>
-
-
-
-
-
-        {/* CONTENT */}
-        <View
-
-          style={{
-
-            padding:20,
-
-            marginTop:-20,
-
-            backgroundColor:"white",
-
-            borderTopLeftRadius:25,
-
-            borderTopRightRadius:25,
-
-          }}
-
-        >
-
-
-
-          {/* TITLE */}
-          <Text
-
-            style={{
-
-              fontSize:24,
-
-              fontWeight:"800",
-
-              color:"#0f172a",
-
-            }}
-
-          >
-            {data.name}
-
-          </Text>
-
-
-
-
-
-          {/* CATEGORY */}
-          <Text
-
-            style={{
-
-              marginTop:6,
-
-              color:"#10b981",
-
-              fontWeight:"700",
-
-            }}
-
-          >
-
-            {data.category}
-
-            {" • "}
-
-            {data.level}
-
-          </Text>
-
-
-
-
-
-          {/* INFO */}
-          <View
-            style={{
-              marginTop:18,
-              gap:12,
-            }}
-          >
-
-
-            <View
-              style={{
-                flexDirection:"row",
-                alignItems:"center",
-                gap:8,
-              }}
-            >
-
-              <Dumbbell
-                size={18}
-                color="#64748b"
-              />
-
-              <Text
-                style={{
-                  color:"#64748b",
-                }}
-              >
-
-                Equipment:
-                {" "}
-                {equipment.join(", ")}
-
-              </Text>
-
+              <View style={styles.workoutIcon}>
+                <Dumbbell
+                  size={19}
+                  color={theme.primaryLight}
+                  strokeWidth={2}
+                />
+              </View>
             </View>
 
+            <View style={styles.infoCard}>
+              <View style={styles.infoRow}>
+                <View style={styles.infoIcon}>
+                  <Dumbbell
+                    size={16}
+                    color={theme.primaryLight}
+                    strokeWidth={2}
+                  />
+                </View>
 
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>
+                    Equipment
+                  </Text>
 
+                  <Text style={styles.infoValue}>
+                    {equipment.join(", ")}
+                  </Text>
+                </View>
+              </View>
 
+              <View style={styles.infoDivider} />
 
-            <View
-              style={{
-                flexDirection:"row",
-                alignItems:"center",
-                gap:8,
-              }}
-            >
+              <View style={styles.infoRow}>
+                <View style={styles.infoIcon}>
+                  <Target
+                    size={16}
+                    color={theme.primaryLight}
+                    strokeWidth={2}
+                  />
+                </View>
 
-              <Target
-                size={18}
-                color="#64748b"
-              />
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>
+                    Target Muscles
+                  </Text>
 
-              <Text
-                style={{
-                  color:"#64748b",
-                }}
-              >
-
-                Muscles:
-                {" "}
-                {muscles.join(", ")}
-
-              </Text>
-
+                  <Text style={styles.infoValue}>
+                    {muscles.join(", ")}
+                  </Text>
+                </View>
+              </View>
             </View>
 
+            <View style={styles.instructionsSection}>
+              <Text style={styles.sectionTitle}>
+                Instructions
+              </Text>
 
+              <View style={styles.instructionsCard}>
+                <Text style={styles.instructions}>
+                  {data.instructions}
+                </Text>
+              </View>
+            </View>
           </View>
+        </ScrollView>
 
-
-
-
-
-
-          {/* INSTRUCTIONS */}
-          <View
-            style={{
-              marginTop:25,
-            }}
+        <View style={styles.bottomBar}>
+          <Pressable
+            onPress={() =>
+              Linking.openURL(data.video_url)
+            }
+            style={({ pressed }) => [
+              styles.youtubeButton,
+              pressed && styles.youtubePressed,
+            ]}
           >
+            <Play
+              size={18}
+              color="#fff"
+              fill="#fff"
+              strokeWidth={2}
+            />
 
-            <Text
-              style={{
-                fontSize:17,
-                fontWeight:"700",
-              }}
-            >
-              Instructions
+            <Text style={styles.youtubeText}>
+              Watch on YouTube
             </Text>
-
-
-            <Text
-              style={{
-                marginTop:10,
-                color:"#64748b",
-                lineHeight:22,
-              }}
-            >
-
-              {data.instructions}
-
-            </Text>
-
-
-          </View>
-
-
-
+          </Pressable>
         </View>
-
-
-
-      </ScrollView>
-
-
-
-
-
-      {/* YOUTUBE BUTTON */}
-      <View
-
-        style={{
-
-          position:"absolute",
-
-          bottom:0,
-
-          left:0,
-
-          right:0,
-
-
-          padding:16,
-
-
-          backgroundColor:"white",
-
-
-          borderTopWidth:1,
-
-
-          borderColor:"#e2e8f0",
-
-        }}
-
-      >
-
-
-        <Pressable
-
-          onPress={() =>
-            Linking.openURL(
-              data.video_url
-            )
-          }
-
-
-          style={{
-
-            backgroundColor:"#10b981",
-
-            paddingVertical:14,
-
-            borderRadius:14,
-
-
-            alignItems:"center",
-
-
-            flexDirection:"row",
-
-
-            justifyContent:"center",
-
-
-            gap:8,
-
-          }}
-
-        >
-
-
-          <Play
-            size={18}
-            color="white"
-          />
-
-
-          <Text
-
-            style={{
-
-              color:"white",
-
-              fontWeight:"700",
-
-            }}
-
-          >
-
-            Watch on YouTube
-
-          </Text>
-
-
-        </Pressable>
-
-
-      </View>
-
-
-
-    </SafeAreaView>
+      </SafeAreaView>
+    </AppBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+
+  scrollContent: {
+    paddingBottom: 105,
+  },
+
+  backButtonContainer: {
+    position: "absolute",
+    top: 50,
+    left: 16,
+    zIndex: 10,
+  },
+
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(15,23,42,0.72)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.16)",
+  },
+
+  pressed: {
+    opacity: 0.75,
+  },
+
+  gallery: {
+    width,
+    height: 320,
+    backgroundColor: theme.surface,
+  },
+
+  image: {
+    width,
+    height: 320,
+  },
+
+  imageError: {
+    width,
+    height: 320,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.surface,
+  },
+
+  imageErrorText: {
+    marginTop: 9,
+    fontSize: 11,
+    color: theme.textMuted,
+  },
+
+  pagination: {
+    position: "absolute",
+    bottom: 18,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+
+  dot: {
+    height: 6,
+    borderRadius: 999,
+  },
+
+  activeDot: {
+    width: 21,
+    backgroundColor: theme.primaryLight,
+  },
+
+  inactiveDot: {
+    width: 6,
+    backgroundColor: "rgba(255,255,255,0.65)",
+  },
+
+  content: {
+    marginTop: -20,
+    paddingHorizontal: 20,
+    paddingTop: 22,
+    paddingBottom: 25,
+    backgroundColor: "transparent",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+  },
+
+  titleContainer: {
+    flex: 1,
+    marginRight: 14,
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: theme.text,
+    letterSpacing: -0.6,
+  },
+
+  category: {
+    marginTop: 6,
+    fontSize: 11.5,
+    fontWeight: "700",
+    color: theme.primaryLight,
+  },
+
+  workoutIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: "rgba(16,185,129,0.18)",
+  },
+
+  infoCard: {
+    marginTop: 20,
+    padding: 13,
+    borderRadius: 16,
+    backgroundColor: theme.card,
+    borderWidth: 1,
+    borderColor: "rgba(16,185,129,0.16)",
+  },
+
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  infoIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: "rgba(16,185,129,0.14)",
+  },
+
+  infoContent: {
+    flex: 1,
+    marginLeft: 11,
+  },
+
+  infoLabel: {
+    fontSize: 9.5,
+    fontWeight: "600",
+    color: theme.textMuted,
+  },
+
+  infoValue: {
+    marginTop: 2,
+    fontSize: 11.5,
+    fontWeight: "600",
+    color: theme.text,
+    lineHeight: 17,
+  },
+
+  infoDivider: {
+    height: 1,
+    marginVertical: 11,
+    backgroundColor: theme.border,
+  },
+
+  instructionsSection: {
+    marginTop: 24,
+  },
+
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: theme.text,
+  },
+
+  instructionsCard: {
+    marginTop: 10,
+    padding: 14,
+    borderRadius: 15,
+    backgroundColor: theme.card,
+    borderWidth: 1,
+    borderColor: "rgba(16,185,129,0.14)",
+  },
+
+  instructions: {
+    fontSize: 12,
+    lineHeight: 20,
+    color: theme.textMuted,
+  },
+
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 12,
+    backgroundColor: theme.bg,
+    borderTopWidth: 1,
+    borderColor: theme.border,
+  },
+
+  youtubeButton: {
+    height: 50,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+    backgroundColor: theme.primaryLight,
+  },
+
+  youtubePressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.99 }],
+  },
+
+  youtubeText: {
+    color: "#fff",
+    fontSize: 12.5,
+    fontWeight: "700",
+  },
+
+  emptyScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+  },
+
+  emptyTitle: {
+    fontSize: 13,
+    color: theme.textMuted,
+  },
+});

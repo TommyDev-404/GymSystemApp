@@ -1,50 +1,56 @@
 import { Pressable, Text, StyleSheet } from "react-native";
 import { Camera } from "lucide-react-native";
+import { theme } from "@/utils/theme";
 
 export default function ChangePhotoButton({
-  onPress,
+	onPress,
 }: {
-  onPress: () => void;
+	onPress: () => void;
 }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.button,
-        pressed && styles.pressed,
-      ]}
-    >
-      <Camera size={18} color="#fff" />
+	return (
+		<Pressable
+			onPress={onPress}
+			style={({ pressed }) => [
+				styles.button,
+				pressed && styles.pressed,
+			]}
+		>
+			<Camera
+				size={17}
+				color={theme.primaryLight}
+				strokeWidth={2.2}
+			/>
 
-      <Text style={styles.text}>
-        Change Profile Photo
-      </Text>
-    </Pressable>
-  );
+			<Text style={styles.text}>
+				Change Profile Photo
+			</Text>
+		</Pressable>
+	);
 }
 
 const styles = StyleSheet.create({
-  button: {
-    marginTop: 16,
-    backgroundColor: "#10b981",
-    borderRadius: 16,
+	button: {
+		minHeight: 48,
+		paddingHorizontal: 18,
+		borderRadius: 14,
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "center",
+		gap: 9,
+		backgroundColor: theme.accentWash,
+		borderWidth: 1,
+		borderColor: theme.borderAccent,
+	},
 
-    paddingVertical: 14,
-    paddingHorizontal: 18,
+	pressed: {
+		opacity: 0.65,
+		transform: [{ scale: 0.98 }],
+	},
 
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
-  },
-
-  pressed: {
-    opacity: 0.7,
-  },
-
-  text: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 14,
-  },
+	text: {
+		fontSize: 13,
+		fontWeight: "700",
+		color: theme.primaryLight,
+		letterSpacing: 0.1,
+	},
 });

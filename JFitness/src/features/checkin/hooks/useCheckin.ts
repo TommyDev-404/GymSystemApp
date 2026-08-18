@@ -7,7 +7,7 @@ export const useCheckIn = () => {
   return useMutation({
     mutationFn: (
       { member_id, sessionId }:
-      { member_id: number,sessionId: string  }
+      { member_id: number, sessionId: string  }
     ) => checkInApi(member_id, sessionId),
     onSuccess: (_, variables) => {
       // refresh attendance list after check-in

@@ -1,101 +1,143 @@
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Header from "@/features/payment-history/components/Header";
 import SummaryCard from "@/features/payment-history/components/SummaryCard";
 import TransactionItem from "@/features/payment-history/components/TransactionItem";
-import { StatusBar } from "react-native";
 import { useFetchPaymentHistory } from "../hook/usePayments";
 import { useAuth } from "@/context/AuthContext";
 import { PaymentStats } from "../types/PaymentTypes";
-import { Loading } from "@/components/shared/Loading";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Receipt } from "lucide-react-native";
-import { useEffect } from "react";
-import { useSocket } from "@/context/SocketContext";
-import { useQueryClient } from "@tanstack/react-query";
-
+import { AppBackground } from "@/components/shared/AppBackground";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
+import { theme } from "@/utils/theme";
+import { PageLoader } from "@/components/shared/PageLoader";
 
 export default function PaymentHistoryScreen() {
-	const socket = useSocket();
-	const queryClient = useQueryClient();
-
 	const { member } = useAuth();
+
 	const { data: paymentData, isLoading } = useFetchPaymentHistory(member?.memberId!);
-
 	const transactions = paymentData?.payments ?? [];
-	const stats = paymentData?.stats ?? {} as PaymentStats;
 
-	useEffect(() => {
-		const handleIncomingSocket = () => {
-			queryClient.invalidateQueries({
-				queryKey: ["member-payment-history", member?.memberId],
-			});
-		};
-	
-		socket.on("payment:new", handleIncomingSocket);
-		
-		return () => {
-			socket.off("payment:new", handleIncomingSocket);
-		};
-	}, [socket, queryClient]);
-	
-	if (isLoading) return <Loading />;
+	const stats: PaymentStats = paymentData?.stats ?? {
+		totalPaid: 0,
+		plan: "No Plan",
+		expires: new Date()
+	};
+
+	if (isLoading) {
+		 return (
+			<PageLoader
+			  title="Check-in History"
+			  subtitle="Your gym attendance records"
+			/>
+		 );
+	  }
 
 	return (
-		<SafeAreaView style={styles.container}>
-			<StatusBar barStyle="dark-content" backgroundColor="#fff" />
+		<AppBackground>
+			<SafeAreaView style={styles.container}>
+				<ScreenHeader
+					title="Payment History"
+					subtitle="View your membership payments and transactions"
+				/>
 
-			<Header totalTransactions={transactions.length ?? 0}/>
+				<FlatList
+					data={transactions}
+					keyExtractor={(item) => item.id.toString()}
+					contentContainerStyle={styles.listContent}
+					showsVerticalScrollIndicator={false}
+					ListHeaderComponent={
+						<View style={styles.listHeader}>
+							<SummaryCard summary={stats} />
 
-			<FlatList
-				data={transactions}
-				keyExtractor={(item) => item.id.toString()}
-				contentContainerStyle={{ padding: 16 }}
-				
-				ListHeaderComponent={() => (
-					<View>
-					<SummaryCard summary={stats} />
+							<View style={styles.sectionHeader}>
+								<View style={styles.sectionIcon}>
+									<Receipt
+										size={15}
+										color={theme.primaryLight}
+										strokeWidth={2.2}
+									/>
+								</View>
 
-					{/* 👇 SECTION TITLE HERE */}
-					<Text style={styles.sectionTitle}>Transactions</Text>
-					</View>
-				)}
-				
-				renderItem={({ item }) => (
-					<TransactionItem txn={item} />
-				)}
+								<View>
+									<Text style={styles.sectionTitle}>
+										Transactions
+									</Text>
 
-				ListEmptyComponent={
-					<View style={styles.emptyWrapper}>
-					<EmptyState
-						icon={Receipt}
-						title="No transactions found"
-						subtitle="Your payment history and membership transactions will appear here."
-					/>
-					</View>
-				} 
-			/>
-		</SafeAreaView>
+									<Text style={styles.sectionSubtitle}>
+										Your recent membership activity
+									</Text>
+								</View>
+							</View>
+						</View>
+					}
+					renderItem={({ item }) => (
+						<View style={styles.transactionItem}>
+							<TransactionItem txn={item} />
+						</View>
+					)}
+					ListEmptyComponent={
+						<View style={styles.emptyWrapper}>
+							<EmptyState
+								icon={Receipt}
+								title="No transactions found"
+								subtitle="Your payment history and membership transactions will appear here."
+							/>
+						</View>
+					}
+				/>
+			</SafeAreaView>
+		</AppBackground>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
-		backgroundColor: "#f8fafc",
+		flex: 1
 	},
-
+	listContent: {
+		paddingHorizontal: 20,
+		paddingTop: 10,
+		paddingBottom: 24
+	},
+	listHeader: {
+		gap: 18
+	},
+	transactionItem: {
+		marginTop: 10
+	},
 	emptyWrapper: {
-		height: 300, // adjust depending on your layout
+		minHeight: 280,
 		justifyContent: "center",
-		alignItems: "center",
+		alignItems: "center"
 	},
-
+	sectionHeader: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginLeft: 2,
+		marginTop: 2
+	},
+	sectionIcon: {
+		width: 32,
+		height: 32,
+		borderRadius: 10,
+		alignItems: "center",
+		justifyContent: "center",
+		marginRight: 9,
+		backgroundColor: "rgba(16,185,129,0.08)",
+		borderWidth: 1,
+		borderColor: theme.borderAccent
+	},
 	sectionTitle: {
 		fontSize: 14,
-		fontWeight: "700",
-		color: "#0f172a",
-		marginTop: 16,
-		marginBottom: 10,
+		fontWeight: "800",
+		color: theme.text,
+		letterSpacing: -0.1
+	},
+	sectionSubtitle: {
+		marginTop: 2,
+		fontSize: 10,
+		fontWeight: "500",
+		color: theme.textMuted
 	},
 });

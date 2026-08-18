@@ -1,46 +1,80 @@
 import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+} from "react-native";
+import { theme } from "@/utils/theme";
 
-export function QuickActionsGrid({ actions }: any) {
+interface QuickAction {
+  label: string;
+  icon: React.ComponentType<any>;
+  color?: string;
+  bg?: string;
+  onPress: () => void;
+}
+
+interface QuickActionsGridProps {
+  actions: QuickAction[];
+}
+
+export function QuickActionsGrid({
+  actions,
+}: QuickActionsGridProps) {
   return (
-    <View style={{ paddingHorizontal: 20 }}>
-      <Text style={styles.title}>
-        Quick Actions
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Quick Actions</Text>
 
       <View style={styles.row}>
-        {actions.map((a: any, i: number) => {
-          const Icon = a.icon;
+        {actions.map((action, index) => {
+          const Icon = action.icon;
+          const iconColor = action.color ?? theme.primary;
 
           return (
             <Pressable
-              key={i}
-              onPress={a.onPress}
+              key={index}
+              onPress={action.onPress}
               style={({ pressed }) => [
                 styles.card,
-                pressed && styles.pressed,
+                pressed && styles.cardPressed,
               ]}
             >
+              {/* Centered Icon */}
               <View
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor: a.bg,
+                    backgroundColor:
+                      action.bg ?? `${iconColor}18`,
+                    borderColor: `${iconColor}45`,
                   },
                 ]}
               >
                 <Icon
-                  size={22}
-                  color={a.color}
+                  size={20}
+                  color={iconColor}
+                  strokeWidth={2.2}
                 />
               </View>
 
+              {/* Label */}
               <Text
                 style={styles.label}
                 numberOfLines={2}
               >
-                {a.label}
+                {action.label}
               </Text>
+
+              {/* Centered Accent Underline */}
+              <View
+                style={[
+                  styles.accentLine,
+                  {
+                    backgroundColor: iconColor,
+                  },
+                ]}
+              />
             </Pressable>
           );
         })}
@@ -49,70 +83,115 @@ export function QuickActionsGrid({ actions }: any) {
   );
 }
 
-
 const styles = StyleSheet.create({
+  container: {
+    
+  },
+
   title: {
+    marginBottom: 12,
     fontSize: 16,
     fontWeight: "700",
-    color: "#0f172a",
-    marginBottom: 12,
+    color: theme.text,
+    letterSpacing: -0.2,
   },
 
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
     gap: 10,
   },
 
   card: {
     flex: 1,
 
-    height: 105,
+    minHeight: 112,
 
-    borderRadius: 18,
-    backgroundColor: "white",
+    paddingHorizontal: 8,
+    paddingVertical: 14,
+
+    borderRadius: 16,
+
+    backgroundColor: theme.card,
+
+    // Sharper visible border
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
 
     alignItems: "center",
     justifyContent: "center",
 
-    paddingHorizontal: 8,
+    overflow: "hidden",
 
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
 
-    elevation: 2,
+    elevation: 3,
   },
 
-  pressed: {
+  cardPressed: {
     transform: [
       {
-        scale: 0.96,
+        scale: 0.97,
       },
     ],
+    borderColor: theme.primary,
+    opacity: 0.9,
   },
-
   iconBox: {
     width: 42,
     height: 42,
-
-    borderRadius: 14,
-
-    justifyContent: "center",
+  
+    borderRadius: 13,
+  
     alignItems: "center",
-
-    marginBottom: 8,
+    justifyContent: "center",
+  
+    marginBottom: 9,
+  
+    // Dark background
+    backgroundColor: theme.surface,
+  
+    // Very subtle border
+    borderWidth: 1,
+    borderColor: theme.border,
+  
+    // Soft glow
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowRadius: 10,
+    shadowOpacity: 0.35,
+  
+    elevation: 3,
   },
 
   label: {
-    fontSize: 12,
+    fontSize: 11,
+    lineHeight: 15,
+
     fontWeight: "600",
-    color: "#334155",
+
+    color: theme.textSub,
 
     textAlign: "center",
+  },
+
+  accentLine: {
+    position: "absolute",
+
+    bottom: 0,
+
+    width: 28,
+    height: 2,
+
+    borderRadius: 999,
+
+    opacity: 0.85,
   },
 });

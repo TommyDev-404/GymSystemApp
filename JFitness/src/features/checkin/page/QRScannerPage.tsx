@@ -1,22 +1,26 @@
 import React, { useState } from "react";
-import { View, Text, StatusBar } from "react-native";
-import { CameraScanner } from "@/features/checkin/components/CameraScanner";
+import { View, StatusBar } from "react-native";
 import { useRouter } from "expo-router";
-import { CheckInSuccessModal } from "@/features/checkin/components/CheckInSuccessModal";
+
+import { CameraScanner } from "@/features/checkin/components/CameraScanner";
+import { CheckInResultModal } from "@/features/checkin/components/CheckInResultModal";
 import { useCheckIn } from "@/features/checkin/hooks/useCheckin";
-import { CheckInInfoModal } from "../components/CheckinInfoModal";
 import { useAuth } from "@/context/AuthContext";
 
+type CheckInResult = {
+  type: "success" | "info";
+  title: string;
+  message: string;
+};
 
 export default function QRScannerPage() {
   const { member } = useAuth();
-
   const router = useRouter();
-  const [isScanning, setIsScanning] = useState(true);
-   const [showModal, setShowModal] = useState(false);
 
-   const [showError, setShowError] = useState(false);
-   const [errorMessage, setErrorMessage] = useState("");
+  const [isScanning, setIsScanning] = useState(true);
+
+  const [checkInResult, setCheckInResult] =
+    useState<CheckInResult | null>(null);
 
   const [today] = useState(
     new Date().toLocaleDateString("en-US", {
@@ -30,83 +34,96 @@ export default function QRScannerPage() {
   const { mutate: checkIn } = useCheckIn();
 
   const handleScan = (value: string) => {
-   if (!isScanning) return;
- 
-   setIsScanning(false);
- 
-   try {
-     const data = JSON.parse(value);
- 
-     if (!data.session_id) {
-       throw new Error("Invalid QR Code");
-     }
- 
-     checkIn({ member_id: member?.memberId!, sessionId: data.session_id }, {
-       onSuccess: (res) => {
-         console.log("CHECK-IN SUCCESS:", res);
- 
-         setShowModal(true);
-       },
- 
-       onError: (err: any) => {
-         const message =
-           err.response?.data?.message ||
-           "Something went wrong";
- 
-         setErrorMessage(message);
-         setShowError(true);
-       },
-     });
- 
-   } catch (err) {
-     console.log("Invalid QR format");
-     setIsScanning(true);
-   }
+    if (!isScanning) return;
+
+    setIsScanning(false);
+
+    try {
+      const data = JSON.parse(value);
+
+      if (!data.session_id) {
+        throw new Error("Invalid QR Code");
+      }
+
+      checkIn(
+        {
+          member_id: member?.memberId!,
+          sessionId: data.session_id,
+        },
+        {
+          onSuccess: () => {
+            setCheckInResult({
+              type: "success",
+              title: "Check-in Successful",
+              message: today,
+            });
+          },
+
+          onError: (err: any) => {
+            const message =
+              err.response?.data?.message ||
+              "Something went wrong";
+
+            setCheckInResult({
+              type: "info",
+              title: "Already Checked In",
+              message,
+            });
+          },
+        }
+      );
+    } catch (err) {
+      console.log("Invalid QR format");
+
+      // Allow scanning again if the QR itself is invalid
+      setIsScanning(true);
+    }
   };
 
-  const handleConfirm = () => {
-    setShowModal(false);
-    router.back();
+  const handleResultClose = () => {
+    const wasSuccess = checkInResult?.type === "success";
+
+    setCheckInResult(null);
+
+    if (wasSuccess) {
+      router.back();
+      return;
+    }
+
+    // Error/info result
+    setIsScanning(true);
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#000" }}>
-      <StatusBar barStyle="light-content" translucent />
+    <View style={styles.container}>
+      <StatusBar
+        barStyle="light-content"
+        translucent
+      />
 
       {/* CAMERA */}
-      {isScanning && <CameraScanner onScanned={handleScan} isScanning={isScanning}  />}
-
-      {/* TOP UI */}
       {isScanning && (
-        <View style={{ position: "absolute", top: 0, paddingTop: 60, paddingHorizontal: 20 }}>
-          <View style={{ backgroundColor: "rgba(0,0,0,0.35)", padding: 14, borderRadius: 16 }}>
-            <Text style={{ color: "white", fontSize: 18, fontWeight: "700" }}>
-              Scan QR Code
-            </Text>
-            <Text style={{ color: "rgba(255,255,255,0.65)", fontSize: 12 }}>
-              Align the QR code within the frame
-            </Text>
-          </View>
-        </View>
+        <CameraScanner
+          onScanned={handleScan}
+          isScanning={isScanning}
+        />
       )}
 
-      {/* SUCCESS MODAL */}
-      <CheckInSuccessModal
-        visible={showModal}
-        dateText={today}
-        onClose={handleConfirm}
-        />
-
-        <CheckInInfoModal
-            visible={showError}
-            message={errorMessage}
-            onClose={() => {
-               setShowError(false);
-               setErrorMessage("");
-               setIsScanning(true);
-               router.back();
-            }}
-         />
+      {/* CHECK-IN RESULT */}
+      <CheckInResultModal
+        visible={!!checkInResult}
+        type={checkInResult?.type ?? "info"}
+        title={checkInResult?.title ?? ""}
+        message={checkInResult?.message ?? ""}
+        onClose={handleResultClose}
+      />
     </View>
   );
 }
+
+const styles = {
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+};

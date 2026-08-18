@@ -1,62 +1,61 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import { theme } from "@/utils/theme";
 
-export function StatsRow({ stats }: any) {
+interface Stat {
+  value?: number;
+  label: string;
+  color: string;
+  icon: React.ComponentType<any>;
+}
+
+interface Props {
+  stats: Stat[];
+}
+
+export function StatsRow({ stats }: Props) {
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        paddingHorizontal: 20,
-        gap: 10,
-      }}
-    >
-      {stats.map((s: any, i: number) => {
+    <View style={styles.container}>
+      {stats.map((s, i) => {
         const Icon = s.icon;
 
         return (
-          <View
-            key={i}
-            style={{
-              flex: 1,
-              padding: 12,
-              borderRadius: 14,
-              backgroundColor: s.bg, // ✅ keep original bg
-              alignItems: "center",
+          <View key={i} style={styles.card}>
+            {/* Icon + indicator */}
+            <View style={styles.topRow}>
+              <View
+                style={[
+                  styles.iconContainer,
+                  {
+                    backgroundColor: s.color + "22",
+                    borderColor: s.color + "35",
+                  },
+                ]}
+              >
+                <Icon
+                  size={17}
+                  color={s.color}
+                  strokeWidth={2.2}
+                />
+              </View>
 
-              // iOS shadow
-              shadowColor: "#000",
-              shadowOpacity: 0.06,
-              shadowRadius: 8,
-              shadowOffset: { width: 0, height: 3 },
-
-              // Android shadow
-              elevation: 3,
-            }}
-          >
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 10,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: s.color + "22",
-              }}
-            >
-              <Icon size={16} color={s.color} />
+              <View
+                style={[
+                  styles.indicator,
+                  { backgroundColor: s.color },
+                ]}
+              />
             </View>
 
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "700",
-                color: "#0f172a",
-                marginTop: 6,
-              }}
-            >
+            {/* Value */}
+            <Text style={styles.value}>
               {s.value ?? 0}
             </Text>
 
-            <Text style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>
+            {/* Label */}
+            <Text
+              numberOfLines={1}
+              style={styles.label}
+            >
               {s.label}
             </Text>
           </View>
@@ -65,3 +64,77 @@ export function StatsRow({ stats }: any) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    gap: 10,
+  },
+
+  card: {
+    flex: 1,
+    minHeight: 100,
+    padding: 14,
+    borderRadius: 16,
+
+    // Dark theme
+    backgroundColor: theme.card,
+
+    // Same accent border style as MembershipCard
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+
+    // Subtle elevation
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    elevation: 3,
+  },
+
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  iconContainer: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    borderWidth: 1,
+  },
+
+  indicator: {
+    width: 5,
+    height: 5,
+    borderRadius: 999,
+    opacity: 0.8,
+  },
+
+  value: {
+    marginTop: 10,
+
+    fontSize: 21,
+    fontWeight: "700",
+    letterSpacing: -0.4,
+
+    color: theme.text,
+  },
+
+  label: {
+    marginTop: 2,
+
+    fontSize: 10.5,
+    fontWeight: "500",
+
+    color: theme.textSub,
+  },
+});

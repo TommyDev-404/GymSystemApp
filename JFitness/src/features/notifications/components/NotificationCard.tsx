@@ -1,9 +1,6 @@
 import { formatNotificationTime } from "@/utils/timeAgoFormatter";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import { theme } from "@/utils/theme";
 
 type Props = {
   title: string;
@@ -26,7 +23,6 @@ export function NotificationCard({
   iconBg,
   onMarkAsRead,
 }: Props) {
-  
   return (
     <View
       style={{
@@ -34,12 +30,7 @@ export function NotificationCard({
         gap: 12,
         padding: 14,
         borderRadius: 18,
-
-        backgroundColor: unread
-          ? "#ffffff"
-          : "#f8fafc",
-
-        // iOS shadow
+        backgroundColor: unread ? theme.card : theme.surface,
         shadowColor: "#000",
         shadowOpacity: unread ? 0.08 : 0,
         shadowRadius: 8,
@@ -47,16 +38,11 @@ export function NotificationCard({
           width: 0,
           height: 2,
         },
-
-        // Android shadow
         elevation: unread ? 3 : 0,
-
-        borderWidth: unread ? 0 : 1,
-        borderColor: "#e2e8f0",
+        borderWidth: 1,
+        borderColor: theme.borderAccent,
       }}
     >
-
-      {/* Icon */}
       <View
         style={{
           width: 38,
@@ -67,21 +53,10 @@ export function NotificationCard({
           justifyContent: "center",
         }}
       >
-        <Icon
-          size={17}
-          color={iconColor}
-        />
+        <Icon size={17} color={iconColor} />
       </View>
 
-
-      {/* Content */}
-      <View
-        style={{
-          flex: 1,
-        }}
-      >
-
-        {/* Header */}
+      <View style={{ flex: 1 }}>
         <View
           style={{
             flexDirection: "row",
@@ -89,21 +64,17 @@ export function NotificationCard({
             justifyContent: "space-between",
           }}
         >
-
           <Text
             style={{
               flex: 1,
               fontSize: 13,
-              fontWeight: unread
-                ? "700"
-                : "500",
-              color: "#0f172a",
+              fontWeight: unread ? "700" : "500",
+              color: theme.text,
             }}
           >
             {title}
           </Text>
 
-          {/* unread indicator */}
           {unread && (
             <View
               style={{
@@ -116,15 +87,12 @@ export function NotificationCard({
               }}
             />
           )}
-
         </View>
 
-
-        {/* Message */}
         <Text
           style={{
             fontSize: 12,
-            color: "#64748b",
+            color: theme.textSub,
             marginTop: 4,
             lineHeight: 18,
           }}
@@ -132,40 +100,31 @@ export function NotificationCard({
           {body}
         </Text>
 
-
-
-        {/* Footer */}
-        <View
-          style={{
-            marginTop: 10,
-          }}
-        >
-
+        <View style={{ marginTop: 10 }}>
           <Text
             style={{
               fontSize: 11,
-              color: "#94a3b8",
+              color: theme.textMuted,
             }}
           >
             {formatNotificationTime(time)}
           </Text>
 
-
-          {/* Mark as read button */}
           {unread && (
             <TouchableOpacity
               onPress={onMarkAsRead}
               activeOpacity={0.7}
               style={{
                 marginTop: 8,
-                backgroundColor: "#10b981",
+                backgroundColor: theme.primary,
                 paddingHorizontal: 14,
                 paddingVertical: 7,
                 borderRadius: 10,
                 alignSelf: "flex-end",
+                borderWidth: 1,
+                borderColor: theme.borderAccent,
               }}
             >
-
               <Text
                 style={{
                   color: "#ffffff",
@@ -175,14 +134,10 @@ export function NotificationCard({
               >
                 Mark as read
               </Text>
-
             </TouchableOpacity>
           )}
-
         </View>
-
       </View>
-
     </View>
   );
 }

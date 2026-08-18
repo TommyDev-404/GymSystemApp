@@ -1,103 +1,137 @@
-import { router } from "expo-router";
-import { ChevronRight, Dumbbell, PlayCircle } from "lucide-react-native";
+import React from "react";
 import {
   View,
   Text,
   Pressable,
   FlatList,
+  StyleSheet,
 } from "react-native";
+import { ChevronRight, PlayCircle } from "lucide-react-native";
+import { router } from "expo-router";
 import { WorkoutTutorialCard } from "./tutorial/WorkoutTutorialCard";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { theme } from "@/utils/theme";
 
 interface Props {
   tutorials: any[];
-  onPressTutorial?: (tutorial: any) => void;
 }
 
-export function WorkoutTutorials({
-  tutorials,
-  onPressTutorial,
-}: Props) {
+export function WorkoutTutorials({ tutorials }: Props) {
   return (
-    <View style={{ marginTop: 5 }}>
-      {/* Header */}
-      <View
-        style={{
-          paddingHorizontal: 20,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 8,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: "600",
-            color: "#0f172a",
-          }}
-        >
-          Workout Tutorials
-        </Text>
+    <View style={styles.container}>
+      <View style={styles.sectionHeader}>
+        <View style={styles.headerText}>
+          <Text style={styles.title}>Workout Tutorials</Text>
 
-        {tutorials.length > 0 &&
+          <Text style={styles.subtitle}>
+            Learn proper form and techniques
+          </Text>
+        </View>
+
+        {tutorials.length > 0 && (
           <Pressable
-            onPress={() => router.push("/(app)/workout-tutorial")}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 4,
-            }}
+            onPress={() =>
+              router.push("/(app)/workout-tutorial")
+            }
+            style={({ pressed }) => [
+              styles.seeMoreButton,
+              pressed && styles.pressed,
+            ]}
           >
-            <Text
-              style={{
-                color: "#10b981",
-                fontWeight: "600",
-              }}
-            >
+            <Text style={styles.seeMoreText}>
               See More
             </Text>
 
-            <ChevronRight size={16} color="#10b981" />
+            <ChevronRight
+              size={15}
+              color={theme.primaryLight}
+              strokeWidth={2.5}
+            />
           </Pressable>
-        }
+        )}
       </View>
 
-      {/* Tutorial List */}
-      <FlatList
-        data={tutorials}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingVertical: 10,
-          flexGrow: 1,
-          justifyContent: tutorials.length === 0 ? "center" : "flex-start",
-        }}
-        ItemSeparatorComponent={() => (
-          <View style={{ width: 14 }} />
-        )}
-        ListEmptyComponent={() => (
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-            }}
-          >
-            <EmptyState
-              icon={PlayCircle}
-              title="No workout tutorials yet"
-              subtitle="Explore guided exercises and training videos to improve your workouts."
-            />
-          </View>
-        )}
-        renderItem={({ item }) => (
-          <View style={{ width: 260 }}>
-            <WorkoutTutorialCard item={item} />
-          </View>
-        )}
-      />
+      {tutorials.length > 0 ? (
+        <FlatList
+          data={tutorials}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.list}
+          ItemSeparatorComponent={() => (
+            <View style={styles.separator} />
+          )}
+          renderItem={({ item }) => (
+            <View style={styles.cardWrapper}>
+              <WorkoutTutorialCard item={item} />
+            </View>
+          )}
+        />
+      ) : (
+        <View style={styles.emptyContainer}>
+          <EmptyState
+            icon={PlayCircle}
+            title="No workout tutorials yet"
+            subtitle="Explore guided exercises and training videos to improve your workouts."
+          />
+        </View>
+      )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {},
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  headerText: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: theme.text,
+  },
+  subtitle: {
+    marginTop: 3,
+    fontSize: 10.5,
+    fontWeight: "500",
+    color: theme.textMuted,
+  },
+  seeMoreButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    paddingVertical: 6,
+    paddingLeft: 8,
+  },
+  seeMoreText: {
+    fontSize: 11.5,
+    fontWeight: "700",
+    color: theme.primaryLight,
+  },
+  pressed: {
+    opacity: 0.65,
+  },
+  list: {
+    paddingVertical: 3,
+  },
+  separator: {
+    width: 12,
+  },
+  cardWrapper: {
+    width: 260,
+  },
+  emptyContainer: {
+    paddingVertical: 10,
+    borderRadius: 16,
+    backgroundColor: theme.card,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+
+});

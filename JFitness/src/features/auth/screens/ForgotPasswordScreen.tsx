@@ -1,529 +1,440 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
-  TextInput,
-  TouchableOpacity,
   Text,
+  TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
-} from "react-native";
-import { router } from "expo-router";
-import {
-  Eye,
-  EyeOff,
-  Check,
-  Mail,
-  ShieldCheck,
-  Lock,
-} from "lucide-react-native";
-
-import { AuthLayout } from "@/features/auth/layout/AuthLayout";
-import * as api from "@/features/auth/api/auth.api";
+} from 'react-native';
+import { router } from 'expo-router';
+import { ShieldCheck } from 'lucide-react-native';
+import { AuthLayout } from '@/features/auth/layout/AuthLayout';
+import * as api from '@/features/auth/api/auth.api';
+import { theme } from '@/utils/theme';
+import FormField from '@/features/auth/components/FormField'; // adjust path if needed
+import PrimaryButton from '@/features/auth/components/PrimaryButton'; // adjust path if needed
 
 export default function ForgotPasswordScreen() {
-  const [step, setStep] = useState(1);
+	const [step, setStep] = useState(1);
+	const [errorMessage, setErrorMessage] = useState('');
+	const [email, setEmail] = useState('');
+	const [code, setCode] = useState('');
+	const [password, setPassword] = useState('');
+	const [confirm, setConfirm] = useState('');
+	const [isLoading, setIsLoading] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
 
-  const [errorMessage, setErrorMessage] = useState("");
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+	const clearError = () => {
+		if (errorMessage) setErrorMessage('');
+	};
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+	const handleSendEmail = async () => {
+		if (!email.trim() || !email.includes('@')) {
+			setErrorMessage('Please enter a valid email address.');
+			return;
+		}
 
-  const handleSendEmail = async () => {
-    try {
-      setErrorMessage("");
-      setIsLoading(true);
-      
-      const res = await api.sendOtpApi(email);
-  
-      if (res.success) {
-        setStep(2);
-      } else {
-        setErrorMessage(
-          res.message || "Failed to send recovery code."
-        );
-      }
-  
-    } catch (error: any) {
-      setErrorMessage(
-        error.message || "Something went wrong."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+		try {
+			setErrorMessage('');
+			setIsLoading(true);
+			const res = await api.sendOtpApi(email);
 
-  const handleCodeVerify = async () => {
-    try {
-      setErrorMessage("");
-      setIsLoading(true);
-      
-      const res = await api.verifyOtpApi({
-        email,
-        code,
-      });
-  
-      if (res.success) {
-        setStep(3);
-      } else {
-        setErrorMessage(
-          res.message || "Invalid verification code."
-        );
-      }
-  
-    } catch (error: any) {
-      setErrorMessage(
-        error.message || "Failed to verify code."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+			if (res.success) {
+				setStep(2);
+			} else {
+				setErrorMessage(res.message || 'Failed to send recovery code.');
+			}
+		} catch (error: any) {
+			setErrorMessage(error.message || 'Something went wrong.');
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-  const handleResetPassword = async () => {
-    if (password !== confirm) {
-      setErrorMessage("Passwords do not match.");
-      return;
-    }
-  
-    try {
-      setErrorMessage("");
-      setIsLoading(true);
-  
-      const res = await api.resetPasswordApi({
-        email,
-        newPassword: confirm,
-      });
-  
-      if (res.success) {
-        router.replace("/(auth)/login");
-      } else {
-        setErrorMessage(
-          res.message || "Failed to update password."
-        );
-      }
-  
-    } catch (error: any) {
-      setErrorMessage(
-        error.message || "Something went wrong."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+	const handleCodeVerify = async () => {
+		if (code.length !== 6) {
+			setErrorMessage('Please enter the 6-digit code.');
+			return;
+		}
 
-  const getSubtitle = () => {
-    if (step === 1)
-      return "Enter your email to receive a recovery code";
+		try {
+			setErrorMessage('');
+			setIsLoading(true);
 
-    if (step === 2)
-      return "Enter the 6-digit verification code";
+			const res = await api.verifyOtpApi({ email, code });
+			if (res.success) {
+				setStep(3);
+			} else {
+				setErrorMessage(res.message || 'Invalid verification code.');
+			}
+		} catch (error: any) {
+			setErrorMessage(error.message || 'Failed to verify code.');
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-    return "Create a new secure password";
-  };
+	const handleResetPassword = async () => {
+		if (!password || !confirm) {
+			setErrorMessage('Please fill in all fields.');
+			return;
+		}
 
-  return (
-    <AuthLayout
-      title="Forgot Password"
-      subtitle={getSubtitle()}
-    >
-      {/* STEP INDICATOR */}
-      <View style={styles.steps}>
-        {[1,2,3].map((item) => (
-          <View
-            key={item}
-            style={[
-              styles.step,
-              step >= item && styles.activeStep,
-            ]}
-          />
-        ))}
-      </View>
+		if (password.length < 8) {
+			setErrorMessage('Password must be at least 8 characters.');
+			return;
+		}
 
-      {errorMessage ? (
-        <View style={styles.errorBox}>
-          <Text style={styles.errorText}>
-            {errorMessage}
-          </Text>
-        </View>
-      ) : null}
+		if (password !== confirm) {
+			setErrorMessage('Passwords do not match.');
+			return;
+		}
 
-      {/* STEP 1 */}
-      {step === 1 && (
-        <>
-          <Text style={styles.label}>
-            Email Address
-          </Text>
+		try {
+			setErrorMessage('');
+			setIsLoading(true);
+			
+			const res = await api.resetPasswordApi({
+				email,
+				newPassword: confirm,
+			});
 
-          <View style={styles.inputWrapper}>
-            <Mail
-              size={20}
-              color="#64748b"
-            />
+			if (res.success) {
+				router.replace('/(auth)/login');
+			} else {
+				setErrorMessage(res.message || 'Failed to update password.');
+			}
+		} catch (error: any) {
+			setErrorMessage(error.message || 'Something went wrong.');
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-            <TextInput
-              placeholder="Enter your email"
-              placeholderTextColor="#94a3b8"
-              value={email}
-              onChangeText={setEmail}
-              style={styles.input}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
+	const getSubtitle = () => {
+		if (step === 1) return 'Enter your email to receive a recovery code';
+		if (step === 2) return 'Enter the 6-digit verification code';
+		return 'Create a new secure password';
+	};
 
-          <PrimaryButton
-            loading={isLoading}
-            text="Send Recovery Code"
-            onPress={handleSendEmail}
-          />
-        </>
-      )}
+	return (
+		<AuthLayout title="Forgot Password" subtitle={getSubtitle()}>
+			{/* Modern Step Indicator */}
+			<View style={styles.stepsContainer}>
+				{[1, 2, 3].map((item, index) => {
+					const isActive = step === item;
+					const isCompleted = step > item;
 
-      {/* STEP 2 */}
-      {step === 2 && (
-        <>
-          <View style={styles.infoCard}>
-            <ShieldCheck
-              size={28}
-              color="#10b981"
-            />
+					return (
+						<React.Fragment key={item}>
+						{/* Circle */}
+						<View
+							style={[
+								styles.stepCircle,
+								isCompleted && styles.stepCircleCompleted,
+								isActive && styles.stepCircleActive,
+							]}
+						>
+							{isCompleted ? (
+								<Text style={styles.stepCheck}>✓</Text>
+							) : (
+								<Text
+								style={[
+									styles.stepNumber,
+									(isActive || isCompleted) && styles.stepNumberActive,
+								]}
+								>
+								{item}
+								</Text>
+							)}
+						</View>
 
-            <Text style={styles.infoText}>
-              We sent a verification code to
-              {"\n"}
-              {email}
-            </Text>
-          </View>
+						{/* Connector line (except after last step) */}
+						{index < 2 && (
+							<View
+								style={[
+								styles.stepLine,
+								step > item && styles.stepLineActive,
+								]}
+							/>
+						)}
+						</React.Fragment>
+					);
+				})}
+			</View>
 
-          <Text style={styles.label}>
-            Verification Code
-          </Text>
+			{/* Error */}
+			{errorMessage ? (
+				<View style={styles.errorBox}>
+					<Text style={styles.errorText}>{errorMessage}</Text>
+				</View>
+			) : null}
 
-          <TextInput
-            placeholder="------"
-            placeholderTextColor="#94a3b8"
-            value={code}
-            onChangeText={(t) =>
-              setCode(
-                t.replace(/\D/g, "")
-                .slice(0,6)
-              )
-            }
-            keyboardType="numeric"
-            maxLength={6}
-            style={[
-              styles.input,
-              styles.codeInput,
-            ]}
-          />
+			{/* STEP 1 – Email */}
+			{step === 1 && (
+				<>
+					<FormField
+						label="EMAIL ADDRESS"
+						value={email}
+						onChangeText={(t) => {
+							setEmail(t);
+							clearError();
+						}}
+						placeholder="your@email.com"
+						keyboardType="email-address"
+						autoCapitalize="none"
+					/>
 
-          <PrimaryButton
-            loading={isLoading}
-            text="Verify Code"
-            onPress={handleCodeVerify}
-          />
-        </>
-      )}
+					<PrimaryButton
+						title={isLoading ? 'Sending...' : 'Send Recovery Code'}
+						onPress={handleSendEmail}
+						loading={isLoading}
+						disabled={isLoading}
+					/>
+				</>
+			)}
 
-      {/* STEP 3 */}
-      {step === 3 && (
-        <>
-          <Text style={styles.label}>
-            New Password
-          </Text>
+			{/* STEP 2 – OTP */}
+			{step === 2 && (
+				<>
+					<View style={styles.infoCard}>
+						<View style={styles.iconBox}>
+							<ShieldCheck size={24} color={theme.primary} strokeWidth={2.2} />
+						</View>
+						<Text style={styles.infoText}>
+							We sent a verification code to{'\n'}
+							<Text style={styles.emailHighlight}>{email}</Text>
+						</Text>
+					</View>
 
-          <PasswordInput
-            value={password}
-            onChangeText={setPassword}
-            show={showPassword}
-            setShow={setShowPassword}
-          />
+					<FormField
+						label="VERIFICATION CODE"
+						value={code}
+						onChangeText={(t) => {
+							setCode(t.replace(/\D/g, '').slice(0, 6));
+							clearError();
+						}}
+						placeholder="------"
+						keyboardType="numeric"
+						autoCapitalize="none"
+					/>
 
-          <Text style={styles.label}>
-            Confirm Password
-          </Text>
+					<PrimaryButton
+						title={isLoading ? 'Verifying...' : 'Verify Code'}
+						onPress={handleCodeVerify}
+						loading={isLoading}
+						disabled={isLoading}
+					/>
+				</>
+			)}
 
-          <PasswordInput
-            value={confirm}
-            onChangeText={setConfirm}
-            show={showPassword}
-            setShow={setShowPassword}
-          />
+			{/* STEP 3 – New Password */}
+			{step === 3 && (
+				<>
+					<FormField
+						label="NEW PASSWORD"
+						value={password}
+						onChangeText={(t) => {
+							setPassword(t);
+							clearError();
+						}}
+						placeholder="Minimum 8 characters"
+						secureTextEntry={!showPassword}
+						autoCapitalize="none"
+					/>
 
-          <TouchableOpacity
-            style={styles.checkbox}
-            onPress={() =>
-              setShowPassword(!showPassword)
-            }
-          >
-            <View
-              style={
-                showPassword
-                  ? styles.checkedBox
-                  : styles.box
-              }
-            >
-              {showPassword && (
-                <Check
-                  size={14}
-                  color="#fff"
-                />
-              )}
-            </View>
+					<FormField
+						label="CONFIRM PASSWORD"
+						value={confirm}
+						onChangeText={(t) => {
+							setConfirm(t);
+							clearError();
+						}}
+						placeholder="Re-enter your password"
+						secureTextEntry={!showPassword}
+						autoCapitalize="none"
+					/>
 
-            <Text style={styles.checkboxText}>
-              Show password
-            </Text>
-          </TouchableOpacity>
+					{/* Show password */}
+					<TouchableOpacity
+						style={styles.showPasswordRow}
+						onPress={() => setShowPassword(!showPassword)}
+						activeOpacity={0.7}
+					>
+						<View style={[styles.checkbox, showPassword && styles.checkboxChecked]}>
+							{showPassword && <Text style={styles.checkMark}>✓</Text>}
+						</View>
+						<Text style={styles.checkboxLabel}>Show password</Text>
+					</TouchableOpacity>
 
-          <PrimaryButton
-            loading={isLoading}
-            text="Reset Password"
-            onPress={handleResetPassword}
-          />
-        </>
-      )}
+					<PrimaryButton
+						title={isLoading ? 'Updating...' : 'Reset Password'}
+						onPress={handleResetPassword}
+						loading={isLoading}
+						disabled={isLoading}
+					/>
+				</>
+			)}
 
-      <TouchableOpacity
-        onPress={() =>
-          router.replace("/(auth)/login")
-        }
-        style={styles.backButton}
-      >
-        <Text style={styles.backText}>
-          Back to login
-        </Text>
-      </TouchableOpacity>
-
-
-    </AuthLayout>
-  );
-}
-
-function PrimaryButton({
-  loading,
-  text,
-  onPress,
-}: any) {
-  return (
-    <TouchableOpacity
-      style={[
-        styles.button,
-        loading && styles.buttonDisabled,
-      ]}
-      onPress={onPress}
-      disabled={loading}
-    >
-      {loading ? (
-        <ActivityIndicator color="#fff"/>
-      ) : (
-        <Text style={styles.buttonText}>
-          {text}
-        </Text>
-      )}
-    </TouchableOpacity>
-  );
-}
-
-function PasswordInput({
-  value,
-  onChangeText,
-  show,
-  setShow,
-}: any) {
-  return (
-    <View style={styles.passwordContainer}>
-      <Lock
-        size={20}
-        color="#64748b"
-      />
-
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        placeholder="Enter password"
-        placeholderTextColor="#94a3b8"
-        secureTextEntry={!show}
-        style={styles.passwordInput}
-      />
-
-      <TouchableOpacity
-        onPress={() => setShow(!show)}
-      >
-        {show ? (
-          <EyeOff size={20} color="#64748b"/>
-        ) : (
-          <Eye size={20} color="#64748b"/>
-        )}
-      </TouchableOpacity>
-    </View>
-  );
+			{/* Back to login */}
+			<TouchableOpacity
+				style={styles.backButton}
+				onPress={() => router.replace('/(auth)/login')}
+				activeOpacity={0.7}
+			>
+				<Text style={styles.backText}>
+					Remember your password?{' '}
+					<Text style={{ color: theme.primary, fontWeight: '700' }}>Sign In</Text>
+				</Text>
+			</TouchableOpacity>
+		</AuthLayout>
+	);
 }
 
 const styles = StyleSheet.create({
-  errorBox:{
-    backgroundColor:"#fef2f2",
-    borderWidth:1,
-    borderColor:"#fecaca",
-    padding:12,
-    borderRadius:14,
-    marginBottom:16,
+  steps: {
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    marginBottom: 24,
   },
-  
-  errorText:{
-    color:"#dc2626",
-    fontSize:13,
-    textAlign:"center",
-    fontWeight:"500",
+  step: {
+    flex: 1,
+    height: 5,
+    borderRadius: 10,
+    backgroundColor: theme.border,
   },
-
-  steps:{
-    flexDirection:"row",
-    gap:8,
-    justifyContent:"center",
-    marginBottom:30,
+  stepsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 28,
+    paddingHorizontal: 8,
   },
-
-  step:{
-    width:45,
-    height:5,
-    borderRadius:10,
-    backgroundColor:"#e2e8f0",
+  stepCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 2,
+    borderColor: theme.borderStrong,
+    backgroundColor: theme.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
-  activeStep:{
-    backgroundColor:"#10b981",
+  stepCircleActive: {
+    borderColor: theme.primary,
+    backgroundColor: theme.accentWash,
   },
-
-  label:{
-    fontSize:14,
-    fontWeight:"600",
-    color:"#1e293b",
-    marginBottom:8,
+  stepCircleCompleted: {
+    borderColor: theme.primary,
+    backgroundColor: theme.primary,
   },
-
-  inputWrapper:{
-    flexDirection:"row",
-    alignItems:"center",
-    gap:10,
-    backgroundColor:"#fff",
-    borderWidth:1,
-    borderColor:"#e2e8f0",
-    borderRadius:16,
-    paddingHorizontal:16,
-    marginBottom:18,
+  stepNumber: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.textMuted,
   },
-
-  input:{
-    flex:1,
-    paddingVertical:15,
-    color:"#0f172a",
-    fontSize:15,
+  stepNumberActive: {
+    color: theme.primaryLight,
   },
-
-  codeInput:{
-    textAlign:"center",
-    fontSize:22,
-    letterSpacing:8,
-    backgroundColor:"#fff",
-    borderWidth:1,
-    borderColor:"#e2e8f0",
-    borderRadius:16,
-    marginBottom:20,
+  stepCheck: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0b0d10',
   },
-
-  infoCard:{
-    backgroundColor:"#ecfdf5",
-    borderRadius:18,
-    padding:18,
-    alignItems:"center",
-    marginBottom:25,
+  stepLine: {
+    flex: 1,
+    height: 2,
+    backgroundColor: theme.border,
+    marginHorizontal: 8,
   },
-
-  infoText:{
-    marginTop:10,
-    textAlign:"center",
-    color:"#475569",
+  stepLineActive: {
+    backgroundColor: theme.primary,
   },
-
-  passwordContainer:{
-    flexDirection:"row",
-    alignItems:"center",
-    gap:10,
-    backgroundColor:"#fff",
-    borderWidth:1,
-    borderColor:"#e2e8f0",
-    borderRadius:16,
-    paddingHorizontal:16,
-    marginBottom:18,
+  activeStep: {
+    backgroundColor: theme.primary,
   },
-
-  passwordInput:{
-    flex:1,
-    paddingVertical:15,
-    color:"#0f172a",
+  errorBox: {
+    backgroundColor: theme.errorBg,
+    borderWidth: 1,
+    borderColor: theme.errorBorder,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
-
-  button:{
-    backgroundColor:"#10b981",
-    paddingVertical:17,
-    borderRadius:18,
-    alignItems:"center",
-    marginTop:8,
+  errorText: {
+    color: theme.errorText,
+    fontSize: 14,
+    textAlign: 'center',
   },
-
-  buttonDisabled:{
-    opacity:.7,
+  infoCard: {
+    backgroundColor: theme.surface,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: theme.border,
+    padding: 18,
+    alignItems: 'center',
+    marginBottom: 22,
   },
-
-  buttonText:{
-    color:"#fff",
-    fontWeight:"700",
-    fontSize:16,
+  iconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
-
-  checkbox:{
-    flexDirection:"row",
-    alignItems:"center",
-    gap:10,
-    marginBottom:15,
+  infoText: {
+    textAlign: 'center',
+    color: theme.textSub,
+    fontSize: 14,
+    lineHeight: 20,
   },
-
-  box:{
-    width:18,
-    height:18,
-    borderRadius:4,
-    borderWidth:1,
-    borderColor:"#cbd5e1",
+  emailHighlight: {
+    color: theme.primaryLight,
+    fontWeight: '700',
   },
-
-  checkedBox:{
-    width:18,
-    height:18,
-    borderRadius:4,
-    backgroundColor:"#10b981",
-    justifyContent:"center",
-    alignItems:"center",
+  showPasswordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: -4,
+    marginBottom: 18,
+    paddingVertical: 4,
   },
-
-  checkboxText:{
-    color:"#64748b",
-    fontSize:13,
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: theme.border,
+    backgroundColor: theme.inputBg,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
-  backButton:{
-    marginTop:24,
-    alignItems:"center",
+  checkboxChecked: {
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
   },
-
-  backText:{
-    color:"#64748b",
-    fontSize:14,
-    fontWeight:"500",
+  checkMark: {
+    color: '#0b0d10',
+    fontSize: 13,
+    fontWeight: '800',
   },
-
+  checkboxLabel: {
+    fontSize: 14,
+    color: theme.textSub,
+    fontWeight: '500',
+  },
+  backButton: {
+    marginTop: 28,
+    alignItems: 'center',
+  },
+  backText: {
+    color: theme.textSub,
+    fontSize: 14,
+  },
 });

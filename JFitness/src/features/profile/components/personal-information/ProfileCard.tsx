@@ -1,141 +1,171 @@
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  ActivityIndicator,
+	View,
+	Text,
+	Image,
+	StyleSheet,
+	ActivityIndicator,
 } from "react-native";
+import { UserRound } from "lucide-react-native";
+import { theme } from "@/utils/theme";
 
 export default function ProfileCard({
-  username,
-  image,
-  uploading,
+	username,
+	image,
+	uploading,
 }: {
-  username: string;
-  image?: string;
-  uploading: boolean;
+	username: string;
+	image?: string;
+	uploading: boolean;
 }) {
+	const initials = username
+		?.split(" ")
+		.filter(Boolean)
+		.map((n) => n[0])
+		.join("")
+		.toUpperCase();
 
-  const initials = username
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
+	return (
+		<View style={styles.container}>
+			<View style={styles.avatarWrapper}>
+				<View style={styles.avatarRing}>
+					{image ? (
+						<Image
+							source={{ uri: image }}
+							style={styles.avatar}
+						/>
+					) : (
+						<View style={styles.fallbackAvatar}>
+							<Text style={styles.initials}>
+								{initials || "U"}
+							</Text>
+						</View>
+					)}
 
+					{uploading && (
+						<View style={styles.loader}>
+							<ActivityIndicator
+								size="small"
+								color={theme.primaryLight}
+							/>
+						</View>
+					)}
+				</View>
 
-  return (
-    <View style={styles.card}>
+				<View style={styles.onlineDot} />
+			</View>
 
-      <View style={styles.avatarContainer}>
+			<Text style={styles.name}>
+				{username || "User"}
+			</Text>
 
-        {image ? (
-          <Image
-            source={{
-              uri: image,
-            }}
-            style={styles.avatar}
-          />
-        ) : (
-          <View style={styles.fallbackAvatar}>
-            <Text style={styles.initials}>
-              {initials || "U"}
-            </Text>
-          </View>
-        )}
+			<View style={styles.memberBadge}>
+				<View style={styles.badgeDot} />
 
-        {uploading && (
-          <View style={styles.loader}>
-            <ActivityIndicator
-              size="small"
-              color="#10b981"
-            />
-          </View>
-        )}
-
-      </View>
-
-
-      <Text style={styles.name}>
-        {username ?? ""}
-      </Text>
-
-
-      <Text style={styles.member}>
-        Premium Member
-      </Text>
-
-    </View>
-  );
+				<Text style={styles.member}>
+					Premium Member
+				</Text>
+			</View>
+		</View>
+	);
 }
 
 const styles = StyleSheet.create({
+	container: {
+		alignItems: "center",
+		paddingVertical: 8,
+	},
 
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    alignItems: "center",
-    paddingVertical: 24,
-    marginBottom: 18,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-  },
+	avatarWrapper: {
+		position: "relative",
+	},
 
+	avatarRing: {
+		width: 96,
+		height: 96,
+		borderRadius: 48,
+		padding: 3,
+		backgroundColor: theme.accentWash,
+		borderWidth: 1,
+		borderColor: theme.borderAccent,
+		alignItems: "center",
+		justifyContent: "center",
+	},
 
-  avatarContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    overflow: "hidden",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+	avatar: {
+		width: "100%",
+		height: "100%",
+		borderRadius: 45,
+	},
 
+	fallbackAvatar: {
+		width: "100%",
+		height: "100%",
+		borderRadius: 45,
+		backgroundColor: theme.surface,
+		alignItems: "center",
+		justifyContent: "center",
+	},
 
-  avatar: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 45,
-  },
+	initials: {
+		fontSize: 25,
+		fontWeight: "800",
+		color: theme.primaryLight,
+		letterSpacing: -0.5,
+	},
 
+	loader: {
+		position: "absolute",
+		inset: 3,
+		borderRadius: 45,
+		backgroundColor: "rgba(11,13,16,0.72)",
+		alignItems: "center",
+		justifyContent: "center",
+	},
 
-  fallbackAvatar: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#ecfdf5",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+	onlineDot: {
+		position: "absolute",
+		right: 3,
+		bottom: 4,
+		width: 15,
+		height: 15,
+		borderRadius: 8,
+		backgroundColor: theme.primary,
+		borderWidth: 3,
+		borderColor: theme.card,
+	},
 
+	name: {
+		marginTop: 13,
+		fontSize: 20,
+		fontWeight: "800",
+		color: theme.text,
+		letterSpacing: -0.4,
+	},
 
-  initials: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#10b981",
-  },
+	memberBadge: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginTop: 6,
+		paddingHorizontal: 9,
+		paddingVertical: 5,
+		borderRadius: 9,
+		backgroundColor: theme.accentWash,
+		borderWidth: 1,
+		borderColor: theme.borderAccent,
+	},
 
+	badgeDot: {
+		width: 5,
+		height: 5,
+		borderRadius: 3,
+		backgroundColor: theme.primaryLight,
+		marginRight: 5,
+	},
 
-  loader: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(255,255,255,0.6)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-
-  name: {
-    marginTop: 12,
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#0f172a",
-  },
-
-
-  member: {
-    marginTop: 3,
-    fontSize: 13,
-    color: "#64748b",
-  },
-
+	member: {
+		fontSize: 10,
+		fontWeight: "700",
+		color: theme.primaryLight,
+		letterSpacing: 0.1,
+	},
 });

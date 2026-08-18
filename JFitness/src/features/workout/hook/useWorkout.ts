@@ -1,12 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as api from "../api/workout.api";
-import { CreateWorkoutInput, Params, Workout } from "../types/WorkoutTypes";
+import { CreateWorkoutInput, Params, WorkoutTutorials, Workout, WorkoutProgress, WorkoutSummary } from "../types/WorkoutTypes";
 
 export const useWorkoutTutorials = (params?: Params) => {
-  return useQuery<Workout[]>({
+  return useQuery<WorkoutTutorials[]>({
     queryKey: ["workout-tutorials", params],
     queryFn: () => api.getWorkoutTutorial(params),
     staleTime: 1000 * 60 * 5, // 5 minutes cache
+  });
+};
+
+export const useWorkoutSummary = (
+  memberId: number
+) => {
+  return useQuery<WorkoutSummary>({
+    queryKey: ["workout-summary", memberId],
+    queryFn: () =>
+      api.getWorkoutSummaryApi(memberId)
   });
 };
 
@@ -15,6 +25,24 @@ export const useGetPersonalWorkoutHistory = (member_id: number) => {
     queryKey: ["personal-workout-history", member_id],
     queryFn: () => api.getPersonalWorkoutHistoryApi(member_id),
     staleTime: 1000 * 60 * 5, // 5 minutes cache
+  });
+};
+
+export const useWorkoutProgress = (
+  member_id?: number
+) => {
+  return useQuery<WorkoutProgress[]>({
+    queryKey: [
+      "workout-progress",
+      member_id,
+    ],
+
+    queryFn: () =>
+      api.getWorkoutProgressApi(
+        member_id!
+      ),
+
+    enabled: !!member_id
   });
 };
 

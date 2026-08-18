@@ -1,33 +1,55 @@
-import React from "react";
-import { View, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { View, StyleSheet } from "react-native";
 
-import { AttendanceHeader } from "@/features/attendance-history/components/AttendanceHeader";
 import { AttendanceList } from "@/features/attendance-history/components/AttendanceList";
-import { router, useLocalSearchParams } from "expo-router";
-import { useGetMemberAttendanceHistory } from "@/features/attendance-history/hook/useAttendance";
+import { useGetMemberAttendanceHistory, useGetMemberAttendanceProgress } from "@/features/attendance-history/hook/useAttendance";
+import { AppBackground } from "@/components/shared/AppBackground";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
+import { AttendanceChart } from "../components/AttendanceChart";
+import { PageLoader } from "@/components/shared/PageLoader";
+import { useAuth } from "@/context/AuthContext";
 
-interface Props {
-  id: number,
-  onBack?: () => void;
-}
+export function AttendanceHistoryScreen() {
+  const { member } = useAuth();
 
-export function AttendanceHistoryScreen({ id }: Props) {
+  const { data: attendanceData = [], isLoading: attendanceLoading} = useGetMemberAttendanceHistory(Number(member?.memberId!));
+  const { data: attendanceProgressData = [], isLoading: progressLoading,} = useGetMemberAttendanceProgress(Number(member?.memberId!));
 
-  const {
-    data: attendanceData = [],
-    isLoading,
-  } = useGetMemberAttendanceHistory(
-    Number(id)
-  );
+  if (attendanceLoading || progressLoading) {
+    return (
+      <PageLoader
+        title="Check-in History"
+        subtitle="Your gym attendance records"
+      />
+    );
+  }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+    <AppBackground>
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenHeader
+          title="Check-in History"
+          subtitle="Your gym attendance records"
+        />
 
-      <AttendanceHeader onBack={() => router.back()} />
+        <View style={styles.content}>
+          <AttendanceChart chartData={attendanceProgressData} />
 
-      <AttendanceList history={attendanceData} />
-    </SafeAreaView>
+          <AttendanceList history={attendanceData} />
+        </View>
+      </SafeAreaView>
+    </AppBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    gap: 16,
+  },
+});

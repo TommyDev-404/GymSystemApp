@@ -1,161 +1,605 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Users, Copy, CheckCircle, Share2 } from "lucide-react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+
+import {
+  Users,
+  Copy,
+  CheckCircle,
+  Share2,
+  Gift,
+  UserPlus,
+} from "lucide-react-native";
+
 import { useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import { theme } from "@/utils/theme";
+
+interface ReferralHeroProps {
+  code?: string;
+  link?: string;
+  activeReferrals?: number;
+  points?: number;
+}
 
 export default function ReferralHero({
   code,
   link,
-  activeReferrals,
-  points,
-}: any) {
+  activeReferrals = 0,
+  points = 0,
+}: ReferralHeroProps) {
   const [copied, setCopied] = useState(false);
 
   const copy = () => {
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
   };
 
   return (
     <View style={styles.card}>
-      <View style={styles.top}>
-        <View style={styles.iconBox}>
-          <Users size={22} color="#10b981" />
+      {/* SUBTLE GLOW */}
+      <View style={styles.glow} />
+
+      <LinearGradient
+        colors={[
+          theme.card,
+          "#111a19",
+          theme.card,
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
+      >
+        {/* ================= HEADER ================= */}
+
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <View style={styles.iconBox}>
+              <Users
+                size={18}
+                color={theme.primaryLight}
+                strokeWidth={2}
+              />
+            </View>
+
+            <View>
+              <Text style={styles.eyebrow}>
+                REFERRAL PROGRAM
+              </Text>
+
+              <Text style={styles.title}>
+                Invite & Earn
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.pointsBadge}>
+            <Gift
+              size={13}
+              color={theme.primaryLight}
+              strokeWidth={2}
+            />
+
+            <Text style={styles.pointsBadgeText}>
+              {points.toLocaleString()} pts
+            </Text>
+          </View>
         </View>
 
-        <View>
-          <Text style={styles.small}>Total Referrals</Text>
-          <Text style={styles.big}>
-            {activeReferrals} active
-          </Text>
+        {/* ================= STATS ================= */}
+
+        <View style={styles.statsContainer}>
+          <View style={styles.stat}>
+            <View style={styles.statIcon}>
+              <UserPlus
+                size={14}
+                color={theme.textSub}
+                strokeWidth={2}
+              />
+            </View>
+
+            <View>
+              <Text style={styles.statLabel}>
+                ACTIVE REFERRALS
+              </Text>
+
+              <Text style={styles.statValue}>
+                {activeReferrals}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.statDivider} />
+
+          <View style={styles.stat}>
+            <View style={styles.statIcon}>
+              <Gift
+                size={14}
+                color={theme.primaryLight}
+                strokeWidth={2}
+              />
+            </View>
+
+            <View>
+              <Text style={styles.statLabel}>
+                POINTS EARNED
+              </Text>
+
+              <Text style={styles.statValueGreen}>
+                {points.toLocaleString()}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        <View style={{ marginLeft: "auto" }}>
-          <Text style={styles.small}>Points</Text>
-          <Text style={styles.points}>{points}</Text>
+        {/* ================= DIVIDER ================= */}
+
+        <View style={styles.divider} />
+
+        {/* ================= REFERRAL CODE ================= */}
+
+        <View style={styles.codeSection}>
+          <View style={styles.codeHeader}>
+            <View>
+              <Text style={styles.codeLabel}>
+                YOUR REFERRAL CODE
+              </Text>
+
+              <Text style={styles.codeHint}>
+                Share this code with your friends
+              </Text>
+            </View>
+
+            <View style={styles.codeIcon}>
+              <Users
+                size={14}
+                color={theme.primaryLight}
+                strokeWidth={2}
+              />
+            </View>
+          </View>
+
+          <View style={styles.codeBox}>
+            <Text style={styles.code}>
+              {code || "------"}
+            </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={copy}
+              style={styles.copyButton}
+            >
+              {copied ? (
+                <CheckCircle
+                  size={14}
+                  color={theme.primaryLight}
+                  strokeWidth={2.2}
+                />
+              ) : (
+                <Copy
+                  size={14}
+                  color={theme.primaryLight}
+                  strokeWidth={2.2}
+                />
+              )}
+
+              <Text style={styles.copyText}>
+                {copied ? "Copied" : "Copy"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
 
-      {/* CODE */}
-      <View style={styles.codeBox}>
-        <Text style={styles.label}>YOUR CODE</Text>
+        {/* ================= SHARE ================= */}
 
-        <View style={styles.row}>
-          <Text style={styles.code}>{code}</Text>
+        <View style={styles.shareRow}>
+          <View style={styles.linkContainer}>
+            <Text
+              style={styles.link}
+              numberOfLines={1}
+            >
+              {link || "Your referral link"}
+            </Text>
+          </View>
 
-          <TouchableOpacity onPress={copy} style={styles.btn}>
-            {copied ? (
-              <CheckCircle size={14} color="white" />
-            ) : (
-              <Copy size={14} color="white" />
-            )}
-            <Text style={styles.btnText}>
-              {copied ? "Copied" : "Copy"}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={styles.shareButton}
+          >
+            <Share2
+              size={14}
+              color="#FFFFFF"
+              strokeWidth={2.2}
+            />
+
+            <Text style={styles.shareText}>
+              Share
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-
-      {/* LINK */}
-      <View style={styles.linkBox}>
-        <Text style={styles.link}>{link}</Text>
-
-        <TouchableOpacity style={styles.shareBtn}>
-          <Share2 size={14} color="white" />
-          <Text style={styles.shareText}>Share</Text>
-        </TouchableOpacity>
-      </View>
+      </LinearGradient>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    margin: 16,
-    padding: 16,
-    borderRadius: 18,
-    backgroundColor: "#0f172a",
-  },
-  top: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: "rgba(16,185,129,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-  },
-  small: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.6)",
-  },
-  big: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "white",
-  },
-  points: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#10b981",
-  },
-  codeBox: {
-    marginTop: 10,
-    padding: 12,
-    borderRadius: 12,
+    marginHorizontal: 20,
+
+    borderRadius: 20,
+
+    overflow: "hidden",
+
+    backgroundColor: theme.card,
+
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: theme.borderAccent,
+
+    shadowColor: "#000",
+
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+
+    elevation: 8,
   },
-  label: {
-    fontSize: 10,
-    color: "rgba(255,255,255,0.5)",
+
+  gradient: {
+    padding: 18,
   },
-  row: {
+
+  /* ================= GLOW ================= */
+
+  glow: {
+    position: "absolute",
+
+    width: 170,
+    height: 170,
+
+    borderRadius: 100,
+
+    right: -90,
+    top: -90,
+
+    backgroundColor: theme.primary,
+
+    opacity: 0.06,
+  },
+
+  /* ================= HEADER ================= */
+
+  header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+
     alignItems: "center",
+
+    justifyContent: "space-between",
   },
+
+  headerLeft: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    gap: 11,
+
+    flex: 1,
+  },
+
+  iconBox: {
+    width: 40,
+    height: 40,
+
+    borderRadius: 12,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: theme.accentWash,
+
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+
+  eyebrow: {
+    fontSize: 9,
+
+    fontWeight: "700",
+
+    letterSpacing: 1,
+
+    color: theme.textMuted,
+  },
+
+  title: {
+    marginTop: 2,
+
+    fontSize: 17,
+
+    fontWeight: "700",
+
+    color: theme.text,
+  },
+
+  /* ================= POINTS BADGE ================= */
+
+  pointsBadge: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    gap: 5,
+
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+
+    borderRadius: 999,
+
+    backgroundColor: theme.accentWash,
+
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+
+  pointsBadgeText: {
+    fontSize: 9,
+
+    fontWeight: "700",
+
+    color: theme.primaryLight,
+  },
+
+  /* ================= STATS ================= */
+
+  statsContainer: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    marginTop: 20,
+  },
+
+  stat: {
+    flex: 1,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    gap: 9,
+  },
+
+  statIcon: {
+    width: 30,
+    height: 30,
+
+    borderRadius: 9,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: theme.surface,
+
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+
+  statLabel: {
+    fontSize: 8,
+
+    fontWeight: "700",
+
+    letterSpacing: 0.7,
+
+    color: theme.textMuted,
+  },
+
+  statValue: {
+    marginTop: 3,
+
+    fontSize: 16,
+
+    fontWeight: "800",
+
+    color: theme.textSub,
+  },
+
+  statValueGreen: {
+    marginTop: 3,
+
+    fontSize: 16,
+
+    fontWeight: "800",
+
+    color: theme.primaryLight,
+  },
+
+  statDivider: {
+    width: 1,
+
+    height: 30,
+
+    marginHorizontal: 12,
+
+    backgroundColor: theme.border,
+  },
+
+  /* ================= DIVIDER ================= */
+
+  divider: {
+    height: 1,
+
+    marginVertical: 18,
+
+    backgroundColor: theme.border,
+  },
+
+  /* ================= CODE ================= */
+
+  codeSection: {
+    width: "100%",
+  },
+
+  codeHeader: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    justifyContent: "space-between",
+
+    marginBottom: 10,
+  },
+
+  codeLabel: {
+    fontSize: 9,
+
+    fontWeight: "700",
+
+    letterSpacing: 0.8,
+
+    color: theme.textSub,
+  },
+
+  codeHint: {
+    marginTop: 2,
+
+    fontSize: 9,
+
+    color: theme.textMuted,
+  },
+
+  codeIcon: {
+    width: 28,
+    height: 28,
+
+    borderRadius: 8,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: theme.accentWash,
+  },
+
+  codeBox: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    justifyContent: "space-between",
+
+    padding: 12,
+
+    borderRadius: 12,
+
+    backgroundColor: theme.surface,
+
+    borderWidth: 1,
+
+    borderColor: theme.border,
+  },
+
   code: {
     fontSize: 20,
+
     fontWeight: "800",
-    color: "#10b981",
+
     letterSpacing: 2,
+
+    color: theme.primaryLight,
   },
-  btn: {
+
+  copyButton: {
     flexDirection: "row",
+
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    padding: 6,
+
+    gap: 5,
+
+    paddingHorizontal: 9,
+    paddingVertical: 7,
+
     borderRadius: 8,
+
+    backgroundColor: theme.accentWash,
+
+    borderWidth: 1,
+
+    borderColor: theme.borderAccent,
   },
-  btnText: {
-    color: "white",
-    fontSize: 11,
+
+  copyText: {
+    fontSize: 10,
+
+    fontWeight: "700",
+
+    color: theme.primaryLight,
   },
-  linkBox: {
+
+  /* ================= SHARE ================= */
+
+  shareRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+
+    alignItems: "center",
+
+    gap: 8,
+
     marginTop: 10,
   },
+
+  linkContainer: {
+    flex: 1,
+
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+
+    borderRadius: 9,
+
+    backgroundColor: theme.surface,
+
+    borderWidth: 1,
+
+    borderColor: theme.border,
+  },
+
   link: {
-    fontSize: 10,
-    color: "rgba(255,255,255,0.6)",
+    fontSize: 9,
+
+    color: theme.textMuted,
   },
-  shareBtn: {
+
+  shareButton: {
     flexDirection: "row",
+
     alignItems: "center",
-    backgroundColor: "#10b981",
-    padding: 6,
-    borderRadius: 8,
-    gap: 6,
+
+    justifyContent: "center",
+
+    gap: 5,
+
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+
+    borderRadius: 9,
+
+    backgroundColor: theme.primary,
   },
+
   shareText: {
-    color: "white",
-    fontSize: 11,
+    fontSize: 10,
+
+    fontWeight: "700",
+
+    color: "#FFFFFF",
   },
 });

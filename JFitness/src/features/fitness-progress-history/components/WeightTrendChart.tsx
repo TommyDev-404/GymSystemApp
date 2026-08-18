@@ -16,12 +16,15 @@ import {
   LineChart,
 } from "react-native-gifted-charts";
 
-import { GoalBottomSheet } from "@/features/home/components/GoalBottomSheet";
-
 import {
   BottomSheetModal,
 } from "@gorhom/bottom-sheet";
+
+import { GoalBottomSheet } from "@/features/home/components/GoalBottomSheet";
+
 import { WeightGoal } from "@/features/home/types/HomeTypes";
+
+import { theme } from "@/utils/theme";
 
 
 interface WeightTrendChartProps {
@@ -31,14 +34,9 @@ interface WeightTrendChartProps {
 }
 
 
-const GREEN = "#10B981";
-const GREEN_DARK = "#059669";
+const GREEN = theme.primary;
+const GREEN_DARK = theme.primaryDark;
 const RED = "#EF4444";
-
-const SLATE_100 = "#F1F5F9";
-const SLATE_200 = "#E2E8F0";
-const SLATE_400 = "#94A3B8";
-const SLATE_900 = "#0F172A";
 
 
 export function WeightTrendChart({
@@ -49,7 +47,6 @@ export function WeightTrendChart({
 
   const updateGoalSheetRef =
     useRef<BottomSheetModal>(null);
-
 
   const chartColor =
     isMovingAway
@@ -69,12 +66,11 @@ export function WeightTrendChart({
 
   return (
     <>
-
-      {/* SECTION HEADER */}
+      {/* ================= SECTION HEADER ================= */}
 
       <View style={styles.sectionHeader}>
 
-        <View>
+        <View style={styles.headerText}>
 
           <Text style={styles.title}>
             Weight Trend
@@ -117,9 +113,25 @@ export function WeightTrendChart({
       </View>
 
 
-      {/* CHART */}
+      {/* ================= CHART CARD ================= */}
 
       <View style={styles.chartCard}>
+
+        {/* Subtle glow */}
+
+        <View
+          pointerEvents="none"
+          style={[
+            styles.chartGlow,
+            {
+              backgroundColor:
+                isMovingAway
+                  ? "rgba(239,68,68,0.055)"
+                  : "rgba(16,185,129,0.055)",
+            },
+          ]}
+        />
+
 
         {chartData.length >= 2 ? (
 
@@ -142,30 +154,30 @@ export function WeightTrendChart({
             thickness={2.5}
 
             dataPointsColor={chartColor}
-            dataPointsRadius={4}
+            dataPointsRadius={3.5}
 
             curved
             areaChart
 
             startFillColor={chartColor}
-            endFillColor="#FFFFFF"
+            endFillColor={theme.card}
 
-            startOpacity={0.12}
+            startOpacity={0.16}
             endOpacity={0.01}
 
             hideRules={false}
 
-            rulesColor={SLATE_100}
-            yAxisColor={SLATE_200}
-            xAxisColor={SLATE_200}
+            rulesColor={theme.border}
+            yAxisColor={theme.borderStrong}
+            xAxisColor={theme.borderStrong}
 
             yAxisTextStyle={{
-              color: SLATE_400,
+              color: theme.textMuted,
               fontSize: 10,
             }}
 
             xAxisLabelTextStyle={{
-              color: SLATE_400,
+              color: theme.textMuted,
               fontSize: 9,
             }}
 
@@ -174,10 +186,11 @@ export function WeightTrendChart({
             focusEnabled
 
             pointerConfig={{
+
               pointerStripHeight: 160,
 
               pointerStripColor:
-                SLATE_200,
+                theme.borderStrong,
 
               pointerStripWidth: 1,
 
@@ -227,10 +240,16 @@ export function WeightTrendChart({
 
           <View style={styles.emptyChart}>
 
-            <TrendingUp
-              size={30}
-              color={SLATE_400}
-            />
+            <View style={styles.emptyIcon}>
+
+              <TrendingUp
+                size={20}
+                color={theme.primary}
+                strokeWidth={2}
+              />
+
+            </View>
+
 
             <Text
               style={
@@ -239,6 +258,7 @@ export function WeightTrendChart({
             >
               Not enough data yet
             </Text>
+
 
             <Text
               style={
@@ -256,7 +276,7 @@ export function WeightTrendChart({
       </View>
 
 
-      {/* UPDATE GOAL / WEIGHT */}
+      {/* ================= UPDATE GOAL ================= */}
 
       <GoalBottomSheet
         modalRef={updateGoalSheetRef}
@@ -287,7 +307,13 @@ export function WeightTrendChart({
 }
 
 
+/* =========================================================
+   STYLES
+========================================================= */
+
 const styles = StyleSheet.create({
+
+  /* ================= HEADER ================= */
 
   sectionHeader: {
     marginTop: 24,
@@ -299,12 +325,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  headerText: {
+    flex: 1,
+  },
+
   title: {
     fontSize: 15,
 
     fontWeight: "700",
 
-    color: SLATE_900,
+    color: theme.text,
+
+    letterSpacing: -0.2,
   },
 
   subtitle: {
@@ -312,8 +344,11 @@ const styles = StyleSheet.create({
 
     fontSize: 11,
 
-    color: SLATE_400,
+    color: theme.textMuted,
   },
+
+
+  /* ================= UPDATE BUTTON ================= */
 
   updateButton: {
     flexDirection: "row",
@@ -328,14 +363,23 @@ const styles = StyleSheet.create({
     borderRadius: 10,
 
     backgroundColor: GREEN,
+
+    borderWidth: 1,
+    borderColor: "rgba(16,185,129,0.35)",
   },
 
   updateButtonDisabled: {
-    opacity: 0.5,
+    opacity: 0.45,
   },
 
   updateButtonPressed: {
     backgroundColor: GREEN_DARK,
+
+    transform: [
+      {
+        scale: 0.97,
+      },
+    ],
   },
 
   updateText: {
@@ -346,13 +390,19 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
+
+  /* ================= CHART CARD ================= */
+
   chartCard: {
-    backgroundColor: "#FFFFFF",
+    position: "relative",
+
+    backgroundColor: theme.card,
 
     borderRadius: 18,
 
     borderWidth: 1,
-    borderColor: SLATE_100,
+
+    borderColor: theme.borderStrong,
 
     paddingVertical: 16,
     paddingHorizontal: 7,
@@ -363,24 +413,74 @@ const styles = StyleSheet.create({
     justifyContent: "center",
 
     overflow: "hidden",
+
+    shadowColor: "#000",
+
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+
+    shadowOpacity: 0.18,
+
+    shadowRadius: 10,
+
+    elevation: 3,
   },
 
+
+  /* ================= GLOW ================= */
+
+  chartGlow: {
+    position: "absolute",
+
+    width: 190,
+    height: 190,
+
+    borderRadius: 999,
+
+    top: -110,
+    left: -70,
+  },
+
+
+  /* ================= TOOLTIP ================= */
+
   tooltip: {
-    backgroundColor: SLATE_900,
+    backgroundColor: theme.surface3,
 
     paddingHorizontal: 9,
     paddingVertical: 6,
 
     borderRadius: 7,
+
+    borderWidth: 1,
+    borderColor: theme.borderStrong,
+
+    shadowColor: "#000",
+
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+
+    shadowOpacity: 0.25,
+
+    shadowRadius: 7,
+
+    elevation: 4,
   },
 
   tooltipText: {
-    color: "#FFFFFF",
+    color: theme.text,
 
     fontSize: 11,
 
     fontWeight: "700",
   },
+
+
+  /* ================= EMPTY STATE ================= */
 
   emptyChart: {
     flex: 1,
@@ -391,14 +491,29 @@ const styles = StyleSheet.create({
     paddingVertical: 35,
   },
 
-  emptyChartTitle: {
-    marginTop: 10,
+  emptyIcon: {
+    width: 40,
+    height: 40,
 
+    borderRadius: 12,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: "rgba(16,185,129,0.08)",
+
+    borderWidth: 1,
+    borderColor: "rgba(16,185,129,0.20)",
+
+    marginBottom: 9,
+  },
+
+  emptyChartTitle: {
     fontSize: 13,
 
     fontWeight: "700",
 
-    color: "#334155",
+    color: theme.text,
   },
 
   emptyChartText: {
@@ -406,9 +521,13 @@ const styles = StyleSheet.create({
 
     fontSize: 11,
 
-    color: SLATE_400,
+    lineHeight: 16,
+
+    color: theme.textMuted,
 
     textAlign: "center",
+
+    maxWidth: 230,
   },
 
 });

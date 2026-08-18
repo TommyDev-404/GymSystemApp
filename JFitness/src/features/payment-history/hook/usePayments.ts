@@ -6,5 +6,6 @@ export function useFetchPaymentHistory(memberId: number) {
   return useQuery<MemberPaymentHistoryData>({
     queryKey: ["member-payment-history", memberId],
     queryFn: () => api.getPaymentHistory(memberId),
+    enabled: !!memberId
   });
 }

@@ -1,60 +1,76 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { ChevronRight } from "lucide-react-native";
-import { useRouter } from "expo-router";
+import { theme } from "@/utils/theme";
 
 export default function InfoItem({
-  label,
-  value,
-  onPress,
-}: any) {
-  const router = useRouter();
+	label,
+	value,
+	onPress,
+}: {
+	label: string;
+	value: string;
+	onPress: () => void;
+}) {
+	return (
+		<TouchableOpacity
+			style={styles.container}
+			onPress={onPress}
+			activeOpacity={0.7}
+		>
+			<View style={styles.content}>
+				<Text style={styles.label}>{label}</Text>
 
-  return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={onPress}
-    >
-      <View>
-        <Text style={styles.label}>
-          {label}
-        </Text>
+				<Text style={styles.value} numberOfLines={1}>
+					{value || "Not provided"}
+				</Text>
+			</View>
 
-        <Text style={styles.value}>
-          {value}
-        </Text>
-      </View>
-
-      <ChevronRight
-        size={18}
-        color="#94a3b8"
-      />
-    </TouchableOpacity>
-  );
+			<View style={styles.action}>
+				<ChevronRight
+					size={16}
+					color={theme.textMuted}
+					strokeWidth={2.2}
+				/>
+			</View>
+		</TouchableOpacity>
+	);
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 18,
-    marginBottom: 12,
-    
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
+	container: {
+		minHeight: 58,
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		paddingVertical: 8,
+	},
 
-  label: {
-    color: "#94a3b8",
-    fontSize: 12,
-    marginBottom: 4,
-  },
+	content: {
+		flex: 1,
+		paddingRight: 12,
+	},
 
-  value: {
-    color: "#0f172a",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+	label: {
+		fontSize: 10,
+		fontWeight: "600",
+		color: theme.textMuted,
+		marginBottom: 4,
+	},
+
+	value: {
+		fontSize: 14,
+		fontWeight: "700",
+		color: theme.text,
+	},
+
+	action: {
+		width: 30,
+		height: 30,
+		borderRadius: 9,
+		alignItems: "center",
+		justifyContent: "center",
+		backgroundColor: theme.card,
+		borderWidth: 1,
+		borderColor: theme.border,
+	},
 });

@@ -1,79 +1,120 @@
 import {
-   View,
-   TextInput,
-   TouchableOpacity,
- } from "react-native";
- import { Send } from "lucide-react-native";
- 
- interface Props {
-   input: string;
-   setInput: (value: string) => void;
-   sendMessage: () => void;
- }
- 
- export default function ChatInput({
-   input,
-   setInput,
-   sendMessage,
- }: Props) {
-   return (
-     <View
-       style={{
-         paddingHorizontal: 16,
-         paddingVertical: 12,
-         backgroundColor: "#fff",
-         borderTopWidth: 1,
-         borderTopColor: "#F1F5F9",
-       }}
-     >
-       <View
-         style={{
-           flexDirection: "row",
-           alignItems: "center",
-           paddingHorizontal: 16,
-           paddingVertical: 12,
-           borderRadius: 20,
-           backgroundColor: "#F8FAFC",
-           borderWidth: 1.5,
-           borderColor: "#E2E8F0",
-         }}
-       >
-         <TextInput
-           value={input}
-           onChangeText={setInput}
-           placeholder="Ask about workouts, nutrition, tips..."
-           placeholderTextColor="#94A3B8"
-           style={{
-             flex: 1,
-             color: "#0F172A",
-             fontSize: 13,
-           }}
-         />
- 
-         <TouchableOpacity
-           onPress={sendMessage}
-           style={{
-             width: 36,
-             height: 36,
-             borderRadius: 12,
-             justifyContent: "center",
-             alignItems: "center",
-             backgroundColor:
-               input.trim()
-                 ? "#10B981"
-                 : "#E2E8F0",
-           }}
-         >
-           <Send
-             size={15}
-             color={
-               input.trim()
-                 ? "#fff"
-                 : "#94A3B8"
-             }
-           />
-         </TouchableOpacity>
-       </View>
-     </View>
-   );
- }
+  View,
+  TextInput,
+  Pressable,
+  StyleSheet,
+} from "react-native";
+import { Send } from "lucide-react-native";
+import { theme } from "@/utils/theme";
+
+interface Props {
+  input: string;
+  setInput: (value: string) => void;
+  sendMessage: () => void;
+}
+
+export default function ChatInput({
+  input,
+  setInput,
+  sendMessage,
+}: Props) {
+  const hasInput = input.trim().length > 0;
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.inputWrapper}>
+        <TextInput
+          value={input}
+          onChangeText={setInput}
+          placeholder="Ask about workouts, nutrition, tips..."
+          placeholderTextColor={theme.textMuted}
+          style={styles.input}
+          multiline
+          maxLength={1000}
+          textAlignVertical="center"
+        />
+
+        <Pressable
+          onPress={sendMessage}
+          disabled={!hasInput}
+          style={({ pressed }) => [
+            styles.sendButton,
+            hasInput
+              ? styles.sendActive
+              : styles.sendDisabled,
+            pressed && hasInput && styles.pressed,
+          ]}
+        >
+          <Send
+            size={15}
+            color={
+              hasInput
+                ? "#FFFFFF"
+                : theme.textMuted
+            }
+            strokeWidth={2.3}
+          />
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 12,
+    backgroundColor: "transparent",
+    borderTopWidth: 1,
+    borderTopColor: theme.border,
+  },
+
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    minHeight: 52,
+    paddingLeft: 15,
+    paddingRight: 7,
+    paddingVertical: 7,
+    borderRadius: 17,
+    backgroundColor: theme.card,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+
+  input: {
+    flex: 1,
+    minHeight: 36,
+    maxHeight: 100,
+    paddingTop: 8,
+    paddingBottom: 8,
+    paddingRight: 10,
+    color: theme.text,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+
+  sendButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  sendActive: {
+    backgroundColor: theme.primary,
+  },
+
+  sendDisabled: {
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+
+  pressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.96 }],
+  },
+});

@@ -6,6 +6,19 @@ export const getWorkoutTutorial = async (params?: Params) => {
    return res.data;
 };
 
+export const getWorkoutSummaryApi = async (member_id: number) => {
+   const response = await api.get(`/workout/${member_id}/summary`);
+   return response.data;
+ };
+
+ 
+export const getWorkoutProgressApi = async (member_id: number) => {
+  const response = await api.get(`/workout/${member_id}/progress`);
+
+  return response.data;
+};
+
+
 export const getPersonalWorkoutHistoryApi = async (member_id: number) => {
    const res = await api.get(`/workout/personal-workout/${member_id}`);
    return res.data;

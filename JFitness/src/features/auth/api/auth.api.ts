@@ -1,6 +1,6 @@
 import { api } from "../../../lib/axios";
 
-export const loginApi = async (data: { email: string, password: string }) => {
+export const loginApi = async (data: { username: string, password: string }) => {
   try {
     const res = await api.post("/auth/login", data);
     return res.data;
@@ -25,7 +25,7 @@ export const verifyActivationCodeApi = async (activation_code: string) => {
 };
 
 export const completeRegistrationApi = async (
-  data: { member_id: number; password: string }
+  data: { member_id: number; username: string; password: string }
 ) => {
   try {
     const res = await api.post("/auth/complete-registration", data);

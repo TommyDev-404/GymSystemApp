@@ -5,6 +5,8 @@ import {
   StyleSheet,
 } from "react-native";
 
+import { theme } from "@/utils/theme";
+
 interface LoadingProps {
   text?: string;
   fullscreen?: boolean;
@@ -23,7 +25,7 @@ export function Loading({
     >
       <ActivityIndicator
         size="large"
-        color="#10b981"
+        color={theme.primary}
       />
 
       {text && (
@@ -35,8 +37,8 @@ export function Loading({
   );
 }
 
-
 const styles = StyleSheet.create({
+
   container: {
     alignItems: "center",
     justifyContent: "center",
@@ -44,13 +46,20 @@ const styles = StyleSheet.create({
 
   fullscreen: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+
+    backgroundColor:
+      theme.bg,
   },
 
   text: {
     marginTop: 12,
-    fontSize: 14,
-    color: "#64748b",
+
+    fontSize: 12,
+
+    color:
+      theme.textMuted,
+
     fontWeight: "500",
   },
+
 });

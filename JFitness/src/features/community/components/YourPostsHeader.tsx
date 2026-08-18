@@ -1,10 +1,12 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import {
   ArrowLeft,
   FileText,
   Heart,
   MessageCircle,
 } from "lucide-react-native";
+
+import { theme } from "@/utils/theme";
 
 interface Props {
   onBack?: () => void;
@@ -16,141 +18,147 @@ interface Props {
 }
 
 export function YourPostsHeader({ onBack, stats }: Props) {
-	return (
-		<View
-			style={{
-				backgroundColor: "white",
-				paddingHorizontal: 16,
-				paddingVertical: 10,
-				borderBottomWidth: 1,
-				borderBottomColor: "#f1f5f9",
-			}}
-		>
-			<View
-				style={{
-					flexDirection: "row",
-					alignItems: "center",
-				}}
-			>
-				<Pressable
-					onPress={onBack}
-					style={{
-						width:32,
-						height:32,
-						borderRadius:8,
-						backgroundColor:"#f8fafc",
-						alignItems:"center",
-						justifyContent:"center",
-					}}
-				>
-					<ArrowLeft size={17} color="#334155"/>
-				</Pressable>
+  return (
+    <View style={styles.container}>
+      <View style={styles.titleRow}>
+        <Pressable
+          onPress={onBack}
+          hitSlop={8}
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <ArrowLeft
+            size={17}
+            color={theme.textSub}
+            strokeWidth={2.2}
+          />
+        </Pressable>
 
-				<Text
-					style={{
-						marginLeft:10,
-						fontSize:17,
-						fontWeight:"700",
-						color:"#0f172a",
-					}}
-				>
-					Your Posts
-				</Text>
-			</View>
+        <Text style={styles.title}>Your Posts</Text>
+      </View>
 
-			{/* MINI STATS */}
-			<View
-				style={{
-					flexDirection:"row",
-					marginTop:10,
-					alignItems:"center",
-				}}
-			>
-				<MiniStat
-					icon={FileText}
-					value={stats.totalPosts}
-					label="Posts"
-				/>
+      <View style={styles.statsRow}>
+        <MiniStat
+          icon={FileText}
+          value={stats.totalPosts}
+          label="Posts"
+        />
 
-				<Divider />
+        <Divider />
 
-				<MiniStat
-					icon={Heart}
-					value={stats.totalLikes}
-					label="Likes"
-				/>
+        <MiniStat
+          icon={Heart}
+          value={stats.totalLikes}
+          label="Likes"
+        />
 
-				<Divider />
+        <Divider />
 
-				<MiniStat
-					icon={MessageCircle}
-					value={stats.totalComments}
-					label="Comments"
-				/>
-			</View>
-		</View>
-	);
+        <MiniStat
+          icon={MessageCircle}
+          value={stats.totalComments}
+          label="Comments"
+        />
+      </View>
+    </View>
+  );
 }
-
 
 function MiniStat({
   icon: Icon,
   value,
   label,
-}:{
-  icon:any;
-  value:number;
-  label:string;
+}: {
+  icon: any;
+  value: number;
+  label: string;
 }) {
-
   return (
-    <View
-      style={{
-        flexDirection:"row",
-        alignItems:"center",
-        flex:1,
-        justifyContent:"center",
-      }}
-    >
-
+    <View style={styles.stat}>
       <Icon
         size={13}
-        color="#10b981"
+        color={theme.primaryLight}
+        strokeWidth={2.2}
       />
 
-      <Text
-        style={{
-          marginLeft:4,
-          fontSize:12,
-          fontWeight:"700",
-          color:"#0f172a",
-        }}
-      >
-        {value}
-      </Text>
+      <Text style={styles.value}>{value}</Text>
 
-      <Text
-        style={{
-          marginLeft:3,
-          fontSize:11,
-          color:"#64748b",
-        }}
-      >
-        {label}
-      </Text>
-
+      <Text style={styles.label}>{label}</Text>
     </View>
   );
 }
 
-function Divider(){
-  return (
-    <View
-      style={{
-        height:18,
-        width:1,
-        backgroundColor:"#e2e8f0",
-      }}
-    />
-  );
+function Divider() {
+  return <View style={styles.divider} />;
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "transparent",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  backButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+
+  pressed: {
+    opacity: 0.65,
+  },
+
+  title: {
+    marginLeft: 10,
+    fontSize: 17,
+    fontWeight: "700",
+    color: theme.text,
+  },
+
+  statsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  stat: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  value: {
+    marginLeft: 4,
+    fontSize: 12,
+    fontWeight: "700",
+    color: theme.text,
+  },
+
+  label: {
+    marginLeft: 3,
+    fontSize: 11,
+    color: theme.textMuted,
+  },
+
+  divider: {
+    width: 1,
+    height: 18,
+    backgroundColor: theme.borderAccent,
+  },
+});

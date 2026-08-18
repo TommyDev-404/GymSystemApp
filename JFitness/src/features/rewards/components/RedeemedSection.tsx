@@ -1,416 +1,556 @@
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-import { BadgeCheck, Gift, X } from "lucide-react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+
+import {
+  BadgeCheck,
+  Gift,
+  X,
+} from "lucide-react-native";
+
 import { RedeemedReward } from "../types/RewardTypes";
+
 import { useAuth } from "@/context/AuthContext";
 import { useCancelRedeemReward } from "../hook/useReward";
+
 import Toast from "react-native-toast-message";
 import { useState } from "react";
 
-export default function RedeemedSection({ data }: { data: RedeemedReward[] }) {
-	const { member } = useAuth();
-	const { mutate: cancelRedeeming, isPending } = useCancelRedeemReward();
+import { EmptyState } from "@/components/shared/EmptyState";
+import { theme } from "@/utils/theme";
 
-	const [cancelingId, setCancelingId] = useState<number | null>(null);
+export default function RedeemedSection({
+  data,
+}: {
+  data: RedeemedReward[];
+}) {
+  const { member } = useAuth();
 
-	const handleCancelRedeemed = (redemption_id: number) => {
-		setCancelingId(redemption_id);
-	 
-		cancelRedeeming(
-		  {
-			 member_id: member?.memberId!,
-			 redemption_id,
-		  },
-		  {
-			 onSuccess: (data) => {
-				Toast.show({
-				  type: "success",
-				  text1: "Success",
-				  text2: data.message,
-				});
-			 },
-	 
-			 onSettled: () => {
-				setCancelingId(null);
-			 },
-		  }
-		);
-	};
+  const {
+    mutate: cancelRedeeming,
+    isPending,
+  } = useCancelRedeemReward();
 
-	return (
+  const [cancelingId, setCancelingId] =
+    useState<number | null>(null);
+
+  const handleCancelRedeemed = (
+    redemption_id: number
+  ) => {
+    setCancelingId(redemption_id);
+
+    cancelRedeeming(
+      {
+        member_id: member?.memberId!,
+        redemption_id,
+      },
+      {
+        onSuccess: (data) => {
+          Toast.show({
+            type: "success",
+            text1: "Success",
+            text2: data.message,
+          });
+        },
+
+        onSettled: () => {
+          setCancelingId(null);
+        },
+      }
+    );
+  };
+
+  return (
     <View style={styles.container}>
+
+      {/* ================= HEADER ================= */}
+
       <View style={styles.header}>
-	<View>
-		<Text style={styles.title}>Redeemed Rewards</Text>
-		<Text style={styles.subtitle}>
-			View your redeemed rewards and track their status
-		</Text>
-	</View>
 
-	<View style={styles.headerIcon}>
-  <BadgeCheck
-			size={19}
-			color="#10B981"
-			strokeWidth={2.2}
-		/>
+        <View style={styles.headerText}>
+
+          <Text style={styles.title}>
+            Redeemed Rewards
+          </Text>
+
+          <Text style={styles.subtitle}>
+            View your redeemed rewards and track their status
+          </Text>
+
         </View>
+
+        <View style={styles.headerIcon}>
+          <BadgeCheck
+            size={19}
+            color={theme.primaryLight}
+            strokeWidth={2.2}
+          />
+        </View>
+
       </View>
-      
-			{data.length === 0 ? (
-			<View style={styles.emptyState}>
-      <View style={styles.emptyIcon}>
-        <Gift
-          size={30}
-          color="#94A3B8"
-          strokeWidth={1.8}
+
+
+      {/* ================= EMPTY ================= */}
+
+      {data.length === 0 ? (
+
+        <EmptyState
+          icon={Gift}
+          title="No rewards redeemed"
+          subtitle="Rewards you redeem will appear here so you can track their status and points used."
         />
-      </View>
-  
-      <Text style={styles.emptyTitle}>
-        No Rewards Redeemed Yet
-      </Text>
-  
-      <Text style={styles.emptyText}>
-        Rewards you redeem will appear here so you can
-        track their status and points used.
-      </Text>
+
+      ) : (
+
+        /* ================= REDEEMED LIST ================= */
+
+        <View style={styles.list}>
+
+          {data.map((reward: RedeemedReward) => (
+
+            <View
+              key={reward.id}
+              style={styles.card}
+            >
+
+              {/* ICON */}
+
+              <View style={styles.iconBox}>
+
+                <Gift
+                  size={18}
+                  color={theme.primaryLight}
+                  strokeWidth={2}
+                />
+
+              </View>
+
+
+              {/* CONTENT */}
+
+              <View style={styles.content}>
+
+                {/* NAME + STATUS */}
+
+                <View style={styles.row}>
+
+                  <Text
+                    style={styles.name}
+                    numberOfLines={1}
+                  >
+                    {reward.name}
+                  </Text>
+
+
+                  <View
+                    style={[
+                      styles.status,
+
+                      reward.status === "Claimed" &&
+                        styles.claimed,
+
+                      reward.status === "Pending" &&
+                        styles.pending,
+
+                      reward.status === "Cancelled" &&
+                        styles.cancelled,
+                    ]}
+                  >
+
+                    <Text
+                      style={[
+                        styles.statusText,
+
+                        reward.status === "Claimed" &&
+                          styles.claimedText,
+
+                        reward.status === "Pending" &&
+                          styles.pendingText,
+
+                        reward.status === "Cancelled" &&
+                          styles.cancelledText,
+                      ]}
+                    >
+                      {reward.status}
+                    </Text>
+
+                  </View>
+
+                </View>
+
+
+                {/* DATE */}
+
+                <Text style={styles.desc}>
+                  {new Date(
+                    reward.redeemed_at
+                  ).toLocaleDateString(
+                    "en-PH",
+                    {
+                      month: "short",
+                      day: "2-digit",
+                      year: "numeric",
+                    }
+                  )}
+                </Text>
+
+
+                {/* FOOTER */}
+
+                <View style={styles.footer}>
+
+                  <Text style={styles.points}>
+                    -{reward.points_used} pts
+                  </Text>
+
+
+                  {/* CANCEL */}
+
+                  {reward.status === "Pending" && (
+
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      disabled={isPending}
+                      onPress={() =>
+                        handleCancelRedeemed(
+                          reward.id
+                        )
+                      }
+                      style={styles.cancelBtn}
+                    >
+
+                      {isPending &&
+                      cancelingId === reward.id ? (
+
+                        <ActivityIndicator
+                          size="small"
+                          color={theme.errorText}
+                        />
+
+                      ) : (
+
+                        <>
+                          <X
+                            size={12}
+                            color={theme.errorText}
+                            strokeWidth={2.5}
+                          />
+
+                          <Text
+                            style={styles.cancelText}
+                          >
+                            Cancel
+                          </Text>
+                        </>
+
+                      )}
+
+                    </TouchableOpacity>
+
+                  )}
+
+                </View>
+
+              </View>
+
+            </View>
+
+          ))}
+
+        </View>
+
+      )}
+
     </View>
-			) : (
-			<View style={{ gap: 10 }}>
-				{data.map((r: RedeemedReward) => (
-					<View key={r.id} style={styles.card}>
-
-					<View style={styles.iconBox}>
-						<Gift size={18} color="#f59e0b" />
-					</View>
-
-
-					<View style={styles.content}>
-
-						<View style={styles.row}>
-							<Text style={styles.name}>
-							{r.name}
-							</Text>
-
-
-							<View
-							style={[
-								styles.status,
-								r.status === "Claimed" && styles.claimed,
-								r.status === "Pending" && styles.pending,
-								r.status === "Cancelled" && styles.cancelled,
-							]}
-							>
-							<Text
-								style={[
-									styles.statusText,
-									r.status === "Claimed" && styles.claimedText,
-									r.status === "Pending" && styles.pendingText,
-									r.status === "Cancelled" && styles.cancelledText,
-								]}
-							>
-								{r.status}
-							</Text>
-							</View>
-						</View>
-
-
-						<Text style={styles.desc}>
-							{new Date(r.redeemed_at).toLocaleDateString(
-							"en-PH",
-							{
-								month: "short",
-								day: "2-digit",
-								year: "numeric",
-							}
-							)}
-						</Text>
-
-
-						<View style={styles.footer}>
-							<Text style={styles.points}>
-							-{r.points_used} pts
-							</Text>
-
-
-							{r.status === "Pending" && (
-								<TouchableOpacity 
-									onPress={() => handleCancelRedeemed(r.id)}
-									style={styles.cancelBtn}
-								>
-									{isPending && cancelingId === r.id ? (
-										<ActivityIndicator color="white"/>
-									): (
-										<>
-											<X size={12} color="#EF4444" />
-											<Text style={styles.cancelText}>
-												Cancel
-											</Text>
-										</>
-									)}
-								</TouchableOpacity>
-							)}
-
-						</View>
-
-					</View>
-
-					</View>
-				))}
-			</View>
-			)}
-		</View>
-	);
+  );
 }
 
+
 const styles = StyleSheet.create({
+
+  /* ================= CONTAINER ================= */
+
   container: {
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 20,
   },
+
+
+  /* ================= HEADER ================= */
 
   header: {
     flexDirection: "row",
+
     alignItems: "center",
+
     justifyContent: "space-between",
+
     marginBottom: 14,
-  },
-  
-  subtitle: {
-    marginTop: 3,
-    fontSize: 11,
-    color: "#94A3B8",
-  },
-  headerIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 13,
-    backgroundColor: "#ECFDF5",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#D1FAE5",
-  },
-  
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0f172a",
+
+    gap: 12,
   },
 
+  headerText: {
+    flex: 1,
+  },
+
+  title: {
+    fontSize: 15,
+
+    fontWeight: "700",
+
+    color: theme.text,
+
+    letterSpacing: -0.2,
+  },
+
+  subtitle: {
+    marginTop: 3,
+
+    fontSize: 10.5,
+
+    lineHeight: 15,
+
+    color: theme.textMuted,
+  },
+
+
+  /* ================= HEADER ICON ================= */
+
+  headerIcon: {
+    width: 38,
+    height: 38,
+
+    borderRadius: 12,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: theme.accentWash,
+
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+
+
+  /* ================= LIST ================= */
+
+  list: {
+    gap: 10,
+  },
+
+
+  /* ================= CARD ================= */
 
   card: {
     flexDirection: "row",
+
     alignItems: "center",
 
-    backgroundColor: "white",
+    backgroundColor: theme.card,
 
-    padding: 14,
+    padding: 13,
 
     borderRadius: 16,
 
+    borderWidth: 1,
+    borderColor: theme.border,
+
     shadowColor: "#000",
+
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: 5,
     },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+
+    shadowOpacity: 0.18,
+
+    shadowRadius: 12,
+
     elevation: 3,
   },
 
 
+  /* ================= ICON ================= */
+
   iconBox: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
 
     borderRadius: 12,
 
-    backgroundColor: "#fef3c7",
-
+    alignItems: "center",
     justifyContent: "center",
+
+    backgroundColor: theme.accentWash,
+
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+
+    marginRight: 11,
+  },
+
+
+  /* ================= CONTENT ================= */
+
+  content: {
+    flex: 1,
+  },
+
+
+  /* ================= TOP ROW ================= */
+
+  row: {
+    flexDirection: "row",
+
     alignItems: "center",
 
-    marginRight: 10,
-  },
+    justifyContent: "space-between",
 
+    gap: 8,
+  },
 
   name: {
+    flex: 1,
+
     fontSize: 13,
-    fontWeight: "600",
-    color: "#0f172a",
+
+    fontWeight: "700",
+
+    color: theme.text,
   },
 
 
+  /* ================= DATE ================= */
+
   desc: {
-    fontSize: 11,
-    color: "#64748b",
-    marginTop: 2,
+    marginTop: 3,
+
+    fontSize: 10,
+
+    color: theme.textMuted,
+  },
+
+
+  /* ================= STATUS ================= */
+
+  status: {
+    paddingHorizontal: 8,
+
+    paddingVertical: 4,
+
+    borderRadius: 999,
+
+    borderWidth: 1,
+  },
+
+  statusText: {
+    fontSize: 8.5,
+
+    fontWeight: "800",
+
+    letterSpacing: 0.2,
+  },
+
+
+  /* PENDING */
+
+  pending: {
+    backgroundColor: "rgba(245,158,11,0.08)",
+
+    borderColor: "rgba(245,158,11,0.18)",
+  },
+
+  pendingText: {
+    color: "#FBBF24",
+  },
+
+
+  /* CLAIMED */
+
+  claimed: {
+    backgroundColor: "rgba(20,184,166,0.08)",
+
+    borderColor: "rgba(20,184,166,0.18)",
+  },
+
+  claimedText: {
+    color: theme.primaryLight,
+  },
+
+
+  /* CANCELLED */
+
+  cancelled: {
+    backgroundColor: theme.errorBg,
+
+    borderColor: theme.errorBorder,
+  },
+
+  cancelledText: {
+    color: theme.errorText,
+  },
+
+
+  /* ================= FOOTER ================= */
+
+  footer: {
+    marginTop: 9,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    justifyContent: "space-between",
   },
 
 
   points: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#64748b",
-  },
-
-
-  // EMPTY STATE
-
-  emptyCard: {
-    backgroundColor: "#FFFFFF",
-
-    borderRadius: 18,
-
-    padding: 24,
-
-    alignItems: "center",
-
-    justifyContent: "center",
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-  
-    paddingHorizontal: 30,
-    paddingVertical: 35,
-  },
-  
-  emptyIcon: {
-    width: 64,
-    height: 64,
-  
-    borderRadius: 22,
-  
-    backgroundColor: "#F8FAFC",
-  
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  
-    alignItems: "center",
-    justifyContent: "center",
-  
-    marginBottom: 14,
-  },
-  
-  emptyTitle: {
-    fontSize: 15,
-    fontWeight: "800",
-  
-    color: "#334155",
-  
-    textAlign: "center",
-  },
-  
-  emptyText: {
-    marginTop: 6,
-  
     fontSize: 11,
-    lineHeight: 17,
-  
-    color: "#94A3B8",
-  
-    textAlign: "center",
-  
-    maxWidth: 270,
+
+    fontWeight: "700",
+
+    color: theme.textSub,
   },
 
-    content: {
-      flex: 1,
-    },
-  
-  
-    row: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: 8,
-    },
-  
-  
-    status: {
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: 20,
-    },
-  
-  
-    statusText: {
-      fontSize: 10,
-      fontWeight: "700",
-    },
-  
-  
-    pending: {
-      backgroundColor: "#FEF3C7",
-    },
-  
-    pendingText: {
-      color: "#D97706",
-    },
-  
-  
-    claimed: {
-      backgroundColor: "#DCFCE7",
-    },
-  
-    claimedText: {
-      color: "#16A34A",
-    },
-  
-  
-    cancelled: {
-      backgroundColor: "#FEE2E2",
-    },
-  
-    cancelledText: {
-      color: "#DC2626",
-    },
-  
-  
-    footer: {
-      marginTop: 8,
-  
-      flexDirection: "row",
-  
-      justifyContent: "space-between",
-  
-      alignItems: "center",
-    },
-  
-  
-    cancelBtn: {
-      flexDirection: "row",
-  
-      alignItems: "center",
-  
-      gap: 4,
-  
-      backgroundColor: "#FEE2E2",
-  
-      paddingHorizontal: 10,
-  
-      paddingVertical: 5,
-  
-      borderRadius: 8,
-    },
-  
-  
-    cancelText: {
-      fontSize: 11,
-  
-      fontWeight: "700",
-  
-      color: "#EF4444",
-    },
-  
+
+  /* ================= CANCEL ================= */
+
+  cancelBtn: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    justifyContent: "center",
+
+    gap: 4,
+
+    minWidth: 60,
+
+    height: 28,
+
+    paddingHorizontal: 9,
+
+    borderRadius: 8,
+
+    backgroundColor: theme.errorBg,
+
+    borderWidth: 1,
+
+    borderColor: theme.errorBorder,
+  },
+
+  cancelText: {
+    fontSize: 9.5,
+
+    fontWeight: "700",
+
+    color: theme.errorText,
+  },
+
 });
