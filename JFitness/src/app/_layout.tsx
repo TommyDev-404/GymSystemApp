@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SocketProvider } from "@/context/SocketContext";
 import { KeyboardProvider } from "react-native-keyboard-controller";
@@ -17,34 +18,31 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
-
   return (
-    <KeyboardProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <BottomSheetModalProvider>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-              <SocketProvider>
-                
-              <RootNavigator/>
-                
-                <Toast />
-                
-              </SocketProvider>
-            </AuthProvider>
-          </QueryClientProvider>
-        </BottomSheetModalProvider>
-      </GestureHandlerRootView>
-    </KeyboardProvider>
+    <SafeAreaProvider>
+      <KeyboardProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <BottomSheetModalProvider>
+            <QueryClientProvider client={queryClient}>
+              <AuthProvider>
+                <SocketProvider>
+                  <RootNavigator />
+                  <Toast />
+                </SocketProvider>
+              </AuthProvider>
+            </QueryClientProvider>
+          </BottomSheetModalProvider>
+        </GestureHandlerRootView>
+      </KeyboardProvider>
+    </SafeAreaProvider>
   );
 }
-
 
 function RootNavigator() {
   const { member, loading } = useAuth();
 
   if (loading) {
-    return null; // or SplashScreen
+    return null;
   }
 
   return (

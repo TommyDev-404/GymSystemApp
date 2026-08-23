@@ -1,28 +1,31 @@
-// Shared dark theme tokens (Dark Mono + Teal)
 export const theme = {
-  bg: '#0b0d10',             // Main background
-  card: '#13161b',           // Surface 1
-  surface: '#1a1e25',        // Surface 2
-  surface3: '#222730',       // Surface 3
+  bg: "#F5F6F8",
+  card: "#FFFFFF",
+  surface: "#FAFAFB",
+  surface3: "#F1F2F4",
 
-  border: '#ffffff0f',       // Subtle border
-  borderStrong: '#ffffff1f', // Strong border
-  borderAccent: "rgba(16,185,129,0.22)", // Accent border
+  border: "#E5E7EB",
+  borderStrong: "#D1D5DB",
+  borderAccent: "rgba(232, 93, 117, 0.20)",
 
-  primary: '#14b8a6',        // Main teal accent
-  primaryLight: '#2dd4bf',   // Light teal
-  primaryDark: '#0f9b8e',    // Dark teal
-  accent: '#14b8a6',         // Accent
-  accentWash: '#14b8a62e',   // Accent background/wash
+  primary: "#E85D75",
+  primaryLight: "#F27B90",
+  primaryDark: "#C9445C",
 
-  text: '#ecedef',           // Main text
-  textSub: '#9494a8',        // Secondary text
-  textMuted: '#52575f',      // Dim/muted text
+  accent: "#E85D75",
+  accentWash: "#E85D7512",
 
-  inputBg: '#13161b',
-  inputBorder: '#ffffff0f',
+  text: "#17181A",
+  textSub: "#4B5563",
+  textMuted: "#6B7280",
 
-  errorBg: '#2a1215',
-  errorBorder: '#7f1d1d',
-  errorText: '#fca5a5',
+  loader: "#DDE1E6",
+  pending: "#DDE1E6",
+
+  inputBg: "#FFFFFF",
+  inputBorder: "#DDE1E6",
+
+  errorBg: "#FEF2F2",
+  errorBorder: "#FCA5A5",
+  errorText: "#B42318",
 };

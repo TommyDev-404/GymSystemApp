@@ -22,7 +22,6 @@ export function WorkoutTutorials({ tutorials }: Props) {
       <View style={styles.sectionHeader}>
         <View style={styles.headerText}>
           <Text style={styles.title}>Workout Tutorials</Text>
-
           <Text style={styles.subtitle}>
             Learn proper form and techniques
           </Text>
@@ -30,18 +29,13 @@ export function WorkoutTutorials({ tutorials }: Props) {
 
         {tutorials.length > 0 && (
           <Pressable
-            onPress={() =>
-              router.push("/(app)/workout-tutorial")
-            }
+            onPress={() => router.push("/(app)/workout-tutorial")}
             style={({ pressed }) => [
               styles.seeMoreButton,
               pressed && styles.pressed,
             ]}
           >
-            <Text style={styles.seeMoreText}>
-              See More
-            </Text>
-
+            <Text style={styles.seeMoreText}>See More</Text>
             <ChevronRight
               size={15}
               color={theme.primaryLight}
@@ -58,9 +52,7 @@ export function WorkoutTutorials({ tutorials }: Props) {
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.list}
-          ItemSeparatorComponent={() => (
-            <View style={styles.separator} />
-          )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
           renderItem={({ item }) => (
             <View style={styles.cardWrapper}>
               <WorkoutTutorialCard item={item} />
@@ -133,5 +125,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.border,
   },
-
 });

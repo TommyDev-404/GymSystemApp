@@ -24,8 +24,11 @@ export const verifyActivationCodeApi = async (activation_code: string) => {
   }
 };
 
-export const completeRegistrationApi = async (
-  data: { member_id: number; username: string; password: string }
+export const completeRegistrationApi = async (data: {
+  member_id: number;
+  username: string;
+  password: string
+}
 ) => {
   try {
     const res = await api.post("/auth/complete-registration", data);

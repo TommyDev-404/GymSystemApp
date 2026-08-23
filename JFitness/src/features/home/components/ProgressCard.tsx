@@ -10,8 +10,9 @@ import {
 import { PieChart } from "react-native-gifted-charts";
 import { LinearGradient } from "expo-linear-gradient";
 
-const GREEN = theme.primary;
-const GREEN_DARK = theme.primaryDark;
+const PRIMARY = theme.primary;
+const PRIMARY_DARK = theme.primaryDark;
+const PRIMARY_LIGHT = theme.primaryLight;
 const RED = "#EF4444";
 
 interface ProgressCardProps {
@@ -35,10 +36,8 @@ export function ProgressCard({
   onNewGoalPress,
 }: ProgressCardProps) {
   const isLoseWeight = goalType === "LOSE_WEIGHT";
-
   const rawProgress = Number(percentage) || 0;
   const chartProgress = Math.min(100, Math.max(0, Math.abs(rawProgress)));
-
   const isMovingAway = rawProgress < 0;
   const isGoalReached = rawProgress >= 100;
 
@@ -47,7 +46,6 @@ export function ProgressCard({
     : currentWeight - startingWeight;
 
   const isProgressPositive = weightChange > 0;
-
   const remainingWeight = Math.abs(currentWeight - goalWeight);
 
   const displayPercentage =
@@ -64,7 +62,7 @@ export function ProgressCard({
   const chartData = [
     {
       value: chartProgress,
-      color: isMovingAway ? RED : GREEN,
+      color: isMovingAway ? RED : PRIMARY,
     },
     {
       value: Math.max(100 - chartProgress, 0.01),
@@ -74,23 +72,17 @@ export function ProgressCard({
 
   return (
     <View style={styles.card}>
-      {/* Subtle background glow */}
       <LinearGradient
         colors={[
-          "rgba(20,184,166,0.10)",
-          "rgba(20,184,166,0.025)",
-          "rgba(11,13,16,0)",
+          "rgba(232,93,117,0.10)",
+          "rgba(242,123,144,0.035)",
+          "rgba(255,255,255,0)",
         ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.backgroundGlow}
         pointerEvents="none"
       />
-
-      {/* Decorative glow */}
-      <View style={styles.topGlow} pointerEvents="none" />
-
-      {/* ================= HEADER ================= */}
 
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -102,7 +94,7 @@ export function ProgressCard({
           >
             <Target
               size={18}
-              color={isMovingAway ? RED : GREEN}
+              color={isMovingAway ? RED : PRIMARY}
               strokeWidth={2.2}
             />
           </View>
@@ -113,17 +105,13 @@ export function ProgressCard({
             <View
               style={[
                 styles.goalBadge,
-                isLoseWeight
-                  ? styles.lossBadge
-                  : styles.gainBadge,
+                isLoseWeight ? styles.lossBadge : styles.gainBadge,
               ]}
             >
               <Text
                 style={[
                   styles.goalBadgeText,
-                  isLoseWeight
-                    ? styles.lossText
-                    : styles.gainText,
+                  isLoseWeight ? styles.lossText : styles.gainText,
                 ]}
               >
                 {isLoseWeight ? "LOSE WEIGHT" : "GAIN WEIGHT"}
@@ -144,7 +132,6 @@ export function ProgressCard({
               isMovingAway && styles.statusDotDanger,
             ]}
           />
-
           <Text
             style={[
               styles.statusText,
@@ -159,8 +146,6 @@ export function ProgressCard({
           </Text>
         </View>
       </View>
-
-      {/* ================= GAUGE ================= */}
 
       <View style={styles.gaugeSection}>
         <PieChart
@@ -200,13 +185,8 @@ export function ProgressCard({
         />
       </View>
 
-      {/* ================= WEIGHT VALUES ================= */}
-
       <View style={styles.weightStats}>
-        <WeightStat
-          label="START"
-          value={startingWeight}
-        />
+        <WeightStat label="START" value={startingWeight} />
 
         <View style={styles.currentStat}>
           <View
@@ -215,9 +195,7 @@ export function ProgressCard({
               isMovingAway && styles.currentIndicatorDanger,
             ]}
           />
-
           <Text style={styles.statLabel}>CURRENT</Text>
-
           <Text
             style={[
               styles.currentValue,
@@ -236,8 +214,6 @@ export function ProgressCard({
         />
       </View>
 
-      {/* ================= SUMMARY ================= */}
-
       <View style={styles.summary}>
         <View style={styles.summaryLeft}>
           <View
@@ -249,7 +225,7 @@ export function ProgressCard({
             {isProgressPositive ? (
               <TrendingUp
                 size={15}
-                color={GREEN}
+                color={PRIMARY}
                 strokeWidth={2.3}
               />
             ) : (
@@ -296,8 +272,6 @@ export function ProgressCard({
         </View>
       </View>
 
-      {/* ================= CTA ================= */}
-
       <Pressable
         onPress={onHistoryPress}
         style={({ pressed }) => [
@@ -305,16 +279,20 @@ export function ProgressCard({
           pressed && styles.ctaPressed,
         ]}
       >
-        <Text style={styles.ctaText}>View Progress History</Text>
-
-        <ChevronRight
-          size={17}
-          color="#fff"
-          strokeWidth={2.3}
-        />
+        <LinearGradient
+          colors={[PRIMARY_LIGHT, PRIMARY, PRIMARY_DARK]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.ctaGradient}
+        >
+          <Text style={styles.ctaText}>View Progress History</Text>
+          <ChevronRight
+            size={17}
+            color="#fff"
+            strokeWidth={2.3}
+          />
+        </LinearGradient>
       </Pressable>
-
-      {/* ================= NEW GOAL ================= */}
 
       {isGoalReached && (
         <View style={styles.newGoalSection}>
@@ -337,7 +315,7 @@ export function ProgressCard({
           >
             <Plus
               size={15}
-              color={GREEN}
+              color={PRIMARY}
               strokeWidth={2.5}
             />
 
@@ -350,10 +328,6 @@ export function ProgressCard({
     </View>
   );
 }
-
-/* =========================================================
-   SMALL COMPONENTS
-========================================================= */
 
 function WeightStat({
   label,
@@ -381,479 +355,340 @@ function WeightStat({
   );
 }
 
-/* =========================================================
-   STYLES
-========================================================= */
-
 const styles = StyleSheet.create({
   card: {
     borderRadius: 20,
     backgroundColor: theme.card,
-
     borderWidth: 1,
     borderColor: theme.borderAccent,
-
     overflow: "hidden",
-
     shadowColor: theme.primary,
     shadowOffset: {
       width: 0,
       height: 8,
     },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.07,
     shadowRadius: 18,
-
-    elevation: 5,
+    elevation: 4,
   },
-
   backgroundGlow: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: 190,
-  },
-
-  topGlow: {
-    position: "absolute",
-    top: -80,
-    right: -70,
-    width: 180,
     height: 180,
-    borderRadius: 90,
-    backgroundColor: "rgba(20,184,166,0.06)",
   },
-
-  /* ================= HEADER ================= */
-
   header: {
     paddingHorizontal: 17,
     paddingTop: 17,
-    paddingBottom: 5,
-
+    paddingBottom: 4,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-
   headerText: {
     justifyContent: "center",
   },
-
   iconBadge: {
     width: 38,
     height: 38,
     borderRadius: 11,
-
     backgroundColor: theme.accentWash,
-
     borderWidth: 1,
     borderColor: theme.borderAccent,
-
     alignItems: "center",
     justifyContent: "center",
   },
-
   iconBadgeDanger: {
     backgroundColor: theme.errorBg,
     borderColor: theme.errorBorder,
   },
-
   title: {
     fontSize: 15,
     fontWeight: "700",
     color: theme.text,
     letterSpacing: -0.2,
   },
-
   goalBadge: {
     marginTop: 4,
     alignSelf: "flex-start",
-
     paddingHorizontal: 7,
     paddingVertical: 2.5,
-
     borderRadius: 999,
   },
-
   lossBadge: {
     backgroundColor: theme.errorBg,
   },
-
   gainBadge: {
     backgroundColor: theme.accentWash,
   },
-
   goalBadgeText: {
     fontSize: 9,
     fontWeight: "700",
     letterSpacing: 0.5,
   },
-
   lossText: {
     color: RED,
   },
-
   gainText: {
-    color: GREEN,
+    color: PRIMARY,
   },
-
-  /* ================= STATUS ================= */
-
   statusPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-
     paddingHorizontal: 8,
     paddingVertical: 5,
-
     borderRadius: 999,
-
     backgroundColor: theme.accentWash,
     borderWidth: 1,
     borderColor: theme.borderAccent,
   },
-
   statusPillDanger: {
     backgroundColor: theme.errorBg,
     borderColor: theme.errorBorder,
   },
-
   statusDot: {
     width: 5,
     height: 5,
     borderRadius: 999,
-    backgroundColor: GREEN,
+    backgroundColor: PRIMARY,
   },
-
   statusDotDanger: {
     backgroundColor: RED,
   },
-
   statusText: {
     fontSize: 9,
     fontWeight: "700",
-    color: GREEN,
+    color: PRIMARY_DARK,
   },
-
   statusTextDanger: {
     color: RED,
   },
-
-  /* ================= GAUGE ================= */
-
   gaugeSection: {
     height: 190,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
   },
-
   centerLabel: {
     width: 150,
     alignItems: "center",
     justifyContent: "center",
-
     marginTop: 27,
   },
-
   percentage: {
     fontSize: 31,
     lineHeight: 35,
-
     fontWeight: "800",
-    color: theme.text,
-
+    color: PRIMARY_DARK,
     letterSpacing: -1,
   },
-
   negativePercentage: {
     color: RED,
   },
-
   completedPercentage: {
-    color: GREEN,
+    color: PRIMARY,
   },
-
   completedText: {
     marginTop: 3,
-
     fontSize: 10,
     fontWeight: "500",
-
     color: theme.textMuted,
     textAlign: "center",
   },
-
   negativeCompletedText: {
     color: RED,
   },
-
   goalReachedText: {
-    color: GREEN,
+    color: PRIMARY,
   },
-
-  /* ================= WEIGHT STATS ================= */
-
   weightStats: {
     marginHorizontal: 16,
-
     paddingVertical: 12,
     paddingHorizontal: 12,
-
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-
     backgroundColor: theme.surface,
-
     borderWidth: 1,
     borderColor: theme.border,
-
     borderRadius: 14,
   },
-
   weightStat: {
     minWidth: 70,
     alignItems: "flex-start",
   },
-
   weightStatRight: {
     alignItems: "flex-end",
   },
-
   currentStat: {
     alignItems: "center",
   },
-
   currentIndicator: {
     width: 6,
     height: 6,
     borderRadius: 999,
-
     marginBottom: 4,
-
-    backgroundColor: GREEN,
+    backgroundColor: PRIMARY,
   },
-
   currentIndicatorDanger: {
     backgroundColor: RED,
   },
-
   statLabel: {
     fontSize: 8,
     fontWeight: "700",
-
     color: theme.textMuted,
-
     letterSpacing: 0.7,
   },
-
   statValue: {
     marginTop: 3,
-
     fontSize: 13,
     fontWeight: "700",
-
     color: theme.textSub,
   },
-
   currentValue: {
     marginTop: 3,
-
     fontSize: 14,
     fontWeight: "800",
-
-    color: GREEN,
+    color: PRIMARY_DARK,
   },
-
   currentValueDanger: {
     color: RED,
   },
-
   unit: {
     fontSize: 9,
     fontWeight: "500",
     color: theme.textMuted,
   },
-
-  /* ================= SUMMARY ================= */
-
   summary: {
     marginHorizontal: 16,
     marginTop: 10,
-
     paddingHorizontal: 12,
     paddingVertical: 10,
-
     borderRadius: 13,
-
     backgroundColor: theme.surface,
-
     borderWidth: 1,
     borderColor: theme.border,
-
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-
   summaryLeft: {
     flexDirection: "row",
     alignItems: "center",
     gap: 9,
   },
-
   trendIcon: {
     width: 30,
     height: 30,
     borderRadius: 9,
-
     backgroundColor: theme.accentWash,
-
     alignItems: "center",
     justifyContent: "center",
   },
-
   trendIconDanger: {
     backgroundColor: theme.errorBg,
   },
-
   summaryValue: {
     fontSize: 14,
     fontWeight: "800",
     color: theme.text,
   },
-
   summaryPositive: {
-    color: GREEN,
+    color: PRIMARY,
   },
-
   summaryNegative: {
     color: RED,
   },
-
   summaryLabel: {
     marginTop: 1,
-
     fontSize: 10,
     color: theme.textMuted,
   },
-
   summaryRight: {
     alignItems: "flex-end",
   },
-
   remainingValue: {
     fontSize: 14,
     fontWeight: "800",
     color: theme.text,
   },
-
   remainingLabel: {
     marginTop: 1,
-
     fontSize: 10,
     color: theme.textMuted,
   },
-
-  /* ================= CTA ================= */
-
   cta: {
     marginHorizontal: 16,
     marginTop: 12,
     marginBottom: 16,
-
     height: 44,
     borderRadius: 12,
-
-    backgroundColor: GREEN,
-
+    overflow: "hidden",
+  },
+  ctaGradient: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-
     gap: 5,
   },
-
   ctaPressed: {
-    backgroundColor: GREEN_DARK,
+    opacity: 0.85,
   },
-
   ctaText: {
     color: "#fff",
-
     fontSize: 13,
     fontWeight: "700",
   },
-
-  /* ================= NEW GOAL ================= */
-
   newGoalSection: {
     marginHorizontal: 16,
     marginTop: -2,
     marginBottom: 15,
-
     paddingTop: 12,
-
     borderTopWidth: 1,
     borderTopColor: theme.border,
-
     flexDirection: "row",
     alignItems: "center",
-
     gap: 10,
   },
-
   newGoalMessage: {
     flex: 1,
   },
-
   newGoalTitle: {
     fontSize: 12,
     fontWeight: "700",
     color: theme.text,
   },
-
   newGoalSubtitle: {
     marginTop: 3,
-
     fontSize: 10,
     lineHeight: 14,
-
     color: theme.textMuted,
   },
-
   newGoalButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-
     paddingHorizontal: 11,
     paddingVertical: 8,
-
     borderRadius: 10,
-
     backgroundColor: theme.accentWash,
-
     borderWidth: 1,
     borderColor: theme.borderAccent,
   },
-
   newGoalButtonPressed: {
     opacity: 0.7,
   },
-
   newGoalButtonText: {
     fontSize: 11,
     fontWeight: "700",
-    color: GREEN,
+    color: PRIMARY_DARK,
   },
 });

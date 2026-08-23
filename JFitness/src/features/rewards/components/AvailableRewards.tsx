@@ -4,6 +4,7 @@ import {
 	TouchableOpacity,
 	StyleSheet,
 	ActivityIndicator,
+	FlatList,
  } from "react-native";
  import { Lock, Gift, Check } from "lucide-react-native";
  import { Reward } from "../types/RewardTypes";
@@ -47,150 +48,125 @@ import {
 	  );
 	};
  
+	const renderItem = ({ item }: { item: Reward }) => {
+	  const canRedeem = points >= item.points_required;
+	  const isRedeeming = isPending && redeemingId === item.id;
+ 
+	  return (
+		 <View style={[styles.card, !canRedeem && styles.lockedCard]}>
+			<View
+			  style={[
+				 styles.categoryBadge,
+				 !canRedeem && styles.categoryBadgeLocked,
+			  ]}
+			>
+			  <Text
+				 style={[
+					styles.categoryText,
+					!canRedeem && styles.categoryTextLocked,
+				 ]}
+			  >
+				 {item.category}
+			  </Text>
+			</View>
+ 
+			<View style={[styles.iconBox, !canRedeem && styles.lockedIconBox]}>
+			  <Gift
+				 size={29}
+				 color={canRedeem ? theme.primaryLight : theme.textMuted}
+				 strokeWidth={1.8}
+			  />
+			</View>
+ 
+			<Text style={styles.name} numberOfLines={2}>
+			  {item.name}
+			</Text>
+ 
+			<Text style={styles.description} numberOfLines={2}>
+			  {item.description}
+			</Text>
+ 
+			<View style={styles.divider} />
+ 
+			<View style={styles.footer}>
+			  <View style={styles.pointsContainer}>
+				 <Text style={[styles.points, !canRedeem && styles.pointsLocked]}>
+					{item.points_required}
+				 </Text>
+				 <Text style={styles.pointsLabel}>pts</Text>
+			  </View>
+ 
+			  {canRedeem ? (
+				 <TouchableOpacity
+					activeOpacity={0.8}
+					disabled={isPending}
+					onPress={() => handleRedeemReward(item.id)}
+					style={styles.redeemBtn}
+				 >
+					{isRedeeming ? (
+					  <ActivityIndicator size="small" color={theme.bg} />
+					) : (
+					  <>
+						 <Check size={13} color={theme.bg} strokeWidth={2.8} />
+						 <Text style={styles.redeemText}>Redeem</Text>
+					  </>
+					)}
+				 </TouchableOpacity>
+			  ) : (
+				 <View style={styles.lock}>
+					<Lock size={12} color={theme.textMuted} />
+					<Text style={styles.lockText}>Locked</Text>
+				 </View>
+			  )}
+			</View>
+		 </View>
+	  );
+	};
+ 
 	return (
-	  <View style={styles.container}>
-		 {/* ================= HEADER ================= */}
+	  <View>
 		 <View style={styles.header}>
 			<View>
 			  <Text style={styles.title}>Available Rewards</Text>
-			  <Text style={styles.subtitle}>
-				 Use your points to claim rewards
-			  </Text>
+			  <Text style={styles.subtitle}>Use your points to claim rewards</Text>
 			</View>
+ 
 			<View style={styles.headerIcon}>
-			  <Gift size={18} color={theme.primaryLight} strokeWidth={2} />
+			  <Gift
+				 size={18}
+				 color={theme.primaryLight}
+				 strokeWidth={2}
+			  />
 			</View>
 		 </View>
  
-		 {/* ================= EMPTY ================= */}
-		 {data.length === 0 ? (
-			<EmptyState
-			  icon={Gift}
-			  title="No rewards available"
-			  subtitle="New rewards will appear here when they become available."
-			/>
-		 ) : (
-			/* ================= GRID ================= */
-			<View style={styles.grid}>
-			  {data.map((reward: Reward) => {
-				 const canRedeem = points >= reward.points_required;
-				 const isRedeeming = isPending && redeemingId === reward.id;
- 
-				 return (
-					<View
-					  key={reward.id}
-					  style={[styles.card, !canRedeem && styles.lockedCard]}
-					>
-					  {/* CATEGORY */}
-					  <View
-						 style={[
-							styles.categoryBadge,
-							!canRedeem && styles.categoryBadgeLocked,
-						 ]}
-					  >
-						 <Text
-							style={[
-							  styles.categoryText,
-							  !canRedeem && styles.categoryTextLocked,
-							]}
-						 >
-							{reward.category}
-						 </Text>
-					  </View>
- 
-					  {/* ICON */}
-					  <View
-						 style={[
-							styles.iconBox,
-							!canRedeem && styles.lockedIconBox,
-						 ]}
-					  >
-						 <Gift
-							size={29}
-							color={
-							  canRedeem ? theme.primaryLight : theme.textMuted
-							}
-							strokeWidth={1.8}
-						 />
-					  </View>
- 
-					  {/* NAME */}
-					  <Text style={styles.name} numberOfLines={2}>
-						 {reward.name}
-					  </Text>
- 
-					  {/* DESCRIPTION */}
-					  <Text style={styles.description} numberOfLines={2}>
-						 {reward.description}
-					  </Text>
- 
-					  {/* DIVIDER */}
-					  <View style={styles.divider} />
- 
-					  {/* FOOTER */}
-					  <View style={styles.footer}>
-						 <View style={styles.pointsContainer}>
-							<Text
-							  style={[
-								 styles.points,
-								 !canRedeem && styles.pointsLocked,
-							  ]}
-							>
-							  {reward.points_required}
-							</Text>
-							<Text style={styles.pointsLabel}>pts</Text>
-						 </View>
- 
-						 {canRedeem ? (
-							<TouchableOpacity
-							  activeOpacity={0.8}
-							  disabled={isPending}
-							  onPress={() => handleRedeemReward(reward.id)}
-							  style={styles.redeemBtn}
-							>
-							  {isRedeeming ? (
-								 <ActivityIndicator size="small" color={theme.bg} />
-							  ) : (
-								 <>
-									<Check
-									  size={13}
-									  color={theme.bg}
-									  strokeWidth={2.8}
-									/>
-									<Text style={styles.redeemText}>Redeem</Text>
-								 </>
-							  )}
-							</TouchableOpacity>
-						 ) : (
-							<View style={styles.lock}>
-							  <Lock size={12} color={theme.textMuted} />
-							  <Text style={styles.lockText}>Locked</Text>
-							</View>
-						 )}
-					  </View>
-					</View>
-				 );
-			  })}
-			</View>
-		 )}
+		 <FlatList
+			data={data}
+			renderItem={renderItem}
+			keyExtractor={(item) => item.id.toString()}
+			numColumns={2}
+			scrollEnabled={false}
+			showsVerticalScrollIndicator={false}
+			columnWrapperStyle={styles.columnWrapper}
+			contentContainerStyle={styles.listContent}
+			ListEmptyComponent={
+			  <EmptyState
+				 icon={Gift}
+				 title="No rewards available"
+				 subtitle="New rewards will appear here when they become available."
+			  />
+			}
+		 />
 	  </View>
 	);
  }
  
  const styles = StyleSheet.create({
-	/* ================= CONTAINER ================= */
-	container: {
-	  paddingHorizontal: 20,
-	  paddingTop: 12,        // was 30 → reduced for better section spacing
-	  paddingBottom: 8,
-	},
- 
-	/* ================= HEADER ================= */
 	header: {
 	  flexDirection: "row",
 	  alignItems: "center",
 	  justifyContent: "space-between",
-	  marginBottom: 14,      // slightly tighter
+	  marginBottom: 14,
 	},
 	title: {
 	  fontSize: 15,
@@ -214,24 +190,24 @@ import {
 	  borderWidth: 1,
 	  borderColor: theme.borderAccent,
 	},
- 
-	/* ================= GRID ================= */
-	grid: {
-	  flexDirection: "row",
-	  flexWrap: "wrap",
+	columnWrapper: {
 	  gap: 12,
 	},
- 
-	/* ================= CARD ================= */
+	listContent: {
+	  gap: 12,
+	},
 	card: {
-	  width: "48%",
+	  flex: 1,
 	  backgroundColor: theme.card,
 	  borderRadius: 18,
 	  padding: 14,
 	  borderWidth: 1,
 	  borderColor: theme.border,
 	  shadowColor: "#000",
-	  shadowOffset: { width: 0, height: 5 },
+	  shadowOffset: {
+		 width: 0,
+		 height: 5,
+	  },
 	  shadowOpacity: 0.2,
 	  shadowRadius: 10,
 	  elevation: 3,
@@ -240,8 +216,6 @@ import {
 	  backgroundColor: "#101318",
 	  borderColor: theme.border,
 	},
- 
-	/* ================= CATEGORY ================= */
 	categoryBadge: {
 	  position: "absolute",
 	  top: 11,
@@ -267,8 +241,6 @@ import {
 	categoryTextLocked: {
 	  color: theme.textMuted,
 	},
- 
-	/* ================= ICON ================= */
 	iconBox: {
 	  width: 58,
 	  height: 58,
@@ -285,8 +257,6 @@ import {
 	  backgroundColor: theme.surface,
 	  borderColor: theme.border,
 	},
- 
-	/* ================= TEXT ================= */
 	name: {
 	  fontSize: 14,
 	  fontWeight: "800",
@@ -303,16 +273,12 @@ import {
 	  lineHeight: 15,
 	  minHeight: 30,
 	},
- 
-	/* ================= DIVIDER ================= */
 	divider: {
 	  height: 1,
 	  backgroundColor: theme.border,
 	  marginTop: 12,
 	  marginBottom: 11,
 	},
- 
-	/* ================= FOOTER ================= */
 	footer: {
 	  width: "100%",
 	  flexDirection: "row",
@@ -337,8 +303,6 @@ import {
 	  fontWeight: "600",
 	  color: theme.textMuted,
 	},
- 
-	/* ================= REDEEM ================= */
 	redeemBtn: {
 	  minWidth: 68,
 	  height: 30,
@@ -357,8 +321,6 @@ import {
 	  fontSize: 10,
 	  fontWeight: "800",
 	},
- 
-	/* ================= LOCKED ================= */
 	lock: {
 	  flexDirection: "row",
 	  alignItems: "center",

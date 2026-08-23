@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import {
@@ -15,40 +16,145 @@ import {
 } from "lucide-react-native";
 
 import SearchHeader from "@/features/search/components/SearchHeader";
+import RecentSection from "@/features/search/components/RecentSection";
+
 import { AppBackground } from "@/components/shared/AppBackground";
 import { theme } from "@/utils/theme";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { useSearchExercises } from "@/features/workout/hook/useWorkout";
 
-export const EXERCISES = [
-  { id: "1", name: "Push-Up" },
-  { id: "2", name: "Pull-Up" },
-  { id: "3", name: "Squat" },
-  { id: "4", name: "Deadlift" },
-  { id: "5", name: "Plank" },
-  { id: "6", name: "Bicep Curl" },
-];
+const RECENT_EXERCISES_KEY = "@recent_exercises_searches";
+const MAX_RECENT_EXERCISES = 5;
+
+interface RecentExercise {
+  id: number;
+  name: string;
+}
 
 export default function ExerciseSearchScreen() {
   const router = useRouter();
+
   const [query, setQuery] = useState("");
+  const [recentExercises, setRecentExercises] =
+    useState<RecentExercise[]>([]);
 
-  const results = useMemo(() => {
-    const search = query.trim().toLowerCase();
-
-    if (!search) return [];
-
-    return EXERCISES.filter((exercise) =>
-      exercise.name.toLowerCase().includes(search)
-    );
-  }, [query]);
+  const {
+    data: exercises = [],
+    isLoading,
+  } = useSearchExercises(query);
 
   const hasQuery = query.trim().length > 0;
+
+  // ==========================================
+  // LOAD RECENT EXERCISES
+  // ==========================================
+
+  useEffect(() => {
+    loadRecentExercises();
+  }, []);
+
+  const loadRecentExercises = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(
+        RECENT_EXERCISES_KEY
+      );
+
+      if (!stored) return;
+
+      const parsed: unknown = JSON.parse(stored);
+
+      if (!Array.isArray(parsed)) return;
+
+      const valid = parsed.filter(
+        (item): item is RecentExercise =>
+          typeof item === "object" &&
+          item !== null &&
+          "id" in item &&
+          "name" in item &&
+          typeof item.id === "number" &&
+          typeof item.name === "string"
+      );
+
+      setRecentExercises(valid);
+    } catch (error) {
+      console.error(
+        "Failed to load recent exercises:",
+        error
+      );
+    }
+  };
+
+  // ==========================================
+  // SAVE RECENT EXERCISE
+  // ==========================================
+
+  const saveRecentExercise = async (
+    exercise: RecentExercise
+  ) => {
+    const updated = [
+      exercise,
+      ...recentExercises.filter(
+        (item) => item.id !== exercise.id
+      ),
+    ].slice(0, MAX_RECENT_EXERCISES);
+
+    setRecentExercises(updated);
+
+    try {
+      await AsyncStorage.setItem(
+        RECENT_EXERCISES_KEY,
+        JSON.stringify(updated)
+      );
+    } catch (error) {
+      console.error(
+        "Failed to save recent exercise:",
+        error
+      );
+    }
+  };
+
+  // ==========================================
+  // OPEN EXERCISE
+  // ==========================================
+
+  const openExercise = async (exercise: RecentExercise) => {
+    await saveRecentExercise(exercise);
+    
+    router.push({
+      pathname: "/(app)/workout-details",
+      params: {
+        fetch: "true",
+        workoutId: String(exercise.id),
+      },
+    });
+  };
+
+  // ==========================================
+  // RECENT CLICK
+  // ==========================================
+
+  const handleRecentPress = async (
+    name: string
+  ) => {
+    const exercise = recentExercises.find(
+      (item) => item.name === name
+    );
+
+    if (!exercise) return;
+
+    await openExercise(exercise);
+  };
+
+  // ==========================================
+  // RENDER
+  // ==========================================
 
   return (
     <AppBackground>
       <SafeAreaView style={styles.container}>
 
-        {/* SEARCH HEADER */}
+        {/* HEADER */}
+
         <SearchHeader
           query={query}
           setQuery={setQuery}
@@ -56,84 +162,118 @@ export default function ExerciseSearchScreen() {
           placeholder="Search exercises..."
         />
 
-        <FlatList
-          data={results}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={[
-            styles.list,
-            !hasQuery && styles.emptyList,
-          ]}
+        {/* CONTENT */}
 
-          /* RESULTS HEADER */
-          ListHeaderComponent={
-            hasQuery && results.length > 0 ? (
-              <Text style={styles.resultLabel}>
-                {results.length}{" "}
-                {results.length === 1
-                  ? "exercise"
-                  : "exercises"}{" "}
-                found
-              </Text>
-            ) : null
-          }
-
-          /* EMPTY STATE */
-          ListEmptyComponent={
-            hasQuery ? (
-              <EmptyState
-                icon={Search}
-                title="No exercises found"
-                subtitle={`We couldn't find an exercise matching "${query.trim()}". Try a different name.`}
+        {!hasQuery ? (
+          /*
+           * RECENT SEARCHES
+           */
+          <FlatList
+            data={[]}
+            renderItem={null}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.recentContent}
+            ListEmptyComponent={
+              <RecentSection
+                recent={recentExercises.map(
+                  (item) => item.name
+                )}
+                onRecentPress={handleRecentPress}
               />
-            ) : (
-              <EmptyState
-                icon={Dumbbell}
-                title="Find an exercise"
-                subtitle="Search for exercises like Push-Up, Squat, Deadlift, or Plank."
-              />
-            )
-          }
-
-          /* EXERCISE RESULT */
-          renderItem={({ item }) => (
-            <Pressable
-              onPress={() => console.log(item.name)}
-              style={({ pressed }) => [
-                styles.exerciseCard,
-                pressed && styles.exercisePressed,
-              ]}
-            >
-              {/* ICON */}
-              <View style={styles.exerciseIcon}>
-                <Dumbbell
-                  size={18}
-                  color={theme.primaryLight}
-                  strokeWidth={2.2}
+            }
+          />
+        ) : (
+          /*
+           * SEARCH RESULTS
+           */
+          <FlatList
+            data={exercises}
+            keyExtractor={(item) =>
+              String(item.id)
+            }
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={[
+              styles.list,
+              exercises.length === 0 &&
+                styles.emptyList,
+            ]}
+            ListHeaderComponent={
+              exercises.length > 0 ? (
+                <Text style={styles.resultLabel}>
+                  {exercises.length}{" "}
+                  {exercises.length === 1
+                    ? "exercise"
+                    : "exercises"}{" "}
+                  found
+                </Text>
+              ) : null
+            }
+            ListEmptyComponent={
+              isLoading ? (
+                <View
+                  style={styles.loadingContainer}
+                >
+                  <Text
+                    style={styles.loadingText}
+                  >
+                    Searching exercises...
+                  </Text>
+                </View>
+              ) : (
+                <EmptyState
+                  icon={Search}
+                  title="No exercises found"
+                  subtitle={`We couldn't find an exercise matching "${query.trim()}". Try a different name.`}
                 />
-              </View>
+              )
+            }
+            renderItem={({ item }) => (
+              <Pressable
+                onPress={() =>
+                  openExercise({
+                    id: Number(item.id),
+                    name: item.name,
+                  })
+                }
+                style={({ pressed }) => [
+                  styles.exerciseCard,
+                  pressed &&
+                    styles.exercisePressed,
+                ]}
+              >
+                <View style={styles.exerciseIcon}>
+                  <Dumbbell
+                    size={18}
+                    color={theme.primaryLight}
+                    strokeWidth={2.2}
+                  />
+                </View>
 
-              {/* NAME */}
-              <View style={styles.exerciseContent}>
-                <Text style={styles.exerciseName}>
-                  {item.name}
-                </Text>
+                <View style={styles.exerciseContent}>
+                  <Text
+                    style={styles.exerciseName}
+                  >
+                    {item.name}
+                  </Text>
 
-                <Text style={styles.exerciseSubtitle}>
-                  View exercise details
-                </Text>
-              </View>
+                  <Text
+                    style={styles.exerciseSubtitle}
+                  >
+                    View exercise details
+                  </Text>
+                </View>
 
-              {/* ARROW */}
-              <ChevronRight
-                size={18}
-                color={theme.textMuted}
-                strokeWidth={2}
-              />
-            </Pressable>
-          )}
-        />
+                <ChevronRight
+                  size={18}
+                  color={theme.textMuted}
+                  strokeWidth={2}
+                />
+              </Pressable>
+            )}
+          />
+        )}
 
       </SafeAreaView>
     </AppBackground>
@@ -144,6 +284,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
+  /*
+   * RECENT
+   */
+
+  recentContent: {
+    flexGrow: 1,
+  },
+
+  /*
+   * RESULTS
+   */
 
   list: {
     paddingHorizontal: 20,
@@ -166,7 +318,25 @@ const styles = StyleSheet.create({
     color: theme.textMuted,
   },
 
-  /* EXERCISE CARD */
+  /*
+   * LOADING
+   */
+
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 40,
+  },
+
+  loadingText: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: theme.textMuted,
+  },
+
+  /*
+   * EXERCISE CARD
+   */
 
   exerciseCard: {
     minHeight: 66,
@@ -228,7 +398,6 @@ const styles = StyleSheet.create({
 
     fontSize: 10,
     fontWeight: "500",
-
     color: theme.textMuted,
   },
 });

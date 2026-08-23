@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -12,50 +12,68 @@ import {
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import {
   ArrowLeft,
   Play,
   Dumbbell,
   Target,
   ImageOff,
+  ChevronRight,
 } from "lucide-react-native";
 import { theme } from "@/utils/theme";
 import { AppBackground } from "@/components/shared/AppBackground";
+import { useWorkoutInfo } from "../../hook/useWorkout";
+import { Loading } from "@/components/shared/Loading";
 
 const { width } = Dimensions.get("window");
+const HERO_HEIGHT = 330;
 
-function parseArray(value: any): string[] {
+interface WorkoutData {
+  name?: string;
+  category?: string;
+  level?: string;
+  muscles_targeted?: string | string[];
+  equipment?: string | string[];
+  demo_images?: string | string[];
+  video_url?: string;
+  instructions?: string;
+}
+
+function parseArray(value: unknown): string[] {
   try {
-    let result = value;
+    let result: unknown = value;
 
     while (typeof result === "string") {
       result = JSON.parse(result);
     }
 
-    if (!Array.isArray(result)) {
-      return [];
-    }
+    if (!Array.isArray(result)) return [];
 
-    return result.flatMap((item) =>
-      typeof item === "string" && item.startsWith("[")
-        ? parseArray(item)
-        : item
-    );
+    return result.flatMap((item) => {
+      if (typeof item === "string" && item.startsWith("[")) {
+        return parseArray(item);
+      }
+
+      return typeof item === "string" ? [item] : [];
+    });
   } catch {
     return [];
   }
 }
 
-function getYoutubeVideoId(url: string) {
-  try {
-    const urlObj = new URL(url);
+function getYoutubeVideoId(url?: string): string | null {
+  if (!url) return null;
 
-    if (urlObj.hostname.includes("youtube.com")) {
-      return urlObj.searchParams.get("v");
+  try {
+    const parsedUrl = new URL(url);
+
+    if (parsedUrl.hostname.includes("youtube.com")) {
+      return parsedUrl.searchParams.get("v");
     }
 
-    if (urlObj.hostname.includes("youtu.be")) {
-      return urlObj.pathname.slice(1);
+    if (parsedUrl.hostname.includes("youtu.be")) {
+      return parsedUrl.pathname.slice(1);
     }
 
     return null;
@@ -65,96 +83,113 @@ function getYoutubeVideoId(url: string) {
 }
 
 export default function WorkoutTutorialDetails() {
-  const { workout } = useLocalSearchParams();
+  const { workout, workoutId, fetch } =
+    useLocalSearchParams<{
+      workout?: string;
+      workoutId?: string;
+      fetch?: "true" | "false";
+    }>();
+
+  const shouldFetch = fetch === "true" && !!workoutId;
+
+  const { data: workoutInfo, isLoading } = useWorkoutInfo(
+    shouldFetch ? Number(workoutId) : undefined
+  );
 
   const [activeImage, setActiveImage] = useState(0);
   const [failedImages, setFailedImages] = useState<number[]>([]);
 
-  const data = workout
-    ? JSON.parse(workout as string)
-    : null;
+  const workoutData: WorkoutData | null = useMemo(() => {
+    // Search result → use fetched data
+    if (shouldFetch) {
+      return workoutInfo ?? null;
+    }
+  
+    // Normal card → use passed workout data
+    if (workout) {
+      try {
+        return JSON.parse(workout);
+      } catch {
+        return null;
+      }
+    }
+  
+    return null;
+  }, [shouldFetch, workoutInfo, workout]);
 
-  if (!data) {
+
+  if (!workoutData) {
     return (
       <AppBackground>
         <SafeAreaView style={styles.emptyScreen}>
-          <Text style={styles.emptyTitle}>
-            No workout found
+          <View style={styles.emptyIcon}>
+            <Dumbbell size={24} color={theme.primaryLight} />
+          </View>
+
+          <Text style={styles.emptyTitle}>No workout found</Text>
+
+          <Text style={styles.emptySubtitle}>
+            This workout could not be loaded.
           </Text>
+
+          <Pressable
+            onPress={() => router.back()}
+            style={styles.emptyButton}
+          >
+            <Text style={styles.emptyButtonText}>Go Back</Text>
+          </Pressable>
         </SafeAreaView>
       </AppBackground>
     );
   }
 
-  const muscles = parseArray(data.muscles_targeted);
-  const equipment = parseArray(data.equipment);
-  const images = parseArray(data.demo_images);
+  const muscles = parseArray(workoutData.muscles_targeted);
+  const equipment = parseArray(workoutData.equipment);
+  const images = parseArray(workoutData.demo_images);
 
-  const videoId = getYoutubeVideoId(data.video_url);
+  const videoId = getYoutubeVideoId(workoutData.video_url);
 
   const thumbnail = videoId
     ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
     : null;
 
-  const gallery =
-    images.length > 0
-      ? images
-      : thumbnail
-        ? [thumbnail]
-        : [];
+  const gallery = images.length > 0 ? images : thumbnail ? [thumbnail] : [];
+
+  const openYoutube = () => {
+    if (workoutData?.video_url) {
+      Linking.openURL(workoutData.video_url);
+    }
+  };
+
+  if (isLoading) return <Loading />;
 
   return (
     <AppBackground>
       <SafeAreaView style={styles.container}>
-        <View style={styles.backButtonContainer}>
-          <Pressable
-            onPress={() => router.back()}
-            style={({ pressed }) => [
-              styles.backButton,
-              pressed && styles.pressed,
-            ]}
-          >
-            <ArrowLeft
-              size={20}
-              color="#fff"
-              strokeWidth={2.2}
-            />
-          </Pressable>
-        </View>
-
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          <View style={styles.gallery}>
+        <View style={styles.gallery}>
+          {gallery.length > 0 ? (
             <FlatList
               data={gallery}
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
+              keyExtractor={(_, index) => index.toString()}
               onMomentumScrollEnd={(event) => {
-                const index = Math.round(
-                  event.nativeEvent.contentOffset.x / width
+                setActiveImage(
+                  Math.round(
+                    event.nativeEvent.contentOffset.x / width
+                  )
                 );
-
-                setActiveImage(index);
               }}
-              keyExtractor={(_, index) =>
-                index.toString()
-              }
               renderItem={({ item, index }) => {
-                const hasError =
-                  failedImages.includes(index);
-
-                if (hasError) {
+                if (failedImages.includes(index)) {
                   return (
                     <View style={styles.imageError}>
                       <ImageOff
-                        size={42}
+                        size={44}
                         color={theme.textMuted}
-                        strokeWidth={1.8}
+                        strokeWidth={1.7}
                       />
-
                       <Text style={styles.imageErrorText}>
                         Image unavailable
                       </Text>
@@ -165,6 +200,8 @@ export default function WorkoutTutorialDetails() {
                 return (
                   <Image
                     source={{ uri: item }}
+                    style={styles.image}
+                    resizeMode="cover"
                     onError={() => {
                       setFailedImages((prev) =>
                         prev.includes(index)
@@ -172,133 +209,237 @@ export default function WorkoutTutorialDetails() {
                           : [...prev, index]
                       );
                     }}
-                    style={styles.image}
-                    resizeMode="cover"
                   />
                 );
               }}
             />
+          ) : (
+            <View style={styles.imageError}>
+              <ImageOff
+                size={44}
+                color={theme.textMuted}
+                strokeWidth={1.7}
+              />
+              <Text style={styles.imageErrorText}>
+                No workout image
+              </Text>
+            </View>
+          )}
 
-            {gallery.length > 1 && (
-              <View style={styles.pagination}>
-                {gallery.map((_, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.dot,
-                      activeImage === index
-                        ? styles.activeDot
-                        : styles.inactiveDot,
-                    ]}
-                  />
-                ))}
-              </View>
-            )}
+          <LinearGradient
+            pointerEvents="none"
+            colors={[
+              "rgba(0,0,0,0.05)",
+              "rgba(0,0,0,0.12)",
+              "rgba(11,13,16,0.88)",
+              theme.bg,
+            ]}
+            locations={[0, 0.38, 0.78, 1]}
+            style={styles.heroGradient}
+          />
+
+          <View style={styles.backButtonContainer}>
+            <Pressable
+              onPress={() => router.back()}
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <ArrowLeft
+                size={21}
+                color="#fff"
+                strokeWidth={2.3}
+              />
+            </Pressable>
           </View>
 
+          <View style={styles.heroContent}>
+            <View style={styles.badges}>
+              {workoutData.category && (
+                <View style={styles.categoryBadge}>
+                  <Text style={styles.categoryBadgeText}>
+                    {workoutData.category}
+                  </Text>
+                </View>
+              )}
+
+              {workoutData.level && (
+                <View style={styles.levelBadge}>
+                  <Text style={styles.levelBadgeText}>
+                    {workoutData.level}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <Text style={styles.title} numberOfLines={2}>
+              {workoutData.name}
+            </Text>
+          </View>
+
+          {gallery.length > 1 && (
+            <View style={styles.pagination}>
+              {gallery.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.dot,
+                    activeImage === index
+                      ? styles.activeDot
+                      : styles.inactiveDot,
+                  ]}
+                />
+              ))}
+            </View>
+          )}
+        </View>
+
+        <ScrollView
+          style={styles.infoScroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.content}>
-            <View style={styles.titleRow}>
-              <View style={styles.titleContainer}>
-                <Text style={styles.title}>
-                  {data.name}
-                </Text>
-
-                <Text style={styles.category}>
-                  {data.category}
-                  {" • "}
-                  {data.level}
-                </Text>
-              </View>
-
-              <View style={styles.workoutIcon}>
+            <View style={styles.introRow}>
+              <View style={styles.introIcon}>
                 <Dumbbell
-                  size={19}
+                  size={20}
                   color={theme.primaryLight}
                   strokeWidth={2}
                 />
               </View>
+
+              <View style={styles.introText}>
+                <Text style={styles.introLabel}>
+                  WORKOUT TUTORIAL
+                </Text>
+
+                <Text style={styles.introDescription}>
+                  Follow the proper technique and form for this
+                  exercise.
+                </Text>
+              </View>
             </View>
 
-            <View style={styles.infoCard}>
-              <View style={styles.infoRow}>
-                <View style={styles.infoIcon}>
-                  <Dumbbell
-                    size={16}
-                    color={theme.primaryLight}
-                    strokeWidth={2}
-                  />
+            <View style={styles.section}>
+              <Text style={styles.sectionEyebrow}>
+                EQUIPMENT
+              </Text>
+
+              {equipment.length > 0 ? (
+                <View style={styles.equipmentList}>
+                  {equipment.map((item, index) => (
+                    <View
+                      key={`${item}-${index}`}
+                      style={styles.equipmentItem}
+                    >
+                      <View style={styles.equipmentIcon}>
+                        <Dumbbell
+                          size={15}
+                          color={theme.primaryLight}
+                          strokeWidth={2}
+                        />
+                      </View>
+
+                      <Text style={styles.equipmentText}>
+                        {item}
+                      </Text>
+
+                      <ChevronRight
+                        size={15}
+                        color={theme.textMuted}
+                      />
+                    </View>
+                  ))}
                 </View>
+              ) : (
+                <Text style={styles.mutedText}>
+                  No equipment required
+                </Text>
+              )}
+            </View>
 
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>
-                    Equipment
-                  </Text>
+            <View style={styles.section}>
+              <Text style={styles.sectionEyebrow}>
+                TARGET MUSCLES
+              </Text>
 
-                  <Text style={styles.infoValue}>
-                    {equipment.join(", ")}
-                  </Text>
+              {muscles.length > 0 ? (
+                <View style={styles.muscleChips}>
+                  {muscles.map((muscle, index) => (
+                    <View
+                      key={`${muscle}-${index}`}
+                      style={styles.muscleChip}
+                    >
+                      <Target
+                        size={13}
+                        color={theme.primaryLight}
+                        strokeWidth={2}
+                      />
+
+                      <Text style={styles.muscleText}>
+                        {muscle}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
-              </View>
-
-              <View style={styles.infoDivider} />
-
-              <View style={styles.infoRow}>
-                <View style={styles.infoIcon}>
-                  <Target
-                    size={16}
-                    color={theme.primaryLight}
-                    strokeWidth={2}
-                  />
-                </View>
-
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>
-                    Target Muscles
-                  </Text>
-
-                  <Text style={styles.infoValue}>
-                    {muscles.join(", ")}
-                  </Text>
-                </View>
-              </View>
+              ) : (
+                <Text style={styles.mutedText}>
+                  No target muscles specified
+                </Text>
+              )}
             </View>
 
             <View style={styles.instructionsSection}>
-              <Text style={styles.sectionTitle}>
-                Instructions
+              <Text style={styles.sectionEyebrow}>
+                HOW TO PERFORM
               </Text>
 
-              <View style={styles.instructionsCard}>
-                <Text style={styles.instructions}>
-                  {data.instructions}
-                </Text>
-              </View>
+              <Text style={styles.instructions}>
+                {workoutData.instructions ||
+                  "Follow proper form and controlled movement throughout the exercise."}
+              </Text>
             </View>
           </View>
         </ScrollView>
 
-        <View style={styles.bottomBar}>
-          <Pressable
-            onPress={() =>
-              Linking.openURL(data.video_url)
-            }
-            style={({ pressed }) => [
-              styles.youtubeButton,
-              pressed && styles.youtubePressed,
-            ]}
-          >
-            <Play
-              size={18}
-              color="#fff"
-              fill="#fff"
-              strokeWidth={2}
-            />
+        {workoutData.video_url && (
+          <View style={styles.bottomBar}>
+            <Pressable
+              onPress={openYoutube}
+              style={({ pressed }) => [
+                styles.youtubeButton,
+                pressed && styles.youtubePressed,
+              ]}
+            >
+              <View style={styles.youtubeIcon}>
+                <Play
+                  size={16}
+                  color="#fff"
+                  fill="#fff"
+                  strokeWidth={2}
+                />
+              </View>
 
-            <Text style={styles.youtubeText}>
-              Watch on YouTube
-            </Text>
-          </Pressable>
-        </View>
+              <View style={styles.youtubeContent}>
+                <Text style={styles.youtubeLabel}>
+                  VIDEO TUTORIAL
+                </Text>
+
+                <Text style={styles.youtubeText}>
+                  Watch on YouTube
+                </Text>
+              </View>
+
+              <ChevronRight
+                size={19}
+                color="#fff"
+                strokeWidth={2.2}
+              />
+            </Pressable>
+          </View>
+        )}
       </SafeAreaView>
     </AppBackground>
   );
@@ -307,250 +448,332 @@ export default function WorkoutTutorialDetails() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "transparent",
   },
-
-  scrollContent: {
-    paddingBottom: 105,
+  gallery: {
+    width,
+    height: HERO_HEIGHT,
+    position: "relative",
+    backgroundColor: theme.surface,
+    overflow: "hidden",
   },
-
+  image: {
+    width,
+    height: HERO_HEIGHT,
+  },
+  heroGradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: HERO_HEIGHT,
+  },
+  heroContent: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    bottom: 30,
+  },
+  badges: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    marginBottom: 9,
+  },
+  categoryBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: theme.primaryLight,
+  },
+  categoryBadgeText: {
+    fontSize: 9.5,
+    fontWeight: "800",
+    color: "#fff",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  levelBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.18)",
+  },
+  levelBadgeText: {
+    fontSize: 9.5,
+    fontWeight: "700",
+    color: "#fff",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  title: {
+    fontSize: 29,
+    lineHeight: 34,
+    fontWeight: "800",
+    color: "#fff",
+    letterSpacing: -0.8,
+  },
   backButtonContainer: {
     position: "absolute",
-    top: 50,
+    top: 15,
     left: 16,
     zIndex: 10,
   },
-
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 13,
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(15,23,42,0.72)",
+    backgroundColor: "rgba(11,13,16,0.62)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.16)",
   },
-
   pressed: {
-    opacity: 0.75,
+    opacity: 0.72,
+    transform: [{ scale: 0.96 }],
   },
-
-  gallery: {
-    width,
-    height: 320,
-    backgroundColor: theme.surface,
-  },
-
-  image: {
-    width,
-    height: 320,
-  },
-
   imageError: {
     width,
-    height: 320,
+    height: HERO_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.surface,
   },
-
   imageErrorText: {
-    marginTop: 9,
+    marginTop: 10,
     fontSize: 11,
+    fontWeight: "600",
     color: theme.textMuted,
   },
-
   pagination: {
     position: "absolute",
-    bottom: 18,
-    left: 0,
-    right: 0,
+    bottom: 15,
+    right: 20,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
+    gap: 5,
   },
-
   dot: {
-    height: 6,
+    height: 5,
     borderRadius: 999,
   },
-
   activeDot: {
-    width: 21,
+    width: 19,
     backgroundColor: theme.primaryLight,
   },
-
   inactiveDot: {
-    width: 6,
-    backgroundColor: "rgba(255,255,255,0.65)",
+    width: 5,
+    backgroundColor: "rgba(255,255,255,0.55)",
   },
-
-  content: {
-    marginTop: -20,
-    paddingHorizontal: 20,
-    paddingTop: 22,
-    paddingBottom: 25,
-    backgroundColor: "transparent",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-  },
-
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-  },
-
-  titleContainer: {
+  infoScroll: {
     flex: 1,
-    marginRight: 14,
   },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: theme.text,
-    letterSpacing: -0.6,
+  scrollContent: {
+    paddingBottom: 100,
   },
-
-  category: {
-    marginTop: 6,
-    fontSize: 11.5,
-    fontWeight: "700",
-    color: theme.primaryLight,
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 25,
   },
-
-  workoutIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+  introRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom: 22,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+  introIcon: {
+    width: 43,
+    height: 43,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.accentWash,
     borderWidth: 1,
-    borderColor: "rgba(16,185,129,0.18)",
+    borderColor: "rgba(16,185,129,0.15)",
   },
-
-  infoCard: {
-    marginTop: 20,
-    padding: 13,
-    borderRadius: 16,
-    backgroundColor: theme.card,
-    borderWidth: 1,
-    borderColor: "rgba(16,185,129,0.16)",
+  introText: {
+    flex: 1,
+    marginLeft: 12,
   },
-
-  infoRow: {
+  introLabel: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: theme.primaryLight,
+    letterSpacing: 1,
+  },
+  introDescription: {
+    marginTop: 4,
+    fontSize: 11.5,
+    lineHeight: 17,
+    fontWeight: "500",
+    color: theme.textMuted,
+  },
+  section: {
+    marginTop: 25,
+  },
+  sectionEyebrow: {
+    marginBottom: 11,
+    fontSize: 9.5,
+    fontWeight: "800",
+    color: theme.textMuted,
+    letterSpacing: 1.1,
+  },
+  equipmentList: {
+    gap: 8,
+  },
+  equipmentItem: {
+    minHeight: 48,
+    paddingHorizontal: 11,
+    borderRadius: 14,
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: theme.card,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
-
-  infoIcon: {
-    width: 34,
-    height: 34,
+  equipmentIcon: {
+    width: 32,
+    height: 32,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.accentWash,
-    borderWidth: 1,
-    borderColor: "rgba(16,185,129,0.14)",
   },
-
-  infoContent: {
+  equipmentText: {
     flex: 1,
-    marginLeft: 11,
-  },
-
-  infoLabel: {
-    fontSize: 9.5,
-    fontWeight: "600",
-    color: theme.textMuted,
-  },
-
-  infoValue: {
-    marginTop: 2,
-    fontSize: 11.5,
-    fontWeight: "600",
-    color: theme.text,
-    lineHeight: 17,
-  },
-
-  infoDivider: {
-    height: 1,
-    marginVertical: 11,
-    backgroundColor: theme.border,
-  },
-
-  instructionsSection: {
-    marginTop: 24,
-  },
-
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: theme.text,
-  },
-
-  instructionsCard: {
-    marginTop: 10,
-    padding: 14,
-    borderRadius: 15,
-    backgroundColor: theme.card,
-    borderWidth: 1,
-    borderColor: "rgba(16,185,129,0.14)",
-  },
-
-  instructions: {
+    marginLeft: 10,
     fontSize: 12,
-    lineHeight: 20,
+    fontWeight: "600",
+    color: theme.text,
+  },
+  muscleChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  muscleChip: {
+    paddingHorizontal: 11,
+    paddingVertical: 8,
+    borderRadius: 999,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: "rgba(16,185,129,0.16)",
+  },
+  muscleText: {
+    fontSize: 10.5,
+    fontWeight: "700",
+    color: theme.primaryLight,
+  },
+  instructionsSection: {
+    marginTop: 30,
+    paddingTop: 25,
+    borderTopWidth: 1,
+    borderTopColor: theme.border,
+  },
+  instructions: {
+    fontSize: 13,
+    lineHeight: 22,
+    fontWeight: "500",
     color: theme.textMuted,
   },
-
+  mutedText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: theme.textMuted,
+  },
   bottomBar: {
     position: "absolute",
-    bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 16,
+    bottom: 0,
+    paddingHorizontal: 18,
     paddingTop: 10,
     paddingBottom: 12,
-    backgroundColor: theme.bg,
+    backgroundColor: "rgba(11,13,16,0.96)",
     borderTopWidth: 1,
     borderColor: theme.border,
   },
-
   youtubeButton: {
-    height: 50,
-    borderRadius: 14,
+    minHeight: 56,
+    paddingHorizontal: 14,
+    borderRadius: 17,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.primary,
+  },
+  youtubeIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 11,
     alignItems: "center",
     justifyContent: "center",
-    flexDirection: "row",
-    gap: 8,
-    backgroundColor: theme.primaryLight,
+    backgroundColor: "rgba(255,255,255,0.16)",
   },
-
-  youtubePressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.99 }],
+  youtubeContent: {
+    flex: 1,
+    marginLeft: 10,
   },
-
+  youtubeLabel: {
+    fontSize: 8.5,
+    fontWeight: "800",
+    color: "rgba(255,255,255,0.68)",
+    letterSpacing: 1,
+  },
   youtubeText: {
+    marginTop: 2,
+    fontSize: 13,
+    fontWeight: "800",
     color: "#fff",
-    fontSize: 12.5,
-    fontWeight: "700",
   },
-
+  youtubePressed: {
+    opacity: 0.82,
+    transform: [{ scale: 0.985 }],
+  },
   emptyScreen: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "transparent",
+    paddingHorizontal: 30,
   },
-
+  emptyIcon: {
+    width: 58,
+    height: 58,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: "rgba(16,185,129,0.16)",
+    marginBottom: 14,
+  },
   emptyTitle: {
-    fontSize: 13,
+    fontSize: 18,
+    fontWeight: "800",
+    color: theme.text,
+  },
+  emptySubtitle: {
+    marginTop: 6,
+    fontSize: 12,
+    textAlign: "center",
     color: theme.textMuted,
+  },
+  emptyButton: {
+    marginTop: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+    borderRadius: 12,
+    backgroundColor: theme.primary,
+  },
+  emptyButtonText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#fff",
   },
 });

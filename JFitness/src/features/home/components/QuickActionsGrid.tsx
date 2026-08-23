@@ -19,9 +19,7 @@ interface QuickActionsGridProps {
   actions: QuickAction[];
 }
 
-export function QuickActionsGrid({
-  actions,
-}: QuickActionsGridProps) {
+export function QuickActionsGrid({ actions }: QuickActionsGridProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Quick Actions</Text>
@@ -30,6 +28,7 @@ export function QuickActionsGrid({
         {actions.map((action, index) => {
           const Icon = action.icon;
           const iconColor = action.color ?? theme.primary;
+          const bgColor = action.bg ?? `${iconColor}14`;
 
           return (
             <Pressable
@@ -40,39 +39,33 @@ export function QuickActionsGrid({
                 pressed && styles.cardPressed,
               ]}
             >
-              {/* Centered Icon */}
+              {/* Icon */}
               <View
                 style={[
                   styles.iconBox,
                   {
-                    backgroundColor:
-                      action.bg ?? `${iconColor}18`,
-                    borderColor: `${iconColor}45`,
+                    backgroundColor: bgColor,
+                    borderColor: `${iconColor}28`,
                   },
                 ]}
               >
                 <Icon
                   size={20}
                   color={iconColor}
-                  strokeWidth={2.2}
+                  strokeWidth={2.1}
                 />
               </View>
 
               {/* Label */}
-              <Text
-                style={styles.label}
-                numberOfLines={2}
-              >
+              <Text style={styles.label} numberOfLines={2}>
                 {action.label}
               </Text>
 
-              {/* Centered Accent Underline */}
+              {/* Accent underline */}
               <View
                 style={[
                   styles.accentLine,
-                  {
-                    backgroundColor: iconColor,
-                  },
+                  { backgroundColor: iconColor },
                 ]}
               />
             </Pressable>
@@ -84,114 +77,72 @@ export function QuickActionsGrid({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    
-  },
-
+  container: {},
   title: {
     marginBottom: 12,
     fontSize: 16,
     fontWeight: "700",
     color: theme.text,
-    letterSpacing: -0.2,
+    letterSpacing: -0.25,
   },
-
   row: {
     flexDirection: "row",
     gap: 10,
   },
-
   card: {
     flex: 1,
-
-    minHeight: 112,
-
+    minHeight: 108,
     paddingHorizontal: 8,
-    paddingVertical: 14,
-
+    paddingTop: 14,
+    paddingBottom: 12,
     borderRadius: 16,
-
     backgroundColor: theme.card,
-
-    // Sharper visible border
     borderWidth: 1,
-    borderColor: theme.borderAccent,
-
+    borderColor: theme.border,
     alignItems: "center",
-    justifyContent: "center",
-
+    justifyContent: "flex-start",
     overflow: "hidden",
-
+    // Soft professional shadow
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
-
   cardPressed: {
-    transform: [
-      {
-        scale: 0.97,
-      },
-    ],
-    borderColor: theme.primary,
-    opacity: 0.9,
+    transform: [{ scale: 0.97 }],
+    borderColor: theme.primary + "60",
+    opacity: 0.92,
   },
   iconBox: {
     width: 42,
     height: 42,
-  
     borderRadius: 13,
-  
     alignItems: "center",
     justifyContent: "center",
-  
-    marginBottom: 9,
-  
-    // Dark background
-    backgroundColor: theme.surface,
-  
-    // Very subtle border
+    marginBottom: 10,
     borderWidth: 1,
-    borderColor: theme.border,
-  
-    // Soft glow
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowRadius: 10,
-    shadowOpacity: 0.35,
-  
-    elevation: 3,
+    // Clean soft shadow for depth
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 1,
   },
-
   label: {
-    fontSize: 11,
+    fontSize: 11.5,
     lineHeight: 15,
-
     fontWeight: "600",
-
-    color: theme.textSub,
-
+    color: theme.text,          // stronger primary text
     textAlign: "center",
+    paddingHorizontal: 2,
   },
-
   accentLine: {
     position: "absolute",
-
     bottom: 0,
-
-    width: 28,
-    height: 2,
-
+    width: 26,
+    height: 2.5,
     borderRadius: 999,
-
-    opacity: 0.85,
+    opacity: 0.9,
   },
 });

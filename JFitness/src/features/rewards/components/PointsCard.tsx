@@ -1,496 +1,234 @@
 import { View, Text, StyleSheet } from "react-native";
-
-import {
-  Trophy,
-} from "lucide-react-native";
-
-import {
-  LinearGradient,
-} from "expo-linear-gradient";
-
+import { Trophy } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "@/utils/theme";
 
 interface PointsCardProps {
   points: number;
 }
 
-export default function PointsCard({
-  points,
-}: PointsCardProps) {
-
-  const MAX_POINTS = 1000;
-
-  const progress =
-    Math.min(
-      (points / MAX_POINTS) * 100,
-      100
-    );
-
-  const remaining =
-    Math.max(
-      MAX_POINTS - points,
-      0
-    );
+export default function PointsCard({ points }: PointsCardProps) {
+  const maxPoints = 1000;
+  const progress = Math.min((points / maxPoints) * 100, 100);
+  const remainingPoints = Math.max(maxPoints - points, 0);
 
   return (
     <View style={styles.card}>
-
-      {/* ================= ACCENT GLOW ================= */}
-
-      <View
-        style={styles.glow}
-        pointerEvents="none"
-      />
-
       <LinearGradient
-        colors={[
-          theme.card,
-          "#111a19",
-          theme.card,
-        ]}
-        start={{
-          x: 0,
-          y: 0,
-        }}
-        end={{
-          x: 1,
-          y: 1,
-        }}
+        colors={[theme.primaryDark, theme.primary, theme.primaryLight]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={styles.gradient}
       >
-
-        {/* ================= HEADER ================= */}
+        <View style={styles.glow} />
 
         <View style={styles.header}>
-
           <View style={styles.headerLeft}>
-
             <View style={styles.iconBox}>
-
               <Trophy
-                size={18}
-                color={theme.primaryLight}
+                size={17}
+                color="#FFD6DE"
                 strokeWidth={2}
               />
-
             </View>
 
             <View>
-
-              <Text
-                style={styles.eyebrow}
-              >
-                REWARD POINTS
-              </Text>
-
-              <Text
-                style={styles.points}
-              >
+              <Text style={styles.eyebrow}>REWARD POINTS</Text>
+              <Text style={styles.points}>
                 {points.toLocaleString()}
               </Text>
-
             </View>
-
           </View>
-
-
-          {/* POINT STATUS */}
 
           <View style={styles.status}>
-
-            <View
-              style={styles.statusDot}
-            />
-
-            <Text
-              style={styles.statusText}
-            >
-              {points >= MAX_POINTS
-                ? "Unlocked"
-                : "Active"}
+            <View style={styles.statusDot} />
+            <Text style={styles.statusText}>
+              {points >= maxPoints ? "Unlocked" : "Active"}
             </Text>
-
           </View>
-
         </View>
 
-
-        {/* ================= POINTS INFO ================= */}
-
-        <View
-          style={styles.pointsInfo}
-        >
-
+        <View style={styles.pointsInfo}>
           <View>
-
-            <Text
-              style={styles.label}
-            >
-              CURRENT POINTS
-            </Text>
-
-            <Text
-              style={styles.currentPoints}
-            >
+            <Text style={styles.label}>CURRENT POINTS</Text>
+            <Text style={styles.currentPoints}>
               {points.toLocaleString()}
-              <Text
-                style={styles.maxPoints}
-              >
+              <Text style={styles.maxPoints}>
                 {" / "}
-                {MAX_POINTS.toLocaleString()}
+                {maxPoints.toLocaleString()}
               </Text>
             </Text>
-
           </View>
 
-          <Text
-            style={styles.percent}
-          >
+          <Text style={styles.percent}>
             {Math.round(progress)}%
           </Text>
-
         </View>
 
-
-        {/* ================= PROGRESS ================= */}
-
-        <View
-          style={styles.progressTrack}
-        >
-
-          <LinearGradient
-            colors={[
-              theme.primaryDark,
-              theme.primary,
-              theme.primaryLight,
-            ]}
-            start={{
-              x: 0,
-              y: 0,
-            }}
-            end={{
-              x: 1,
-              y: 0,
-            }}
+        <View style={styles.progressTrack}>
+          <View
             style={[
               styles.progressFill,
-              {
-                width: `${progress}%`,
-              },
+              { width: `${progress}%` },
             ]}
           />
-
         </View>
 
-
-        {/* ================= FOOTER ================= */}
-
-        <View
-          style={styles.footer}
-        >
-
-          <Text
-            style={styles.footerText}
-          >
-            {remaining > 0
-              ? `${remaining.toLocaleString()} points until next reward`
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            {remainingPoints > 0
+              ? `${remainingPoints.toLocaleString()} points until next reward`
               : "Next reward unlocked"}
           </Text>
 
-          <Text
-            style={styles.footerPoints}
-          >
+          <Text style={styles.footerPoints}>
             {points.toLocaleString()} pts
           </Text>
-
         </View>
-
       </LinearGradient>
-
     </View>
   );
 }
 
-
 const styles = StyleSheet.create({
-
-  /* ================= CARD ================= */
-
   card: {
-    marginHorizontal: 20,
-
     borderRadius: 20,
-
     overflow: "hidden",
-
-    backgroundColor:
-      theme.card,
-
+    backgroundColor: theme.primaryDark,
     borderWidth: 1,
-
-    borderColor:
-      theme.borderAccent,
-
-    shadowColor: "#000",
-
+    borderColor: "rgba(255, 232, 237, 0.25)",
+    shadowColor: theme.primaryDark,
     shadowOffset: {
       width: 0,
       height: 10,
     },
-
-    shadowOpacity: 0.25,
-
-    shadowRadius: 20,
-
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
     elevation: 8,
   },
-
   gradient: {
     padding: 18,
   },
-
   glow: {
     position: "absolute",
-
-    width: 170,
-
-    height: 170,
-
-    borderRadius: 999,
-
-    right: -85,
-
-    top: -85,
-
-    backgroundColor:
-      theme.primary,
-
+    width: 160,
+    height: 160,
+    borderRadius: 100,
+    right: -70,
+    top: -70,
+    backgroundColor: "#FFFFFF",
     opacity: 0.07,
   },
-
-
-  /* ================= HEADER ================= */
-
   header: {
     flexDirection: "row",
-
     alignItems: "center",
-
-    justifyContent:
-      "space-between",
-
-    gap: 10,
+    justifyContent: "space-between",
   },
-
   headerLeft: {
     flexDirection: "row",
-
     alignItems: "center",
-
-    gap: 11,
-
+    gap: 12,
     flex: 1,
   },
-
   iconBox: {
-    width: 40,
-
-    height: 40,
-
+    width: 38,
+    height: 38,
     borderRadius: 12,
-
     alignItems: "center",
-
     justifyContent: "center",
-
-    backgroundColor:
-      theme.accentWash,
-
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
     borderWidth: 1,
-
-    borderColor:
-      theme.borderAccent,
+    borderColor: "rgba(255, 255, 255, 0.18)",
   },
-
   eyebrow: {
-    fontSize: 9,
-
-    fontWeight: "700",
-
-    letterSpacing: 1,
-
-    color:
-      theme.textMuted,
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 0.9,
+    color: "rgba(255, 232, 237, 0.75)",
   },
-
   points: {
-    marginTop: 1,
-
-    fontSize: 25,
-
-    lineHeight: 29,
-
-    fontWeight: "800",
-
-    color:
-      theme.text,
-
-    letterSpacing: -0.5,
+    marginTop: 3,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#FFFFFF",
   },
-
-
-  /* ================= STATUS ================= */
-
   status: {
     flexDirection: "row",
-
     alignItems: "center",
-
-    paddingHorizontal: 9,
-
-    paddingVertical: 6,
-
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 999,
-
-    backgroundColor:
-      theme.accentWash,
-
+    backgroundColor: "rgba(255, 255, 255, 0.14)",
     borderWidth: 1,
-
-    borderColor:
-      theme.borderAccent,
+    borderColor: "rgba(255, 255, 255, 0.22)",
   },
-
   statusDot: {
     width: 6,
-
     height: 6,
-
     borderRadius: 999,
-
-    backgroundColor:
-      theme.primaryLight,
-
+    backgroundColor: "#A7F3D0",
     marginRight: 6,
   },
-
   statusText: {
-    fontSize: 9.5,
-
-    fontWeight: "700",
-
-    color:
-      theme.primaryLight,
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#F0FDF4",
   },
-
-
-  /* ================= POINTS INFO ================= */
-
   pointsInfo: {
-    marginTop: 20,
-
+    marginTop: 22,
     flexDirection: "row",
-
     alignItems: "flex-end",
-
-    justifyContent:
-      "space-between",
+    justifyContent: "space-between",
   },
-
   label: {
-    fontSize: 8,
-
-    fontWeight: "700",
-
-    letterSpacing: 0.8,
-
-    color:
-      theme.textMuted,
+    fontSize: 9,
+    fontWeight: "600",
+    letterSpacing: 0.7,
+    color: "rgba(255, 232, 237, 0.65)",
   },
-
   currentPoints: {
     marginTop: 3,
-
-    fontSize: 14,
-
+    fontSize: 16,
     fontWeight: "800",
-
-    color:
-      theme.primaryLight,
+    color: "#FFFFFF",
   },
-
   maxPoints: {
-    fontSize: 10,
-
+    fontSize: 11,
     fontWeight: "500",
-
-    color:
-      theme.textMuted,
+    color: "rgba(255, 255, 255, 0.55)",
   },
-
   percent: {
     fontSize: 11,
-
     fontWeight: "800",
-
-    color:
-      theme.textSub,
+    color: "rgba(255, 232, 237, 0.9)",
   },
-
-
-  /* ================= PROGRESS ================= */
-
   progressTrack: {
-    height: 7,
-
-    marginTop: 12,
-
+    height: 6,
+    marginTop: 14,
     borderRadius: 999,
-
-    backgroundColor:
-      theme.surface3,
-
+    backgroundColor: "rgba(255, 255, 255, 0.18)",
     overflow: "hidden",
   },
-
   progressFill: {
     height: "100%",
-
     borderRadius: 999,
+    backgroundColor: "#FFE8ED",
   },
-
-
-  /* ================= FOOTER ================= */
-
   footer: {
     marginTop: 9,
-
     flexDirection: "row",
-
     alignItems: "center",
-
-    justifyContent:
-      "space-between",
+    justifyContent: "space-between",
   },
-
   footerText: {
     flex: 1,
-
-    fontSize: 9.5,
-
-    color:
-      theme.textMuted,
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.6)",
   },
-
   footerPoints: {
     marginLeft: 10,
-
-    fontSize: 9.5,
-
+    fontSize: 11,
     fontWeight: "700",
-
-    color:
-      theme.textSub,
+    color: "rgba(255, 232, 237, 0.9)",
   },
-
 });

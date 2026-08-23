@@ -1,5 +1,5 @@
 import { formatNotificationTime } from "@/utils/timeAgoFormatter";
-import { View, Text, TouchableOpacity } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "@/utils/theme";
 
 type Props = {
@@ -24,120 +24,132 @@ export function NotificationCard({
   onMarkAsRead,
 }: Props) {
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        gap: 12,
-        padding: 14,
-        borderRadius: 18,
-        backgroundColor: unread ? theme.card : theme.surface,
-        shadowColor: "#000",
-        shadowOpacity: unread ? 0.08 : 0,
-        shadowRadius: 8,
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        elevation: unread ? 3 : 0,
-        borderWidth: 1,
-        borderColor: theme.borderAccent,
-      }}
-    >
-      <View
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: 12,
-          backgroundColor: iconBg,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+    <View style={[styles.card, unread ? styles.unreadCard : styles.readCard]}>
+      <View style={[styles.iconContainer, { backgroundColor: iconBg }]}>
         <Icon size={17} color={iconColor} />
       </View>
 
-      <View style={{ flex: 1 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-          }}
-        >
+      <View style={styles.content}>
+        <View style={styles.titleRow}>
           <Text
-            style={{
-              flex: 1,
-              fontSize: 13,
-              fontWeight: unread ? "700" : "500",
-              color: theme.text,
-            }}
+            numberOfLines={2}
+            style={[styles.title, unread ? styles.unreadTitle : styles.readTitle]}
           >
             {title}
           </Text>
 
           {unread && (
-            <View
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: 99,
-                backgroundColor: iconColor,
-                marginTop: 4,
-                marginLeft: 8,
-              }}
-            />
+            <View style={[styles.unreadDot, { backgroundColor: iconColor }]} />
           )}
         </View>
 
-        <Text
-          style={{
-            fontSize: 12,
-            color: theme.textSub,
-            marginTop: 4,
-            lineHeight: 18,
-          }}
-        >
-          {body}
-        </Text>
+        <Text style={styles.body}>{body}</Text>
 
-        <View style={{ marginTop: 10 }}>
-          <Text
-            style={{
-              fontSize: 11,
-              color: theme.textMuted,
-            }}
-          >
-            {formatNotificationTime(time)}
-          </Text>
+        <View style={styles.footer}>
+          <Text style={styles.time}>{formatNotificationTime(time)}</Text>
 
-          {unread && (
-            <TouchableOpacity
+          {unread && onMarkAsRead && (
+            <Pressable
               onPress={onMarkAsRead}
-              activeOpacity={0.7}
-              style={{
-                marginTop: 8,
-                backgroundColor: theme.primary,
-                paddingHorizontal: 14,
-                paddingVertical: 7,
-                borderRadius: 10,
-                alignSelf: "flex-end",
-                borderWidth: 1,
-                borderColor: theme.borderAccent,
-              }}
+              style={({ pressed }) => [
+                styles.markReadButton,
+                pressed && styles.markReadPressed,
+              ]}
             >
-              <Text
-                style={{
-                  color: "#ffffff",
-                  fontSize: 12,
-                  fontWeight: "600",
-                }}
-              >
-                Mark as read
-              </Text>
-            </TouchableOpacity>
+              <Text style={styles.markReadText}>Mark as read</Text>
+            </Pressable>
           )}
         </View>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    gap: 12,
+    padding: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+  unreadCard: {
+    backgroundColor: theme.card,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    elevation: 3,
+  },
+  readCard: {
+    backgroundColor: theme.surface,
+  },
+  iconContainer: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  content: {
+    flex: 1,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  title: {
+    flex: 1,
+    fontSize: 13,
+    color: theme.text,
+  },
+  unreadTitle: {
+    fontWeight: "700",
+  },
+  readTitle: {
+    fontWeight: "500",
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 99,
+    marginTop: 4,
+    marginLeft: 8,
+  },
+  body: {
+    marginTop: 4,
+    fontSize: 12,
+    lineHeight: 18,
+    color: theme.textSub,
+  },
+  footer: {
+    marginTop: 10,
+  },
+  time: {
+    fontSize: 11,
+    color: theme.textMuted,
+  },
+  markReadButton: {
+    alignSelf: "flex-end",
+    marginTop: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 10,
+    backgroundColor: theme.primary,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+  markReadPressed: {
+    opacity: 0.75,
+    transform: [{ scale: 0.97 }],
+  },
+  markReadText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+});

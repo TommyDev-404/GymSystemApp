@@ -1,28 +1,49 @@
 import AppHeader from "@/components/shared/AppHeader";
 import { ProfileSidebar } from "@/features/profile/screen/ProfileSidebar";
 import { theme } from "@/utils/theme";
-import { router, Tabs } from "expo-router";
-import {
-  House,
-  Dumbbell,
-  QrCode,
-  Bell,
-  Users,
-} from "lucide-react-native";
-import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { router, Tabs, usePathname } from "expo-router";
+import { Bell, Dumbbell, House, QrCode, Users } from "lucide-react-native";
+import { useCallback, useState } from "react";
+import { Pressable, StatusBar, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const [profileOpen, setProfileOpen] = useState(false);
+  const pathname = usePathname();
+  const insets = useSafeAreaInsets();
 
-  const openProfile = () => setProfileOpen(true);
-  const closeProfile = () => setProfileOpen(false);
+  const openProfile = useCallback(() => {
+    setProfileOpen(true);
+  }, []);
+
+  const closeProfile = useCallback(() => {
+    setProfileOpen(false);
+  }, []);
+
+  const scanPress = useCallback(() => {
+    router.push("/qr-scanner");
+  }, []);
 
   return (
-    <>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+        },
+      ]}
+    >
+      <StatusBar barStyle="dark-content" />
+
+      <AppHeader
+        pathname={pathname}
+        onProfilePress={openProfile}
+      />
+
       <Tabs
         screenOptions={{
-          headerShown: true,
+          headerShown: false,
           tabBarShowLabel: true,
           tabBarActiveTintColor: theme.primary,
           tabBarInactiveTintColor: theme.textSub,
@@ -45,9 +66,6 @@ export default function TabLayout() {
         <Tabs.Screen
           name="home"
           options={{
-            header: () => (
-              <AppHeader onProfilePress={openProfile} />
-            ),
             title: "Home",
             tabBarIcon: ({ color, focused }) => (
               <House
@@ -62,12 +80,6 @@ export default function TabLayout() {
         <Tabs.Screen
           name="workout"
           options={{
-            header: () => (
-              <AppHeader
-                isOnWorkout
-                onProfilePress={openProfile}
-              />
-            ),
             title: "Workout",
             tabBarIcon: ({ color, focused }) => (
               <Dumbbell
@@ -86,35 +98,14 @@ export default function TabLayout() {
             tabBarLabel: "Scan",
             tabBarIcon: () => (
               <Pressable
-                onPress={() => router.push("/qr-scanner")}
-                style={{ top: -14 }}
+                onPress={scanPress}
+                style={styles.scanButton}
               >
-                <View
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 24,
-                    backgroundColor: theme.primary,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    shadowColor: theme.primary,
-                    shadowOpacity: 0.35,
-                    shadowRadius: 10,
-                    shadowOffset: {
-                      width: 0,
-                      height: 4,
-                    },
-                    elevation: 8,
-                    borderWidth: 1.5,
-                    borderColor: theme.borderAccent,
-                  }}
-                >
-                  <QrCode
-                    size={22}
-                    color="#ffffff"
-                    strokeWidth={2.2}
-                  />
-                </View>
+                <QrCode
+                  size={22}
+                  color="#ffffff"
+                  strokeWidth={2.2}
+                />
               </Pressable>
             ),
             tabBarStyle: {
@@ -126,7 +117,6 @@ export default function TabLayout() {
         <Tabs.Screen
           name="community"
           options={{
-            header: () => <AppHeader isOnCommunity />,
             title: "Community",
             tabBarIcon: ({ color, focused }) => (
               <Users
@@ -141,9 +131,6 @@ export default function TabLayout() {
         <Tabs.Screen
           name="notifications"
           options={{
-            header: () => (
-              <AppHeader onProfilePress={openProfile} />
-            ),
             title: "Alerts",
             tabBarIcon: ({ color, focused }) => (
               <Bell
@@ -161,6 +148,32 @@ export default function TabLayout() {
         onRequestClose={closeProfile}
         onClosed={closeProfile}
       />
-    </>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.card,
+  },
+  scanButton: {
+    top: -14,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: theme.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: theme.primary,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    elevation: 8,
+    borderWidth: 1.5,
+    borderColor: theme.borderAccent,
+  },
+});

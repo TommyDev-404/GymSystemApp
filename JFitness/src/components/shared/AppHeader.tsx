@@ -1,133 +1,204 @@
-import { theme } from "@/utils/theme"; // adjust path if needed
+import { theme } from "@/utils/theme";
 import { router } from "expo-router";
-import { BotMessageSquare, Image, Search, User } from "lucide-react-native";
-import { Pressable, Text, View, StatusBar as RNStatusBar } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  BotMessageSquare,
+  Search,
+  User,
+  Share2,
+} from "lucide-react-native";
+import { memo, useCallback } from "react";
+import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  FadeIn,
+  FadeOut,
+} from "react-native-reanimated";
 
-export default function AppHeader({
-  isOnWorkout,
-  isOnCommunity,
-  onProfilePress,
-}: {
-  isOnWorkout?: boolean;
-  isOnCommunity?: boolean;
+interface AppHeaderProps {
+  pathname: string;
   onProfilePress?: () => void;
-}) {
-  const handleSearch = () => {
-    if (isOnWorkout) {
+}
+
+function AppHeader({
+  pathname,
+  onProfilePress,
+}: AppHeaderProps) {
+  const isWorkout = pathname.includes("/workout");
+  const isCommunity = pathname.includes("/community");
+
+  const handleSearch = useCallback(() => {
+    if (isWorkout) {
       router.push({
         pathname: "/(app)/search",
-        params: { fromWorkout: "true" },
+        params: {
+          fromWorkout: "true",
+        },
       });
     } else {
       router.push("/(app)/search");
     }
-  };
+  }, [isWorkout]);
 
-  const handleFieldPress = () => {
-    if (isOnCommunity) {
+  const handleFieldPress = useCallback(() => {
+    if (isCommunity) {
       router.push("/(app)/share-progress");
     } else {
       handleSearch();
     }
-  };
+  }, [isCommunity, handleSearch]);
+
+  const handleProfilePress = useCallback(() => {
+    if (onProfilePress) {
+      onProfilePress();
+    } else {
+      router.push("/(app)/profile");
+    }
+  }, [onProfilePress]);
+
+  const handleAssistantPress = useCallback(() => {
+    router.push("/(app)/ai-assistant");
+  }, []);
+
+  const fieldKey = isCommunity
+    ? "community"
+    : isWorkout
+    ? "workout"
+    : "default";
+
+  const fieldText = isCommunity
+    ? "Share your progress..."
+    : isWorkout
+    ? "Search exercises..."
+    : "Search features...";
 
   return (
     <>
-      <RNStatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-   
-      <SafeAreaView edges={["top"]} style={{ backgroundColor: theme.card }}>     
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            paddingHorizontal: 16,
-            paddingVertical: 10,
-            gap: 10,
-            backgroundColor: theme.card,
-            borderBottomWidth: 1,
-            borderBottomColor: theme.border,
-          }}
-        >
-          {/* Logo / Profile */}
-          <Pressable
-            onPress={onProfilePress ?? (() => router.push("/(app)/profile"))}
-            hitSlop={8}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: theme.primary,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <User size={20} color="#ffffff" />
-          </Pressable>
 
-          {/* Search / Share field */}
-          <Pressable
-            onPress={handleFieldPress}
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: theme.surface,
-              height: 36,
-              borderRadius: 18,
-              paddingHorizontal: 12,
-              gap: 8,
-              borderWidth: 1,
-              borderColor: theme.border,
-            }}
+      <View style={styles.header}>
+        <Pressable
+          onPress={handleProfilePress}
+          hitSlop={8}
+          style={styles.profileButton}
+        >
+          <User
+            size={20}
+            color="#ffffff"
+            strokeWidth={2.2}
+          />
+        </Pressable>
+
+        <Pressable
+          onPress={handleFieldPress}
+          style={styles.searchField}
+        >
+          <Animated.View
+            key={fieldKey}
+            entering={FadeIn.duration(160)}
+            exiting={FadeOut.duration(120)}
+            style={styles.fieldContent}
           >
-            {isOnCommunity ? (
-              <Image size={16} color={theme.primary} />
+            {isCommunity ? (
+              <Share2
+                size={16}
+                color={theme.primary}
+                strokeWidth={2}
+              />
             ) : (
-              <Search size={16} color={theme.textSub} />
+              <Search
+                size={16}
+                color={theme.textSub}
+                strokeWidth={2}
+              />
             )}
+
             <Text
-              style={{
-                color: isOnCommunity ? theme.textSub : theme.textMuted,
-                fontSize: 14,
-                flex: 1,
-              }}
+              style={[
+                styles.fieldText,
+                isCommunity && styles.communityFieldText,
+              ]}
               numberOfLines={1}
             >
-              {isOnCommunity
-                ? "Share your progress..."
-                : isOnWorkout
-                ? "Search exercises..."
-                : "Search features..."}
+              {fieldText}
             </Text>
-          </Pressable>
+          </Animated.View>
+        </Pressable>
 
-          {/* AI Assistant */}
-          <Pressable
-            onPress={() => router.push("/(app)/ai-assistant")}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <BotMessageSquare size={22} color={theme.textSub} />
-            <View
-              style={{
-                position: "absolute",
-                top: 6,
-                right: 6,
-                width: 7,
-                height: 7,
-                borderRadius: 4,
-                backgroundColor: theme.primaryLight, // soft teal "online" dot
-              }}
-            />
-          </Pressable>
-        </View>
-      </SafeAreaView>
+        <Pressable
+          onPress={handleAssistantPress}
+          hitSlop={6}
+          style={styles.assistantButton}
+        >
+          <BotMessageSquare
+            size={22}
+            color={theme.textSub}
+            strokeWidth={2}
+          />
+
+          <View style={styles.assistantDot} />
+        </Pressable>
+      </View>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    height: 58,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    gap: 10,
+    backgroundColor: theme.card,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+  profileButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: theme.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  searchField: {
+    flex: 1,
+    height: 36,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.border,
+    justifyContent: "center",
+  },
+  fieldContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  fieldText: {
+    flex: 1,
+    color: theme.textMuted,
+    fontSize: 14,
+  },
+  communityFieldText: {
+    color: theme.textSub,
+  },
+  assistantButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  assistantDot: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: theme.primaryLight,
+  },
+});
+
+export default memo(AppHeader);

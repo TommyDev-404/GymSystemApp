@@ -9,7 +9,6 @@ import {
   ChevronRight,
 } from "lucide-react-native";
 import { router } from "expo-router";
-
 import { EmptyState } from "@/components/shared/EmptyState";
 import { theme } from "@/utils/theme";
 import { WorkoutHistoryList } from "./history/WorkoutHistoryList";
@@ -26,9 +25,7 @@ export function WorkoutHistory({
   return (
     <View style={styles.container}>
       {previewWorkouts.length > 0 ? (
-        <WorkoutHistoryList
-          workouts={previewWorkouts}
-        />
+        <WorkoutHistoryList workouts={previewWorkouts} />
       ) : (
         <View style={styles.emptyContainer}>
           <EmptyState
@@ -41,9 +38,7 @@ export function WorkoutHistory({
 
       {workouts.length > 0 && (
         <Pressable
-          onPress={() =>
-            router.push("/(app)/workout-history")
-          }
+          onPress={() => router.push("/(app)/workout-history")}
           style={({ pressed }) => [
             styles.viewHistoryButton,
             pressed && styles.viewHistoryPressed,
@@ -52,7 +47,6 @@ export function WorkoutHistory({
           <Text style={styles.viewHistoryText}>
             View Full Workout History
           </Text>
-
           <ChevronRight
             size={15}
             color={theme.primaryLight}
@@ -66,34 +60,25 @@ export function WorkoutHistory({
 
 const styles = StyleSheet.create({
   container: {},
-
   emptyContainer: {
     paddingVertical: 10,
   },
-
   viewHistoryButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 3,
-
-    marginTop: 12,
-
     paddingVertical: 12,
-
     borderRadius: 12,
-
     backgroundColor: theme.accentWash,
-
     borderWidth: 1,
     borderColor: theme.borderAccent,
+    marginTop: 15
   },
-
   viewHistoryPressed: {
     opacity: 0.7,
     transform: [{ scale: 0.98 }],
   },
-
   viewHistoryText: {
     fontSize: 11.5,
     fontWeight: "700",

@@ -1,48 +1,98 @@
-import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import {
-  LayoutDashboard,
-  Users,
+  TouchableOpacity,
+  View,
+  Text,
+  StyleSheet,
+} from "react-native";
+import {
+  Activity,
+  Award,
+  BotMessageSquare,
   CalendarCheck,
+  ChartNoAxesColumn,
+  ChevronRight,
+  Clock3,
   CreditCard,
   Dumbbell,
-  BookOpen,
+  FileText,
+  Info,
+  LockKeyhole,
+  QrCode,
   ScanLine,
-  Megaphone,
-  ChartColumn,
-  BotMessageSquare,
-  Settings,
-  ChevronRight,
+  Share2,
+  ShieldCheck,
+  User,
+  Users,
 } from "lucide-react-native";
+import { theme } from "@/utils/theme";
 
-export default function FeatureItem({ item, onPress }: any) {
-  const ICONS: any = {
-    dashboard: LayoutDashboard,
-    members: Users,
-    attendance: CalendarCheck,
-    payments: CreditCard,
-    workouts: Dumbbell,
-    exercises: BookOpen,
-    scanner: ScanLine,
-    announcements: Megaphone,
-    reports: ChartColumn,
-    chatbot: BotMessageSquare,
-    settings: Settings,
-  };
+interface FeatureItemData {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+  route: string;
+  keywords: string[];
+}
 
-  const Icon = ICONS[item.icon];
+interface Props {
+  item: FeatureItemData;
+  onPress: () => void;
+}
+
+const ICONS: Record<string, React.ComponentType<any>> = {
+  progress: Activity,
+  referral: Users,
+  rewards: Award,
+  tutorials: Dumbbell,
+  attendance: CalendarCheck,
+  payments: CreditCard,
+  "workout-history": FileText,
+  "my-posts": FileText,
+  scanner: ScanLine,
+  post: Share2,
+  timer: Clock3,
+  "ai-buddy": BotMessageSquare,
+  "personal-info": User,
+  security: ShieldCheck,
+  about: Info,
+};
+
+export default function FeatureItem({
+  item,
+  onPress,
+}: Props) {
+  const Icon = ICONS[item.icon] ?? Activity;
 
   return (
-    <TouchableOpacity style={styles.row} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.row}
+      activeOpacity={0.7}
+      onPress={onPress}
+    >
       <View style={styles.iconBox}>
-        <Icon size={22} color="#2563EB" />
+        <Icon
+          size={21}
+          color={theme.primaryLight}
+          strokeWidth={2}
+        />
       </View>
 
-      <View style={{ flex: 1 }}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.sub}>{item.subtitle}</Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>
+          {item.title}
+        </Text>
+
+        <Text style={styles.sub}>
+          {item.subtitle}
+        </Text>
       </View>
 
-      <ChevronRight size={20} color="#9CA3AF" />
+      <ChevronRight
+        size={19}
+        color={theme.textMuted}
+        strokeWidth={2}
+      />
     </TouchableOpacity>
   );
 }
@@ -51,25 +101,34 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 14,
+    paddingVertical: 13,
+    paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderColor: "#eee",
+    borderBottomColor: theme.border,
   },
   iconBox: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: "#EFF6FF",
-    justifyContent: "center",
+    borderRadius: 14,
     alignItems: "center",
+    justifyContent: "center",
     marginRight: 12,
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+  },
+  content: {
+    flex: 1,
   },
   title: {
-    fontWeight: "600",
-    fontSize: 15,
+    fontSize: 13,
+    fontWeight: "700",
+    color: theme.text,
   },
   sub: {
-    fontSize: 12,
-    color: "#6B7280",
+    marginTop: 3,
+    fontSize: 10.5,
+    fontWeight: "500",
+    color: theme.textMuted,
   },
 });

@@ -26,8 +26,6 @@ export default function SearchHeader({
 }: Props) {
   return (
     <View style={styles.header}>
-
-      {/* BACK BUTTON */}
       <TouchableOpacity
         onPress={onBack}
         activeOpacity={0.7}
@@ -40,9 +38,7 @@ export default function SearchHeader({
         />
       </TouchableOpacity>
 
-      {/* SEARCH BOX */}
       <View style={styles.box}>
-
         <Search
           size={18}
           color={theme.textMuted}
@@ -58,23 +54,24 @@ export default function SearchHeader({
           selectionColor={theme.primaryLight}
           returnKeyType="search"
           autoCorrect={false}
+          autoCapitalize="none"
         />
 
-        {/* CLEAR */}
-        {query.length > 0 && (
-          <TouchableOpacity
-            onPress={() => setQuery("")}
-            activeOpacity={0.7}
-            style={styles.clearButton}
-          >
-            <X
-              size={17}
-              color={theme.textMuted}
-              strokeWidth={2.2}
-            />
-          </TouchableOpacity>
-        )}
-
+        <View style={styles.clearContainer}>
+          {query.length > 0 && (
+            <TouchableOpacity
+              onPress={() => setQuery("")}
+              activeOpacity={0.7}
+              style={styles.clearButton}
+            >
+              <X
+                size={17}
+                color={theme.textMuted}
+                strokeWidth={2.2}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -82,17 +79,16 @@ export default function SearchHeader({
 
 const styles = StyleSheet.create({
   header: {
+    height: 68,
+
     flexDirection: "row",
     alignItems: "center",
 
     paddingHorizontal: 16,
-    paddingVertical: 12,
 
     borderBottomWidth: 1,
     borderBottomColor: theme.border,
   },
-
-  /* BACK */
 
   backButton: {
     width: 40,
@@ -103,11 +99,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
 
     backgroundColor: theme.surface,
+
     borderWidth: 1,
     borderColor: theme.border,
   },
-
-  /* SEARCH */
 
   box: {
     flex: 1,
@@ -115,7 +110,7 @@ const styles = StyleSheet.create({
     height: 44,
 
     marginLeft: 10,
-    paddingHorizontal: 12,
+    paddingLeft: 12,
 
     flexDirection: "row",
     alignItems: "center",
@@ -138,6 +133,14 @@ const styles = StyleSheet.create({
     fontWeight: "500",
 
     color: theme.text,
+  },
+
+  clearContainer: {
+    width: 40,
+    height: 44,
+
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   clearButton: {

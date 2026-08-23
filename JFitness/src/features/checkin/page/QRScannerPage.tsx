@@ -51,18 +51,16 @@ export default function QRScannerPage() {
           sessionId: data.session_id,
         },
         {
-          onSuccess: () => {
+          onSuccess: (data) => {
             setCheckInResult({
               type: "success",
-              title: "Check-in Successful",
+              title: data.message,
               message: today,
             });
           },
 
           onError: (err: any) => {
-            const message =
-              err.response?.data?.message ||
-              "Something went wrong";
+            const message = err.response?.data?.message || "Something went wrong";
 
             setCheckInResult({
               type: "info",

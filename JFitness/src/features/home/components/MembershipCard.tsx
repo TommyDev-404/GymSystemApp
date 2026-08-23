@@ -29,62 +29,41 @@ export function MembershipCard({
 
   return (
     <View style={styles.card}>
-      {/* Subtle accent glow */}
-      <View style={styles.glow} />
-
       <LinearGradient
-        colors={[
-          theme.card,
-          "#111a19",
-          theme.card,
-        ]}
+        colors={[theme.primaryDark, theme.primary, theme.primaryLight]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
       >
-        {/* HEADER */}
+        {/* Soft highlight */}
+        <View style={styles.glow} />
+
+        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={styles.iconBox}>
-              <Star
-                size={17}
-                color={theme.primaryLight}
-                fill={theme.primaryLight}
-                strokeWidth={2}
-              />
+              <Star size={16} color="#FFD6DE" fill="#FFD6DE" strokeWidth={2} />
             </View>
-
             <View>
               <Text style={styles.eyebrow}>CURRENT MEMBERSHIP</Text>
               <Text style={styles.plan}>{plan || "Standard Plan"}</Text>
             </View>
           </View>
 
-          {/* STATUS */}
           <View style={styles.status}>
             <View style={styles.statusDot} />
-            <Text style={styles.statusText}>
-              {status || "Active"}
-            </Text>
+            <Text style={styles.statusText}>{status || "Active"}</Text>
           </View>
         </View>
 
-        {/* MEMBERSHIP INFO */}
+        {/* Dates */}
         <View style={styles.infoContainer}>
-
-          {/* START */}
           <View style={styles.dateBlock}>
             <View style={styles.dateIcon}>
-              <CalendarDays
-                size={14}
-                color={theme.textSub}
-                strokeWidth={2}
-              />
+              <CalendarDays size={14} color="#FFD6DE" strokeWidth={2} />
             </View>
-
             <View>
               <Text style={styles.label}>STARTED</Text>
-
               <Text style={styles.date}>
                 {membership_start ||
                   new Date().toLocaleDateString("en-PH", {
@@ -96,27 +75,16 @@ export function MembershipCard({
             </View>
           </View>
 
-          {/* ARROW */}
           <View style={styles.arrow}>
-            <ChevronRight
-              size={16}
-              color={theme.textMuted}
-            />
+            <ChevronRight size={16} color="rgba(255,232,237,0.5)" />
           </View>
 
-          {/* EXPIRY */}
           <View style={[styles.dateBlock, styles.expiryBlock]}>
             <View style={styles.dateIcon}>
-              <CalendarDays
-                size={14}
-                color={theme.primaryLight}
-                strokeWidth={2}
-              />
+              <CalendarDays size={14} color="#FFD6DE" strokeWidth={2} />
             </View>
-
             <View>
               <Text style={styles.label}>EXPIRES</Text>
-
               <Text style={styles.expiry}>
                 {expiry ||
                   new Date().toLocaleDateString("en-PH", {
@@ -129,28 +97,17 @@ export function MembershipCard({
           </View>
         </View>
 
-        {/* DIVIDER */}
         <View style={styles.divider} />
 
-        {/* REWARD POINTS */}
+        {/* Points section */}
         <View style={styles.pointsHeader}>
           <View style={styles.pointsTitle}>
             <View style={styles.awardIcon}>
-              <Award
-                size={15}
-                color={theme.primaryLight}
-                strokeWidth={2}
-              />
+              <Award size={15} color="#FFD6DE" strokeWidth={2} />
             </View>
-
             <View>
-              <Text style={styles.pointsLabel}>
-                REWARD POINTS
-              </Text>
-
-              <Text style={styles.pointsHint}>
-                Keep training to earn more
-              </Text>
+              <Text style={styles.pointsLabel}>REWARD POINTS</Text>
+              <Text style={styles.pointsHint}>Keep training to earn more</Text>
             </View>
           </View>
 
@@ -163,34 +120,17 @@ export function MembershipCard({
           </Text>
         </View>
 
-        {/* PROGRESS */}
         <View style={styles.progressTrack}>
-          <LinearGradient
-            colors={[
-              theme.primaryDark,
-              theme.primary,
-              theme.primaryLight,
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[
-              styles.progressFill,
-              { width: `${progress}%` },
-            ]}
-          />
+          <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
 
-        {/* BOTTOM INFO */}
         <View style={styles.pointsFooter}>
           <Text style={styles.progressText}>
             {remainingPoints > 0
               ? `${remainingPoints.toLocaleString()} points until next reward`
               : "Next reward unlocked"}
           </Text>
-
-          <Text style={styles.progressPercent}>
-            {Math.round(progress)}%
-          </Text>
+          <Text style={styles.progressPercent}>{Math.round(progress)}%</Text>
         </View>
       </LinearGradient>
     </View>
@@ -201,294 +141,209 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 20,
     overflow: "hidden",
-
-    backgroundColor: theme.card,
-
+    backgroundColor: theme.primaryDark,
     borderWidth: 1,
-    borderColor: theme.borderAccent,
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
+    borderColor: "rgba(255, 232, 237, 0.25)",
+    shadowColor: theme.primaryDark,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
     elevation: 8,
   },
-
   gradient: {
     padding: 18,
   },
-
   glow: {
     position: "absolute",
-    width: 150,
-    height: 150,
+    width: 160,
+    height: 160,
     borderRadius: 100,
-
-    right: -80,
-    top: -80,
-
-    backgroundColor: theme.primary,
-    opacity: 0.06,
+    right: -70,
+    top: -70,
+    backgroundColor: "#FFFFFF",
+    opacity: 0.07,
   },
 
-  /* HEADER */
-
+  // Header
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 11,
+    gap: 12,
     flex: 1,
   },
-
   iconBox: {
     width: 38,
     height: 38,
     borderRadius: 12,
-
     alignItems: "center",
     justifyContent: "center",
-
-    backgroundColor: theme.accentWash,
-
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
     borderWidth: 1,
-    borderColor: theme.borderAccent,
+    borderColor: "rgba(255, 255, 255, 0.18)",
   },
-
   eyebrow: {
-    fontSize: 9,
-    fontWeight: "700",
-    letterSpacing: 1,
-
-    color: theme.textMuted,
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 0.9,
+    color: "rgba(255, 232, 237, 0.75)", // soft muted label
   },
-
   plan: {
-    marginTop: 2,
-
-    fontSize: 17,
+    marginTop: 3,
+    fontSize: 18,
     fontWeight: "700",
-
-    color: theme.text,
+    color: "#FFFFFF", // primary title – only pure white
   },
-
-  /* STATUS */
-
   status: {
     flexDirection: "row",
     alignItems: "center",
-
-    paddingHorizontal: 9,
-    paddingVertical: 6,
-
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 999,
-
-    backgroundColor: theme.accentWash,
-
+    backgroundColor: "rgba(255, 255, 255, 0.14)",
     borderWidth: 1,
-    borderColor: theme.borderAccent,
+    borderColor: "rgba(255, 255, 255, 0.22)",
   },
-
   statusDot: {
     width: 6,
     height: 6,
-
     borderRadius: 999,
-
-    backgroundColor: theme.primaryLight,
-
+    backgroundColor: "#A7F3D0", // soft mint for “active”
     marginRight: 6,
   },
-
   statusText: {
-    fontSize: 10,
-    fontWeight: "700",
-
-    color: theme.primaryLight,
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#F0FDF4", // soft green-tinted white
   },
 
-  /* DATES */
-
+  // Dates
   infoContainer: {
     flexDirection: "row",
     alignItems: "center",
-
     marginTop: 22,
   },
-
   dateBlock: {
     flex: 1,
-
     flexDirection: "row",
     alignItems: "center",
-
-    gap: 9,
+    gap: 10,
   },
-
   expiryBlock: {
     justifyContent: "flex-end",
   },
-
   dateIcon: {
     width: 30,
     height: 30,
-
     borderRadius: 9,
-
     alignItems: "center",
     justifyContent: "center",
-
-    backgroundColor: theme.surface,
-
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: "rgba(255, 255, 255, 0.16)",
   },
-
   label: {
-    fontSize: 8,
-    fontWeight: "700",
-    letterSpacing: 0.8,
-
-    color: theme.textMuted,
+    fontSize: 9,
+    fontWeight: "600",
+    letterSpacing: 0.7,
+    color: "rgba(255, 232, 237, 0.65)", // secondary labels
   },
-
   date: {
     marginTop: 3,
-
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
-
-    color: theme.textSub,
+    color: "rgba(255, 255, 255, 0.9)", // supporting value
   },
-
   expiry: {
     marginTop: 3,
-
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "700",
-
-    color: theme.primaryLight,
+    color: "#FFE8ED", // slightly warmer emphasis for expiry
   },
-
   arrow: {
     width: 24,
     alignItems: "center",
   },
 
-  /* DIVIDER */
-
   divider: {
     height: 1,
-
     marginVertical: 18,
-
-    backgroundColor: theme.border,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
   },
 
-  /* POINTS */
-
+  // Points
   pointsHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-
   pointsTitle: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 9,
+    gap: 10,
   },
-
   awardIcon: {
     width: 30,
     height: 30,
-
     borderRadius: 9,
-
     alignItems: "center",
     justifyContent: "center",
-
-    backgroundColor: theme.accentWash,
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.16)",
   },
-
   pointsLabel: {
-    fontSize: 9,
-    fontWeight: "700",
-    letterSpacing: 0.8,
-
-    color: theme.textSub,
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 0.7,
+    color: "rgba(255, 232, 237, 0.8)",
   },
-
   pointsHint: {
     marginTop: 2,
-
-    fontSize: 9,
-
-    color: theme.textMuted,
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.55)", // quiet helper text
   },
-
   pointsValue: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "800",
-
-    color: theme.primaryLight,
+    color: "#FFFFFF", // main number
   },
-
   pointsMax: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "500",
-
-    color: theme.textMuted,
+    color: "rgba(255, 255, 255, 0.55)",
   },
-
-  /* PROGRESS */
 
   progressTrack: {
     height: 6,
-
-    marginTop: 13,
-
+    marginTop: 14,
     borderRadius: 999,
-
-    backgroundColor: theme.surface3,
-
+    backgroundColor: "rgba(255, 255, 255, 0.18)",
     overflow: "hidden",
   },
-
   progressFill: {
     height: "100%",
-
     borderRadius: 999,
+    backgroundColor: "#FFE8ED", // soft pinkish fill matching accent
   },
-
-  /* FOOTER */
 
   pointsFooter: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-
-    marginTop: 8,
+    marginTop: 9,
   },
-
   progressText: {
-    fontSize: 10,
-
-    color: theme.textMuted,
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.6)",
   },
-
   progressPercent: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "700",
-
-    color: theme.textSub,
+    color: "rgba(255, 232, 237, 0.9)",
   },
 });

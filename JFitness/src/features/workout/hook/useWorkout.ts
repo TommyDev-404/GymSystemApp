@@ -10,6 +10,14 @@ export const useWorkoutTutorials = (params?: Params) => {
   });
 };
 
+export const useWorkoutInfo = (workoutId?: number) => {
+  return useQuery<WorkoutTutorials>({
+    queryKey: ["workout-info", workoutId],
+    queryFn: () => api.getWorkoutInfoApi(workoutId!),
+    enabled: !!workoutId
+  });
+};
+
 export const useWorkoutSummary = (
   memberId: number
 ) => {
@@ -43,6 +51,14 @@ export const useWorkoutProgress = (
       ),
 
     enabled: !!member_id
+  });
+};
+
+export const useSearchExercises = (search: string) => {
+  return useQuery<WorkoutTutorials[]>({
+    queryKey: ["search-exercises", search],
+    queryFn: () => api.searchExerciseApi(search),
+    enabled: search.trim().length > 0,
   });
 };
 

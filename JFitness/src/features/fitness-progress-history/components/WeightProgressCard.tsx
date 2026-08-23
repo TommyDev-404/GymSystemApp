@@ -1,15 +1,6 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-} from "react-native";
-
-import {
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react-native";
-
+import { View, Text, StyleSheet } from "react-native";
+import { TrendingDown, TrendingUp } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "@/utils/theme";
 
@@ -29,451 +20,252 @@ export function WeighProgressCard({
   isMovingAway,
   goalType,
 }: CurrentWeightCardProps) {
-  const weightChange =
-    currentWeight - startingWeight;
-
-  const absoluteChange =
-    Math.abs(weightChange);
-
+  const weightChange = currentWeight - startingWeight;
+  const absoluteChange = Math.abs(weightChange);
   const changeType =
-    weightChange < 0
-      ? "lost"
-      : weightChange > 0
-        ? "gained"
-        : "no change";
-
+    weightChange < 0 ? "lost" : weightChange > 0 ? "gained" : "no change";
   const isWeightLoss = weightChange < 0;
-
   const GoalIcon =
-    goalType === "LOSE_WEIGHT"
-      ? TrendingDown
-      : TrendingUp;
-
-  const goalColor = isMovingAway ? RED : GREEN;
+    goalType === "LOSE_WEIGHT" ? TrendingDown : TrendingUp;
+  const goalColor = isMovingAway ? "#FCA5A5" : "#FFFFFF";
 
   return (
     <View style={styles.card}>
-
-      {/* ================= BACKGROUND GLOW ================= */}
-
       <LinearGradient
-        colors={[
-          "rgba(20,184,166,0.09)",
-          "rgba(20,184,166,0.025)",
-          "rgba(11,13,16,0)",
-        ]}
+        colors={[theme.primaryDark, theme.primary, theme.primaryLight]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={styles.backgroundGlow}
-        pointerEvents="none"
-      />
+        style={styles.gradient}
+      >
+        <View style={styles.glow} />
 
-      {/* Decorative top-left glow */}
-      <View
-        style={styles.topGlow}
-        pointerEvents="none"
-      />
+        <View style={styles.header}>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Weight Progress</Text>
+            <Text style={styles.subtitle}>Your current weight journey</Text>
+          </View>
 
-      {/* ================= HEADER ================= */}
-
-      <View style={styles.header}>
-
-        <View style={styles.headerText}>
-          <Text style={styles.title}>
-            Weight Progress
-          </Text>
-
-          <Text style={styles.subtitle}>
-            Your current weight journey
-          </Text>
+          <View
+            style={[
+              styles.goalBadge,
+              isMovingAway
+                ? styles.goalBadgeDanger
+                : styles.goalBadgeNormal,
+            ]}
+          >
+            <GoalIcon size={13} color={goalColor} strokeWidth={2.5} />
+            <Text style={[styles.goalBadgeText, { color: goalColor }]}>
+              {goalType === "LOSE_WEIGHT" ? "LOSE WEIGHT" : "GAIN WEIGHT"}
+            </Text>
+          </View>
         </View>
 
-        {/* GOAL TYPE */}
+        <View style={styles.content}>
+          <Text
+            style={[styles.weight, isMovingAway && styles.weightDanger]}
+          >
+            {currentWeight.toFixed(1)}
+            <Text style={styles.unit}> kg</Text>
+          </Text>
 
-        <View
-          style={[
-            styles.goalBadge,
-            isMovingAway
-              ? styles.goalBadgeDanger
-              : styles.goalBadgeNormal,
-          ]}
-        >
-          <GoalIcon
-            size={13}
-            color={goalColor}
-            strokeWidth={2.5}
-          />
+          <Text style={styles.currentLabel}>Current Weight</Text>
+
+          {changeType !== "no change" ? (
+            <View
+              style={[
+                styles.changeBadge,
+                isMovingAway && styles.changeBadgeDanger,
+              ]}
+            >
+              {isWeightLoss ? (
+                <TrendingDown
+                  size={14}
+                  color={isMovingAway ? RED : GREEN}
+                  strokeWidth={2.5}
+                />
+              ) : (
+                <TrendingUp
+                  size={14}
+                  color={isMovingAway ? RED : GREEN}
+                  strokeWidth={2.5}
+                />
+              )}
+
+              <Text
+                style={[
+                  styles.changeText,
+                  isMovingAway && styles.changeTextDanger,
+                ]}
+              >
+                {absoluteChange.toFixed(1)} kg {changeType}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.noChangeBadge}>
+              <Text style={styles.noChangeText}>No weight change</Text>
+            </View>
+          )}
 
           <Text
             style={[
-              styles.goalBadgeText,
-              {
-                color: goalColor,
-              },
+              styles.description,
+              isMovingAway && styles.descriptionDanger,
             ]}
           >
-            {goalType === "LOSE_WEIGHT"
-              ? "LOSE WEIGHT"
-              : "GAIN WEIGHT"}
+            {isMovingAway
+              ? "Moving away from your goal"
+              : goalType === "LOSE_WEIGHT"
+                ? "Progress toward your weight-loss goal"
+                : "Progress toward your weight-gain goal"}
           </Text>
         </View>
-
-      </View>
-
-      {/* ================= CURRENT WEIGHT ================= */}
-
-      <View style={styles.content}>
-
-        <Text
-          style={[
-            styles.weight,
-            isMovingAway && styles.weightDanger,
-          ]}
-        >
-          {currentWeight.toFixed(1)}
-
-          <Text style={styles.unit}>
-            {" kg"}
-          </Text>
-        </Text>
-
-        <Text style={styles.currentLabel}>
-          Current Weight
-        </Text>
-
-        {/* ================= CHANGE ================= */}
-
-        {changeType !== "no change" ? (
-          <View
-            style={[
-              styles.changeBadge,
-              isMovingAway &&
-                styles.changeBadgeDanger,
-            ]}
-          >
-            {isWeightLoss ? (
-              <TrendingDown
-                size={14}
-                color={
-                  isMovingAway
-                    ? RED
-                    : GREEN
-                }
-                strokeWidth={2.5}
-              />
-            ) : (
-              <TrendingUp
-                size={14}
-                color={
-                  isMovingAway
-                    ? RED
-                    : GREEN
-                }
-                strokeWidth={2.5}
-              />
-            )}
-
-            <Text
-              style={[
-                styles.changeText,
-                isMovingAway &&
-                  styles.changeTextDanger,
-              ]}
-            >
-              {absoluteChange.toFixed(1)}
-              {" kg "}
-              {changeType}
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.noChangeBadge}>
-            <Text style={styles.noChangeText}>
-              No weight change
-            </Text>
-          </View>
-        )}
-
-        {/* ================= DESCRIPTION ================= */}
-
-        <Text
-          style={[
-            styles.description,
-            isMovingAway &&
-              styles.descriptionDanger,
-          ]}
-        >
-          {isMovingAway
-            ? "Moving away from your goal"
-            : goalType === "LOSE_WEIGHT"
-              ? "Progress toward your weight-loss goal"
-              : "Progress toward your weight-gain goal"}
-        </Text>
-
-      </View>
-
+      </LinearGradient>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-
-  /* ================= CARD ================= */
-
   card: {
-    position: "relative",
-
-    backgroundColor: theme.card,
-
-    borderRadius: 18,
-
-    borderWidth: 1,
-    borderColor: theme.borderAccent,
-
-    padding: 17,
-
+    borderRadius: 20,
     overflow: "hidden",
-
-    shadowColor: "#000",
-
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
-
-    elevation: 4,
+    backgroundColor: theme.primaryDark,
+    borderWidth: 1,
+    borderColor: "rgba(255, 232, 237, 0.25)",
+    shadowColor: theme.primaryDark,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
+    elevation: 8,
   },
-
-  backgroundGlow: {
-    position: "absolute",
-
-    top: 0,
-    left: 0,
-    right: 0,
-
-    height: 180,
+  gradient: {
+    position: "relative",
+    padding: 18,
   },
-
-  topGlow: {
+  glow: {
     position: "absolute",
-
-    top: -75,
-    left: -70,
-
     width: 180,
     height: 180,
-
-    borderRadius: 999,
-
-    backgroundColor:
-      "rgba(20,184,166,0.055)",
+    borderRadius: 100,
+    right: -75,
+    top: -75,
+    backgroundColor: "#FFFFFF",
+    opacity: 0.07,
   },
-
-  /* ================= HEADER ================= */
-
   header: {
     flexDirection: "row",
-
     alignItems: "center",
-
     justifyContent: "space-between",
-
     gap: 10,
   },
-
   headerText: {
     flex: 1,
   },
-
   title: {
     fontSize: 15,
-
     fontWeight: "700",
-
-    color: theme.text,
-
+    color: "#FFFFFF",
     letterSpacing: -0.2,
   },
-
   subtitle: {
     marginTop: 3,
-
     fontSize: 10.5,
-
-    color: theme.textMuted,
+    color: "rgba(255, 232, 237, 0.7)",
   },
-
-  /* ================= GOAL BADGE ================= */
-
   goalBadge: {
     flexDirection: "row",
-
     alignItems: "center",
-
-    gap: 4,
-
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 999,
-
+    backgroundColor: "rgba(255, 255, 255, 0.16)",
     borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.28)",
   },
-
   goalBadgeNormal: {
-    backgroundColor:
-      "rgba(16,185,129,0.07)",
-
-    borderColor:
-      "rgba(16,185,129,0.20)",
+    backgroundColor: "rgba(255, 255, 255, 0.16)",
+    borderColor: "rgba(255, 255, 255, 0.28)",
   },
-
   goalBadgeDanger: {
-    backgroundColor:
-      "rgba(239,68,68,0.07)",
-
-    borderColor:
-      "rgba(239,68,68,0.20)",
+    backgroundColor: "rgba(239, 68, 68, 0.18)",
+    borderColor: "rgba(255, 180, 180, 0.4)",
   },
-
   goalBadgeText: {
     fontSize: 8.5,
-
     fontWeight: "800",
-
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
-
-  /* ================= CONTENT ================= */
-
   content: {
     alignItems: "center",
-
-    paddingTop: 20,
+    paddingTop: 22,
   },
-
   weight: {
-    fontSize: 38,
-
-    lineHeight: 42,
-
+    fontSize: 40,
+    lineHeight: 44,
     fontWeight: "800",
-
-    color: theme.text,
-
+    color: "#FFFFFF",
     letterSpacing: -1,
   },
-
   weightDanger: {
-    color: RED,
+    color: "#FCA5A5",
   },
-
   unit: {
     fontSize: 16,
-
     fontWeight: "600",
-
-    color: theme.textMuted,
+    color: "rgba(255, 255, 255, 0.65)",
   },
-
   currentLabel: {
     marginTop: 2,
-
     fontSize: 10,
-
     fontWeight: "500",
-
-    color: theme.textMuted,
+    color: "rgba(255, 255, 255, 0.6)",
   },
-
-  /* ================= CHANGE ================= */
-
   changeBadge: {
-    marginTop: 11,
-
+    marginTop: 12,
     flexDirection: "row",
-
     alignItems: "center",
-
     gap: 5,
-
     paddingHorizontal: 10,
     paddingVertical: 5,
-
     borderRadius: 999,
-
-    backgroundColor:
-      "rgba(16,185,129,0.07)",
-
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
     borderWidth: 1,
-
-    borderColor:
-      "rgba(16,185,129,0.18)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
-
   changeBadgeDanger: {
-    backgroundColor:
-      "rgba(239,68,68,0.07)",
-
-    borderColor:
-      "rgba(239,68,68,0.18)",
+    backgroundColor: "rgba(239, 68, 68, 0.14)",
+    borderColor: "rgba(239, 68, 68, 0.3)",
   },
-
   changeText: {
     fontSize: 11,
-
     fontWeight: "700",
-
-    color: GREEN,
+    color: "#FFFFFF",
   },
-
   changeTextDanger: {
-    color: RED,
+    color: "#FCA5A5",
   },
-
-  /* ================= NO CHANGE ================= */
-
   noChangeBadge: {
-    marginTop: 11,
-
+    marginTop: 12,
     paddingHorizontal: 10,
     paddingVertical: 5,
-
     borderRadius: 999,
-
-    backgroundColor: theme.surface,
-
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 1,
-
-    borderColor: theme.border,
+    borderColor: "rgba(255, 255, 255, 0.16)",
   },
-
   noChangeText: {
     fontSize: 10.5,
-
     fontWeight: "600",
-
-    color: theme.textMuted,
+    color: "rgba(255, 255, 255, 0.7)",
   },
-
-  /* ================= DESCRIPTION ================= */
-
   description: {
-    marginTop: 6,
-
+    marginTop: 7,
     fontSize: 10,
-
     lineHeight: 14,
-
-    color: theme.textMuted,
-
+    color: "rgba(255, 255, 255, 0.62)",
     textAlign: "center",
   },
-
   descriptionDanger: {
-    color: RED,
+    color: "#FCA5A5",
   },
-
 });

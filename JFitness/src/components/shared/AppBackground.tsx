@@ -10,12 +10,11 @@ interface AppBackgroundProps {
 export function AppBackground({ children }: AppBackgroundProps) {
   return (
     <View style={styles.container}>
-      {/* Base background */}
       <LinearGradient
         colors={[
+          "#FFFFFF",
           theme.bg,
-          "#0d1415",
-          "#0b1112",
+          "#F8F8FA",
           theme.bg,
         ]}
         start={{ x: 0, y: 0 }}
@@ -23,13 +22,12 @@ export function AppBackground({ children }: AppBackgroundProps) {
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Top-left soft teal glow */}
       <LinearGradient
         colors={[
-          "rgba(20,184,166,0.10)",
-          "rgba(20,184,166,0.045)",
-          "rgba(20,184,166,0.012)",
-          "rgba(20,184,166,0)",
+          "rgba(232,93,117,0.075)",
+          "rgba(232,93,117,0.035)",
+          "rgba(232,93,117,0.012)",
+          "rgba(232,93,117,0)",
         ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -37,13 +35,12 @@ export function AppBackground({ children }: AppBackgroundProps) {
         pointerEvents="none"
       />
 
-      {/* Bottom-left soft teal glow */}
       <LinearGradient
         colors={[
-          "rgba(20,184,166,0.08)",
-          "rgba(20,184,166,0.035)",
-          "rgba(20,184,166,0.01)",
-          "rgba(20,184,166,0)",
+          "rgba(232,93,117,0.055)",
+          "rgba(232,93,117,0.025)",
+          "rgba(232,93,117,0.008)",
+          "rgba(232,93,117,0)",
         ]}
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 0 }}
@@ -51,12 +48,11 @@ export function AppBackground({ children }: AppBackgroundProps) {
         pointerEvents="none"
       />
 
-      {/* Very subtle right-side ambient glow */}
       <LinearGradient
         colors={[
-          "rgba(20,184,166,0.035)",
-          "rgba(20,184,166,0.01)",
-          "rgba(20,184,166,0)",
+          "rgba(201,68,92,0.025)",
+          "rgba(201,68,92,0.008)",
+          "rgba(201,68,92,0)",
         ]}
         start={{ x: 1, y: 0.5 }}
         end={{ x: 0, y: 0.5 }}
@@ -64,7 +60,6 @@ export function AppBackground({ children }: AppBackgroundProps) {
         pointerEvents="none"
       />
 
-      {/* Content */}
       <View style={styles.content}>
         {children}
       </View>
@@ -75,55 +70,34 @@ export function AppBackground({ children }: AppBackgroundProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.bg,
     position: "relative",
     overflow: "hidden",
   },
-
   content: {
     flex: 1,
   },
-
-  /*
-   * Large asymmetric gradients.
-   *
-   * They intentionally extend outside the screen so
-   * there is no obvious "circle" or hard edge.
-   */
-
   topLeftGlow: {
     position: "absolute",
-
-    width: 360,
-    height: 300,
-
-    top: -150,
-    left: -150,
-
-    opacity: 0.9,
-  },
-
-  bottomLeftGlow: {
-    position: "absolute",
-
     width: 380,
     height: 320,
-
-    bottom: -170,
-    left: -170,
-
+    top: -160,
+    left: -160,
+    opacity: 0.9,
+  },
+  bottomLeftGlow: {
+    position: "absolute",
+    width: 400,
+    height: 340,
+    bottom: -180,
+    left: -180,
     opacity: 0.8,
   },
-
   rightGlow: {
     position: "absolute",
-
-    width: 220,
-    height: 500,
-
-    top: "25%",
-    right: -170,
-
-    opacity: 0.45,
+    width: 240,
+    height: 520,
+    top: "20%",
+    right: -190,
+    opacity: 0.5,
   },
 });

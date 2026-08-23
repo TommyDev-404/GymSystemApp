@@ -1,232 +1,313 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
-import { router } from 'expo-router';
-import { AuthLayout } from '@/features/auth/layout/AuthLayout';
-import { useAuth } from '@/context/AuthContext';
-import { theme } from '@/utils/theme';
-import FormField from '@/features/auth/components/FormField'; // adjust path if needed
-import PrimaryButton from '@/features/auth/components/PrimaryButton'; // adjust path if needed
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { EaseView } from "react-native-ease";
+import { AuthLayout } from "@/features/auth/layout/AuthLayout";
+import { useAuth } from "@/context/AuthContext";
+import { theme } from "@/utils/theme";
+import FormField from "@/features/auth/components/FormField";
+import PrimaryButton from "@/features/auth/components/PrimaryButton";
+import { router } from "expo-router";
 
 export default function LoginScreen() {
-	const { login } = useAuth();
-	const [username, setUsername] = useState('');
-	const [password, setPassword] = useState('');
-	const [showPassword, setShowPassword] = useState(false);
-	const [isLoading, setIsLoading] = useState(false);
-	const [errorMessage, setErrorMessage] = useState('');
+  const { login } = useAuth();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-	const handleUsernameChange = (text: string) => {
-		setUsername(text);
-		if (errorMessage) setErrorMessage('');
-	};
+  const handleLogin = async () => {
+    if (!username.trim() || !password.trim()) {
+      setErrorMessage("Please fill in all fields.");
+      return;
+    }
 
-	const handlePasswordChange = (text: string) => {
-		setPassword(text);
-		if (errorMessage) setErrorMessage('');
-	};
+    try {
+      setErrorMessage("");
+      setIsLoading(true);
+      await login(username, password);
+      
+      router.push('/(app)/(tabs)/home')
+    } catch (error: any) {
+      setErrorMessage(error?.message || "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-	const handleLogin = async () => {
-		if (!username.trim() || !password.trim()) {
-			setErrorMessage('Please fill in all fields.');
-			return;
-		}
+  return (
+    <AuthLayout title="Welcome back" subtitle="Let's train!">
+      <EaseView
+        initialAnimate={{ opacity: 0, translateY: -20 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{
+          type: "timing",
+          duration: 450,
+          delay: 60,
+          easing: "easeOut",
+        }}
+        style={styles.form}
+      >
+        {errorMessage ? (
+          <EaseView
+            initialAnimate={{ opacity: 0, translateY: -12 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{
+              type: "timing",
+              duration: 300,
+              easing: "easeOut",
+            }}
+            style={styles.errorBox}
+          >
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          </EaseView>
+        ) : null}
 
-		try {
-			setErrorMessage('');
-			setIsLoading(true);
+        <EaseView
+          initialAnimate={{ opacity: 0, translateY: -20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{
+            type: "timing",
+            duration: 450,
+            delay: 100,
+            easing: "easeOut",
+          }}
+        >
+          <FormField
+            label="USERNAME"
+            value={username}
+            onChangeText={(text) => {
+              setUsername(text);
+              if (errorMessage) setErrorMessage("");
+            }}
+            placeholder="Enter your username"
+            autoCapitalize="none"
+          />
+        </EaseView>
 
-			await login(username, password);
-			router.replace('/(app)/(tabs)/home');
-		} catch (error: any) {
-			setErrorMessage(error.message || 'Login failed. Please try again.');
-		} finally {
-			setIsLoading(false);
-		}
-	};
+        <EaseView
+          initialAnimate={{ opacity: 0, translateY: -20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{
+            type: "timing",
+            duration: 450,
+            delay: 160,
+            easing: "easeOut",
+          }}
+          style={styles.passwordField}
+        >
+          <FormField
+            label="PASSWORD"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              if (errorMessage) setErrorMessage("");
+            }}
+            placeholder="Enter your password"
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+          />
+        </EaseView>
 
-	return (
-		<AuthLayout title="JFitness Gym" subtitle="Welcome back, let's train!">
-			{/* Error */}
-			{errorMessage ? (
-				<View style={styles.errorBox}>
-					<Text style={styles.errorText}>{errorMessage}</Text>
-				</View>
-			) : null}
+        <EaseView
+          initialAnimate={{ opacity: 0, translateY: -20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{
+            type: "timing",
+            duration: 450,
+            delay: 220,
+            easing: "easeOut",
+          }}
+          style={styles.optionsRow}
+        >
+          <TouchableOpacity
+            style={styles.showPasswordRow}
+            onPress={() => setShowPassword((prev) => !prev)}
+            activeOpacity={0.7}
+          >
+            <View
+              style={[
+                styles.checkbox,
+                showPassword && styles.checkboxChecked,
+              ]}
+            >
+              {showPassword ? (
+                <Text style={styles.checkMark}>✓</Text>
+              ) : null}
+            </View>
+            <Text style={styles.checkboxLabel}>Show password</Text>
+          </TouchableOpacity>
 
-			{/* Username */}
-			<FormField
-				label="USERNAME"
-				value={username}
-				onChangeText={handleUsernameChange}
-				placeholder="Enter your username"
-				autoCapitalize="none"
-			/>
+          <TouchableOpacity
+            onPress={() => router.push("/(auth)/forgot-password")}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.forgotText}>Forgot password?</Text>
+          </TouchableOpacity>
+        </EaseView>
 
-			{/* Password */}
-			<FormField
-				label="PASSWORD"
-				value={password}
-				onChangeText={handlePasswordChange}
-				placeholder="Enter your password"
-				secureTextEntry={!showPassword}
-				autoCapitalize="none"
-			/>
+        <EaseView
+          initialAnimate={{ opacity: 0, translateY: -20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{
+            type: "timing",
+            duration: 450,
+            delay: 280,
+            easing: "easeOut",
+          }}
+        >
+          <PrimaryButton
+            title={isLoading ? "Signing in..." : "Login"}
+            onPress={handleLogin}
+            loading={isLoading}
+            disabled={isLoading}
+          />
+        </EaseView>
 
-			{/* Show password */}
-			<TouchableOpacity
-				style={styles.showPasswordRow}
-				onPress={() => setShowPassword(!showPassword)}
-				activeOpacity={0.7}
-			>
-				<View style={[styles.checkbox, showPassword && styles.checkboxChecked]}>
-					{showPassword && (
-					<View style={styles.checkIcon}>
-						<Text style={styles.checkMark}>✓</Text>
-					</View>
-					)}
-				</View>
-				<Text style={styles.checkboxLabel}>Show password</Text>
-			</TouchableOpacity>
+        <EaseView
+          initialAnimate={{ opacity: 0, translateY: -20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{
+            type: "timing",
+            duration: 450,
+            delay: 340,
+            easing: "easeOut",
+          }}
+        >
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.dividerLine} />
+          </View>
 
-			{/* Forgot password */}
-			<TouchableOpacity
-				style={styles.forgotRow}
-				onPress={() => router.push('/(auth)/forgot-password')}
-				activeOpacity={0.7}
-			>
-				<Text style={styles.forgotText}>Forgot your password?</Text>
-			</TouchableOpacity>
+          <TouchableOpacity
+            style={styles.activateButton}
+            onPress={() => router.push("/(auth)/account-activation")}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.activateButtonText}>
+              Activate Membership
+            </Text>
+          </TouchableOpacity>
 
-			{/* Login Button */}
-			<PrimaryButton
-				title={isLoading ? 'Signing in...' : 'Login'}
-				onPress={handleLogin}
-				loading={isLoading}
-				disabled={isLoading}
-			/>
-
-			{/* Activate Account */}
-			<View style={styles.activationCard}>
-				<View style={styles.activationTextBlock}>
-					<Text style={styles.activationTitle}>Already a gym member?</Text>
-					<Text style={styles.activationSubtitle}>
-					Activate using your membership code
-					</Text>
-				</View>
-
-				<TouchableOpacity
-					style={styles.activationButton}
-					onPress={() => router.push('/(auth)/account-activation')}
-					activeOpacity={0.85}
-				>
-					<Text style={styles.activationButtonText}>Activate</Text>
-				</TouchableOpacity>
-			</View>
-		</AuthLayout>
-	);
+          <Text style={styles.activateHint}>
+            Already a gym member? Use your membership code
+          </Text>
+        </EaseView>
+      </EaseView>
+    </AuthLayout>
+  );
 }
 
 const styles = StyleSheet.create({
+  form: {
+    flex: 1,
+  },
   errorBox: {
     backgroundColor: theme.errorBg,
     borderWidth: 1,
     borderColor: theme.errorBorder,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginBottom: 18,
+    borderRadius: 10,
+    paddingVertical: 11,
+    paddingHorizontal: 13,
+    marginBottom: 16,
   },
   errorText: {
     color: theme.errorText,
-    fontSize: 14,
-    textAlign: 'center',
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: "center",
+    fontWeight: "500",
+    letterSpacing: 0.05,
+  },
+  passwordField: {
+    marginTop: 6,
+  },
+  optionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 10,
+    marginBottom: 20,
   },
   showPasswordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: -4,
-    marginBottom: 8,
-    paddingVertical: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
+    width: 18,
+    height: 18,
+    borderRadius: 5,
     borderWidth: 1.5,
-    borderColor: theme.border,
+    borderColor: theme.borderStrong,
     backgroundColor: theme.inputBg,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   checkboxChecked: {
     backgroundColor: theme.primary,
     borderColor: theme.primary,
   },
-  checkIcon: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   checkMark: {
-    color: '#0b0d10',
-    fontSize: 13,
-    fontWeight: '800',
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "800",
+    lineHeight: 13,
   },
   checkboxLabel: {
-    fontSize: 14,
     color: theme.textSub,
-    fontWeight: '500',
-  },
-  forgotRow: {
-    alignSelf: 'flex-end',
-    marginBottom: 18,
-    paddingVertical: 4,
+    fontSize: 13,
+    fontWeight: "500",
+    letterSpacing: 0.05,
   },
   forgotText: {
     color: theme.primary,
-    fontSize: 14,
-    fontWeight: '700',
-  },activationCard: {
+    fontSize: 13,
+    fontWeight: "600",
+    letterSpacing: 0.05,
+  },
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 24,
-    backgroundColor: theme.surface,
-    borderRadius: 16,
-    paddingVertical: 14,
+    marginBottom: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: theme.border,
+  },
+  dividerText: {
+    marginHorizontal: 12,
+    color: theme.textMuted,
+    fontSize: 10.5,
+    fontWeight: "600",
+    letterSpacing: 1,
+  },
+  activateButton: {
+    minHeight: 50,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: theme.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
+    borderColor: theme.borderAccent,
+    borderRadius: 12,
+    backgroundColor: theme.accentWash,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  activationTextBlock: {
-    flex: 1,
-  },
-  activationTitle: {
+  activateButtonText: {
+    color: theme.primary,
     fontSize: 14,
-    fontWeight: '700',
-    color: theme.text,
+    fontWeight: "700",
+    letterSpacing: 0.1,
   },
-  activationSubtitle: {
-    marginTop: 2,
-    fontSize: 12,
-    color: theme.textSub,
+  activateHint: {
+    marginTop: 9,
+    paddingHorizontal: 10,
+    color: theme.textMuted,
+    fontSize: 11.5,
+    fontWeight: "400",
     lineHeight: 16,
-  },
-  activationButton: {
-    backgroundColor: theme.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 999,
-  },
-  activationButtonText: {
-    color: '#0b0d10',
-    fontSize: 13,
-    fontWeight: '700',
+    textAlign: "center",
   },
 });

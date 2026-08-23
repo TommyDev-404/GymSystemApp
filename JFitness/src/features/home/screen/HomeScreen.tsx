@@ -1,41 +1,37 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, StatusBar, StyleSheet, View } from "react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-
 import {
+  Calendar,
+  Dumbbell,
   Flame,
   MapPin,
-  Calendar,
   Trophy,
-  Dumbbell,
   UsersRound,
 } from "lucide-react-native";
-
+import { TabWrapper } from "@/components/shared/TabWrapper";
+import { useAuth } from "@/context/AuthContext";
 import { GreetingHeader } from "@/features/home/components/GreetingHeader";
 import { MembershipCard } from "@/features/home/components/MembershipCard";
 import { StatsRow } from "@/features/home/components/StatsRow";
 import { QuickActionsGrid } from "@/features/home/components/QuickActionsGrid";
 import { ActivityList } from "@/features/home/components/ActivityList";
-import { ProgressCard } from "../components/ProgressCard";
-import { GoalStatusCard } from "../components/GoalStatusCard";
+import { theme } from "@/utils/theme";
 import { GoalBottomSheet } from "../components/GoalBottomSheet";
-
+import { GoalStatusCard } from "../components/GoalStatusCard";
+import { ProgressCard } from "../components/ProgressCard";
 import {
   useGetFitnessGoal,
   useGetMemberDashboardData,
   useGetMemberRecentActivity,
 } from "../hook/useHome";
-
-import { useAuth } from "@/context/AuthContext";
 import { MemberDashboard, WeightGoal } from "../types/HomeTypes";
-import { Loading } from "@/components/shared/Loading";
-import { theme } from "@/utils/theme";
-import { AppBackground } from "@/components/shared/AppBackground";
 
 export default function HomeScreen() {
   const { member } = useAuth();
+  const [goal, setGoal] = useState<WeightGoal | null>(null);
+  const goalSheetRef = useRef<BottomSheetModal>(null);
+  const updateGoalSheetRef = useRef<BottomSheetModal>(null);
 
   const {
     data: dashboardData = {} as MemberDashboard,
@@ -52,33 +48,33 @@ export default function HomeScreen() {
     isLoading: weightGoalLoading,
   } = useGetFitnessGoal(member?.memberId!);
 
-  const goalSheetRef = useRef<BottomSheetModal>(null);
-  const updateGoalSheetRef = useRef<BottomSheetModal>(null);
+  useEffect(() => {
+    setGoal(memberWeightGoal ?? null);
+  }, [memberWeightGoal]);
 
-  const [goal, setGoal] = useState<WeightGoal | null>(null);
   const stats = useMemo(
-	() => [
-	  {
-		 label: "Day Streak",
-		 value: dashboardData?.stats?.dayStreak,
-		 icon: Flame,
-		 color: "#FB923C", // soft orange
-	  },
-	  {
-		 label: "Total Visits",
-		 value: dashboardData?.stats?.totalVisits,
-		 icon: MapPin,
-		 color: "#60A5FA", // soft blue
-	  },
-	  {
-		 label: "This Month",
-		 value: dashboardData?.stats?.thisMonth,
-		 icon: Calendar,
-		 color: theme.primary, // emerald
-	  },
-	],
-	[dashboardData?.stats]
- );
+    () => [
+      {
+        label: "Day Streak",
+        value: dashboardData?.stats?.dayStreak,
+        icon: Flame,
+        color: "#FB923C",
+      },
+      {
+        label: "Total Visits",
+        value: dashboardData?.stats?.totalVisits,
+        icon: MapPin,
+        color: "#60A5FA",
+      },
+      {
+        label: "This Month",
+        value: dashboardData?.stats?.thisMonth,
+        icon: Calendar,
+        color: theme.primary,
+      },
+    ],
+    [dashboardData?.stats]
+  );
 
   const actions = useMemo(
     () => [
@@ -122,81 +118,64 @@ export default function HomeScreen() {
     [member?.memberId]
   );
 
-  useEffect(() => {
-    setGoal(memberWeightGoal ?? null);
-  }, [memberWeightGoal]);
+  const loading = dashboardLoading || recentLoading || weightGoalLoading;
 
-  if (dashboardLoading || recentLoading || weightGoalLoading) {
-    return <Loading />;
-  }
+  return (
+    <>
+      <TabWrapper
+        loading={loading}
+        horizontalPadding={15}
+        gap={20}
+      >
+        <GreetingHeader memberName={dashboardData?.username} />
 
-	return (
-		<>
-			<AppBackground>
-				<ScrollView
-					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}
-				>
-				<GreetingHeader memberName={dashboardData?.username} />
+        <MembershipCard
+          plan={dashboardData?.plan}
+          membership_start={dashboardData?.membership_start!}
+          expiry={dashboardData?.expiry!}
+          status={dashboardData?.status}
+          points={dashboardData?.points}
+        />
 
-				<MembershipCard
-					plan={dashboardData?.plan}
-					membership_start={dashboardData?.membership_start!}
-					expiry={dashboardData?.expiry!}
-					status={dashboardData?.status}
-					points={dashboardData?.points}
-				/>
+        <StatsRow stats={stats} />
 
-				<StatsRow stats={stats} />
+        {goal ? (
+          <ProgressCard
+            goalType={goal.goal_type}
+            startingWeight={goal.start_weight}
+            currentWeight={goal.current_weight}
+            goalWeight={goal.target_weight}
+            percentage={goal.progress_percentage}
+            onPress={() => updateGoalSheetRef.current?.present()}
+            onHistoryPress={() =>
+              router.push({
+                pathname: "/(app)/fitness-history",
+                params: {
+                  goalId: String(goal.id),
+                },
+              })
+            }
+            onNewGoalPress={() => goalSheetRef.current?.present()}
+          />
+        ) : (
+          <GoalStatusCard
+            onPress={() => goalSheetRef.current?.present()}
+          />
+        )}
 
-				{goal ? (
-					<ProgressCard
-						goalType={goal.goal_type}
-						startingWeight={goal.start_weight}
-						currentWeight={goal.current_weight}
-						goalWeight={goal.target_weight}
-						percentage={goal.progress_percentage}
-						onPress={() => updateGoalSheetRef.current?.present()}
-						onHistoryPress={() =>
-						router.push({
-							pathname: "/(app)/fitness-history",
-							params: {
-								goalId: String(goal.id),
-							},
-						})
-						}
-						onNewGoalPress={() => {
-						goalSheetRef.current?.present();
-						}}
-					/>
-				) : (
-					<GoalStatusCard
-						onPress={() => goalSheetRef.current?.present()}
-					/>
-				)}
+        <QuickActionsGrid actions={actions} />
 
-				<QuickActionsGrid actions={actions} />
+        <ActivityList activities={recentActivity} />
+      </TabWrapper>
 
-				<ActivityList activities={recentActivity} />
-				</ScrollView>
-			</AppBackground>
-
-			<GoalBottomSheet
-				modalRef={goalSheetRef}
-				title="Set Weight Goal 🎯"
-				subtitle="Define your target weight and start tracking progress"
-				buttonText="Save Goal"
-				onClose={() => {}}
-				mode="CREATE"
-			/>
-		</>
-	);
+      <GoalBottomSheet
+        modalRef={goalSheetRef}
+        title="Set Weight Goal 🎯"
+        subtitle="Define your target weight and start tracking progress"
+        buttonText="Save Goal"
+        onClose={() => {}}
+        mode="CREATE"
+      />
+    </>
+  );
 }
-
-const styles = StyleSheet.create({
-	scrollContent: {
-		paddingBottom: 30,
-		paddingHorizontal: 20,
-	  gap: 20,
-	},
- });

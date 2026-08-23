@@ -11,7 +11,7 @@ export default function AppLayout() {
         name="qr-scanner"
         options={{
           presentation: "fullScreenModal",
-          animation: "fade",
+          animation: "slide_from_bottom",
           gestureEnabled: false,
         }}
       />

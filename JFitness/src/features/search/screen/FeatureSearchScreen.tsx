@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   StyleSheet,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
@@ -14,119 +15,291 @@ import EmptyState from "@/features/search/components/EmptyState";
 
 import { AppBackground } from "@/components/shared/AppBackground";
 
+const RECENT_SEARCHES_KEY = "@recent_feature_searches";
+const MAX_RECENT_SEARCHES = 5;
+
 export const APP_FEATURES = [
   {
     id: "1",
-    title: "Dashboard",
-    subtitle: "Overview of your gym",
-    icon: "dashboard",
-    route: "/dashboard",
-    keywords: ["home", "overview"],
+    title: "Progress History",
+    subtitle: "Track your fitness progress",
+    icon: "progress",
+    route: "/(app)/fitness-history",
+    keywords: [
+      "progress",
+      "weight",
+      "body",
+      "fitness",
+      "history",
+    ],
   },
   {
     id: "2",
-    title: "Members",
-    subtitle: "Manage gym members",
-    icon: "members",
-    route: "/members",
-    keywords: ["member", "users"],
+    title: "Referral",
+    subtitle: "Invite friends and earn rewards",
+    icon: "referral",
+    route: "/(app)/referral",
+    keywords: [
+      "refer",
+      "invite",
+      "friend",
+      "referral",
+    ],
   },
   {
     id: "3",
-    title: "Attendance",
-    subtitle: "QR check-in records",
-    icon: "attendance",
-    route: "/attendance",
-    keywords: ["scan", "qr", "check in"],
+    title: "Rewards",
+    subtitle: "View and redeem your rewards",
+    icon: "rewards",
+    route: "/(app)/rewards",
+    keywords: [
+      "reward",
+      "points",
+      "redeem",
+      "prize",
+    ],
   },
   {
     id: "4",
-    title: "Payments",
-    subtitle: "Billing system",
-    icon: "payments",
-    route: "/payments",
-    keywords: ["cash", "payment"],
+    title: "Workout Tutorials",
+    subtitle: "Learn proper exercise techniques",
+    icon: "tutorials",
+    route: "/(app)/workout-tutorial",
+    keywords: [
+      "workout",
+      "exercise",
+      "tutorial",
+      "technique",
+      "guide",
+    ],
   },
   {
     id: "5",
-    title: "Workout Plans",
-    subtitle: "Training routines",
-    icon: "workouts",
-    route: "/workouts",
-    keywords: ["fitness", "routine"],
+    title: "Attendance History",
+    subtitle: "View your gym attendance",
+    icon: "attendance",
+    route: "/(app)/attendance-history",
+    keywords: [
+      "attendance",
+      "check in",
+      "check-in",
+      "visit",
+      "gym",
+    ],
   },
   {
     id: "6",
-    title: "Exercise Library",
-    subtitle: "Browse exercises",
-    icon: "exercises",
-    route: "/exercise-library",
-    keywords: ["exercise"],
+    title: "Payment History",
+    subtitle: "View your payment records",
+    icon: "payments",
+    route: "/(app)/payment-history",
+    keywords: [
+      "payment",
+      "payments",
+      "billing",
+      "transaction",
+      "receipt",
+    ],
   },
   {
     id: "7",
-    title: "QR Scanner",
-    subtitle: "Scan member QR",
-    icon: "scanner",
-    route: "/scanner",
-    keywords: ["qr", "scan"],
+    title: "Workout History",
+    subtitle: "Review your completed workouts",
+    icon: "workout-history",
+    route: "/(app)/workout-history",
+    keywords: [
+      "workout",
+      "exercise",
+      "training",
+      "history",
+      "routine",
+    ],
   },
   {
     id: "8",
-    title: "Announcements",
-    subtitle: "Notify members",
-    icon: "announcements",
-    route: "/announcements",
-    keywords: ["news"],
+    title: "My Posts",
+    subtitle: "View your shared posts",
+    icon: "my-posts",
+    route: "/(app)/your-posts",
+    keywords: [
+      "post",
+      "posts",
+      "my posts",
+      "feed",
+      "community",
+    ],
   },
   {
     id: "9",
-    title: "Reports",
-    subtitle: "Analytics",
-    icon: "reports",
-    route: "/reports",
-    keywords: ["stats", "analytics"],
+    title: "QR Scanner",
+    subtitle: "Scan your gym QR code",
+    icon: "scanner",
+    route: "/(app)/qr-scanner",
+    keywords: [
+      "qr",
+      "scan",
+      "scanner",
+      "check in",
+    ],
   },
   {
     id: "10",
-    title: "AI Chatbot",
-    subtitle: "Fitness assistant",
-    icon: "chatbot",
-    route: "/chatbot",
-    keywords: ["ai", "bot", "assistant"],
+    title: "Create Post",
+    subtitle: "Share your fitness journey",
+    icon: "post",
+    route: "/(app)/share-progress",
+    keywords: [
+      "post",
+      "create",
+      "share",
+      "upload",
+      "photo",
+    ],
   },
   {
     id: "11",
-    title: "Settings",
-    subtitle: "App settings",
-    icon: "settings",
-    route: "/settings",
-    keywords: ["preferences", "configuration"],
+    title: "Workout Timer",
+    subtitle: "Track your workout intervals",
+    icon: "timer",
+    route: "/(app)/timer",
+    keywords: [
+      "timer",
+      "time",
+      "interval",
+      "rest",
+      "stopwatch",
+    ],
+  },
+  {
+    id: "12",
+    title: "AI Fitness Buddy",
+    subtitle: "Get your personal fitness assistant",
+    icon: "ai-buddy",
+    route: "/(app)/ai-assistant",
+    keywords: [
+      "ai",
+      "buddy",
+      "assistant",
+      "fitness",
+      "coach",
+      "chat",
+    ],
+  },
+  {
+    id: "13",
+    title: "Personal Information",
+    subtitle: "Manage your personal details",
+    icon: "personal-info",
+    route: "/(app)/personal-info",
+    keywords: [
+      "personal",
+      "profile",
+      "information",
+      "name",
+      "details",
+    ],
+  },
+  {
+    id: "14",
+    title: "Security",
+    subtitle: "Manage your account security",
+    icon: "security",
+    route: "/(app)/security",
+    keywords: [
+      "security",
+      "password",
+      "account",
+      "privacy",
+      "login",
+    ],
+  },
+  {
+    id: "15",
+    title: "About",
+    subtitle: "Learn more about the app",
+    icon: "about",
+    route: "/(app)/about",
+    keywords: [
+      "about",
+      "app",
+      "information",
+      "version",
+    ],
   },
 ];
 
-export const RECENT = [
-  "Members",
-  "Payments",
-  "Attendance",
-  "Chatbot",
-];
-
 export const QUICK_ACTIONS = [
-  "Add Workout",
-  "Check-in",
-  "Timer",
-  "Ai-Fitness Buddy",
+  "QR Scanner",
+  "Workout Timer",
+  "AI Fitness Buddy",
+  "Create Post",
 ];
 
 export default function FeatureSearchScreen() {
   const router = useRouter();
+
   const [query, setQuery] = useState("");
+  const [recent, setRecent] = useState<string[]>([]);
+
+  useEffect(() => {
+    loadRecentSearches();
+  }, []);
+
+  const loadRecentSearches = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(
+        RECENT_SEARCHES_KEY
+      );
+
+      if (!stored) {
+        return;
+      }
+
+      const parsed: unknown = JSON.parse(stored);
+
+      if (Array.isArray(parsed)) {
+        const validRecent = parsed.filter(
+          (item): item is string =>
+            typeof item === "string"
+        );
+
+        setRecent(validRecent);
+      }
+    } catch (error) {
+      console.error(
+        "Failed to load recent searches:",
+        error
+      );
+    }
+  };
+
+  const saveRecentSearch = async (title: string) => {
+    const updated = [
+      title,
+      ...recent.filter((item) => item !== title),
+    ].slice(0, MAX_RECENT_SEARCHES);
+
+    setRecent(updated);
+
+    try {
+      await AsyncStorage.setItem(
+        RECENT_SEARCHES_KEY,
+        JSON.stringify(updated)
+      );
+    } catch (error) {
+      console.error(
+        "Failed to save recent search:",
+        error
+      );
+    }
+  };
 
   const results = useMemo(() => {
     const search = query.trim().toLowerCase();
 
-    if (!search) return [];
+    if (!search) {
+      return [];
+    }
 
     return APP_FEATURES.filter((item) => {
       const titleMatch = item.title
@@ -137,60 +310,115 @@ export default function FeatureSearchScreen() {
         .toLowerCase()
         .includes(search);
 
-      const keywordMatch = item.keywords.some((keyword) =>
-        keyword.toLowerCase().includes(search)
+      const keywordMatch = item.keywords.some(
+        (keyword) =>
+          keyword.toLowerCase().includes(search)
       );
 
-      return titleMatch || subtitleMatch || keywordMatch;
+      return (
+        titleMatch ||
+        subtitleMatch ||
+        keywordMatch
+      );
     });
   }, [query]);
+
+  const navigateToFeature = async (
+    title: string
+  ) => {
+    const feature = APP_FEATURES.find(
+      (item) => item.title === title
+    );
+
+    if (!feature) {
+      return;
+    }
+
+    await saveRecentSearch(feature.title);
+
+    router.push(feature.route as any);
+  };
+
+  const handleFeaturePress = async (
+    item: (typeof APP_FEATURES)[number]
+  ) => {
+    await saveRecentSearch(item.title);
+
+    router.push(item.route as any);
+  };
+
+  const handleRecentPress = async (
+    title: string
+  ) => {
+    await navigateToFeature(title);
+  };
+
+  const handleQuickPress = async (
+    title: string
+  ) => {
+    await navigateToFeature(title);
+  };
+
+  const handleQueryChange = (
+    value: string
+  ) => {
+    setQuery(value);
+  };
 
   const hasQuery = query.trim().length > 0;
 
   return (
     <AppBackground>
       <SafeAreaView style={styles.container}>
-        {/* SEARCH HEADER */}
-        <SearchHeader
-          query={query}
-          setQuery={setQuery}
-          placeholder="Search features..."
-          onBack={() => router.back()}
-        />
 
-        {/* CONTENT */}
-        {!hasQuery ? (
-          <View style={styles.recentContainer}>
-            <RecentSection
-              recent={RECENT}
-              quick={QUICK_ACTIONS}
-            />
-          </View>
-        ) : (
-          <FlatList
-            data={results}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={[
-              styles.resultsContent,
-              results.length === 0 && styles.emptyContent,
-            ]}
-            renderItem={({ item }) => (
-              <FeatureItem
-                item={item}
-                onPress={() =>
-                  router.push(item.route as any)
-                }
-              />
-            )}
-            ListEmptyComponent={
-              <EmptyState
-                hint="Members, Payments, QR, Attendance, Reports"
-              />
-            }
+        <View style={styles.header}>
+          <SearchHeader
+            query={query}
+            setQuery={handleQueryChange}
+            placeholder="Search features..."
+            onBack={() => router.back()}
           />
-        )}
+        </View>
+
+        <FlatList
+          data={hasQuery ? results : []}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={
+            hasQuery
+              ? results.length === 0
+                ? styles.emptyContent
+                : styles.resultsContent
+              : styles.recentContent
+          }
+          renderItem={({ item }) => (
+            <FeatureItem
+              item={item}
+              onPress={() =>
+                handleFeaturePress(item)
+              }
+            />
+          )}
+          ListHeaderComponent={
+            !hasQuery ? (
+              <RecentSection
+                recent={recent}
+                quick={QUICK_ACTIONS}
+                onRecentPress={handleRecentPress}
+                onQuickPress={handleQuickPress}
+              />
+            ) : null
+          }
+          ListEmptyComponent={
+            hasQuery ? (
+              <EmptyState
+                hint="Progress, Rewards, QR, Attendance, Workout"
+              />
+            ) : null
+          }
+        />
       </SafeAreaView>
     </AppBackground>
   );
@@ -201,8 +429,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  recentContainer: {
-    flex: 1,
+  header: {
+    width: "100%",
+    flexShrink: 0,
+  },
+
+  recentContent: {
+    paddingBottom: 30,
   },
 
   resultsContent: {
@@ -213,6 +446,7 @@ const styles = StyleSheet.create({
 
   emptyContent: {
     flexGrow: 1,
+    paddingHorizontal: 16,
     justifyContent: "center",
   },
 });
