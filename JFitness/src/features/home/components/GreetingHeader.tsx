@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   greeting: {
     position: "absolute",
     top: 20,
-    left: 15,
+    left: 0,
     right: 20,
     zIndex: 2,
   },
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   bubble: {
     position: "absolute",
     top: 112,
-    left: 15,
+    left: 0,
     right: 140,
     minHeight: 112,
     backgroundColor: theme.primary,
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 175,
     height: 200,
-    right: -10,
+    right: -15,
     bottom: -12,
     zIndex: 6,
   },

@@ -216,11 +216,6 @@ export function ProfileSidebar({
       pointerEvents={visible ? "auto" : "none"}
       style={StyleSheet.absoluteFill}
     >
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="transparent"
-        translucent
-      />
 
       <Animated.View
         style={[

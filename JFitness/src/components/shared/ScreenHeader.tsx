@@ -4,8 +4,7 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  StatusBar,
+  StyleSheet
 } from "react-native";
 
 import { ArrowLeft } from "lucide-react-native";
@@ -27,9 +26,8 @@ export function ScreenHeader({
 
   return (
     <View style={styles.header}>
-      <StatusBar barStyle="dark-content"/>
+      
       <View style={styles.left}>
-
         <TouchableOpacity
           onPress={() => router.back()}
           activeOpacity={0.7}

@@ -11,7 +11,6 @@ import {
   StyleSheet,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   ArrowLeft,
@@ -22,9 +21,8 @@ import {
   ChevronRight,
 } from "lucide-react-native";
 import { theme } from "@/utils/theme";
-import { AppBackground } from "@/components/shared/AppBackground";
 import { useWorkoutInfo } from "../../hook/useWorkout";
-import { Loading } from "@/components/shared/Loading";
+import { StackWrapper } from "@/components/shared/StackWrapper";
 
 const { width } = Dimensions.get("window");
 const HERO_HEIGHT = 330;
@@ -92,7 +90,7 @@ export default function WorkoutTutorialDetails() {
 
   const shouldFetch = fetch === "true" && !!workoutId;
 
-  const { data: workoutInfo, isLoading } = useWorkoutInfo(
+  const { data: workoutInfo } = useWorkoutInfo(
     shouldFetch ? Number(workoutId) : undefined
   );
 
@@ -100,12 +98,10 @@ export default function WorkoutTutorialDetails() {
   const [failedImages, setFailedImages] = useState<number[]>([]);
 
   const workoutData: WorkoutData | null = useMemo(() => {
-    // Search result → use fetched data
     if (shouldFetch) {
       return workoutInfo ?? null;
     }
-  
-    // Normal card → use passed workout data
+
     if (workout) {
       try {
         return JSON.parse(workout);
@@ -113,17 +109,27 @@ export default function WorkoutTutorialDetails() {
         return null;
       }
     }
-  
+
     return null;
   }, [shouldFetch, workoutInfo, workout]);
 
-
   if (!workoutData) {
     return (
-      <AppBackground>
-        <SafeAreaView style={styles.emptyScreen}>
+      <StackWrapper
+        title="Workout"
+        showDefaultHeader={false}
+        horizontalPadding={0}
+        paddingTop={0}
+        paddingBottom={0}
+        gap={0}
+      >
+        <View style={styles.emptyScreen}>
           <View style={styles.emptyIcon}>
-            <Dumbbell size={24} color={theme.primaryLight} />
+            <Dumbbell
+              size={24}
+              color={theme.primaryLight}
+              strokeWidth={2}
+            />
           </View>
 
           <Text style={styles.emptyTitle}>No workout found</Text>
@@ -134,12 +140,15 @@ export default function WorkoutTutorialDetails() {
 
           <Pressable
             onPress={() => router.back()}
-            style={styles.emptyButton}
+            style={({ pressed }) => [
+              styles.emptyButton,
+              pressed && styles.pressed,
+            ]}
           >
             <Text style={styles.emptyButtonText}>Go Back</Text>
           </Pressable>
-        </SafeAreaView>
-      </AppBackground>
+        </View>
+      </StackWrapper>
     );
   }
 
@@ -153,19 +162,25 @@ export default function WorkoutTutorialDetails() {
     ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
     : null;
 
-  const gallery = images.length > 0 ? images : thumbnail ? [thumbnail] : [];
+  const gallery =
+    images.length > 0 ? images : thumbnail ? [thumbnail] : [];
 
   const openYoutube = () => {
-    if (workoutData?.video_url) {
+    if (workoutData.video_url) {
       Linking.openURL(workoutData.video_url);
     }
   };
 
-  if (isLoading) return <Loading />;
-
   return (
-    <AppBackground>
-      <SafeAreaView style={styles.container}>
+    <StackWrapper
+      title={workoutData.name ?? "Workout"}
+      showDefaultHeader={false}
+      horizontalPadding={0}
+      paddingTop={0}
+      paddingBottom={0}
+      gap={0}
+    >
+      <View style={styles.screen}>
         <View style={styles.gallery}>
           {gallery.length > 0 ? (
             <FlatList
@@ -229,16 +244,16 @@ export default function WorkoutTutorialDetails() {
           <LinearGradient
             pointerEvents="none"
             colors={[
-              "rgba(0,0,0,0.05)",
-              "rgba(0,0,0,0.12)",
-              "rgba(11,13,16,0.88)",
-              theme.bg,
+              "rgba(109,24,37,0.04)",
+              "rgba(109,24,37,0.12)",
+              "rgba(109,24,37,0.68)",
+              "rgba(109,24,37,0.98)",
             ]}
-            locations={[0, 0.38, 0.78, 1]}
+            locations={[0, 0.34, 0.70, 1]}
             style={styles.heroGradient}
           />
 
-          <View style={styles.backButtonContainer}>
+          <View style={styles.topBar}>
             <Pressable
               onPress={() => router.back()}
               style={({ pressed }) => [
@@ -273,7 +288,10 @@ export default function WorkoutTutorialDetails() {
               )}
             </View>
 
-            <Text style={styles.title} numberOfLines={2}>
+            <Text
+              style={styles.title}
+              numberOfLines={2}
+            >
               {workoutData.name}
             </Text>
           </View>
@@ -440,13 +458,13 @@ export default function WorkoutTutorialDetails() {
             </Pressable>
           </View>
         )}
-      </SafeAreaView>
-    </AppBackground>
+      </View>
+    </StackWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
   },
   gallery: {
@@ -467,57 +485,13 @@ const styles = StyleSheet.create({
     bottom: 0,
     height: HERO_HEIGHT,
   },
-  heroContent: {
-    position: "absolute",
-    left: 20,
-    right: 20,
-    bottom: 30,
-  },
-  badges: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    marginBottom: 9,
-  },
-  categoryBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: theme.primaryLight,
-  },
-  categoryBadgeText: {
-    fontSize: 9.5,
-    fontWeight: "800",
-    color: "#fff",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  levelBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
-  },
-  levelBadgeText: {
-    fontSize: 9.5,
-    fontWeight: "700",
-    color: "#fff",
-    textTransform: "uppercase",
-    letterSpacing: 0.4,
-  },
-  title: {
-    fontSize: 29,
-    lineHeight: 34,
-    fontWeight: "800",
-    color: "#fff",
-    letterSpacing: -0.8,
-  },
-  backButtonContainer: {
+  topBar: {
     position: "absolute",
     top: 15,
     left: 16,
+    right: 16,
+    flexDirection: "row",
+    alignItems: "flex-start",
     zIndex: 10,
   },
   backButton: {
@@ -526,26 +500,82 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(11,13,16,0.62)",
+    backgroundColor: "rgba(109,24,37,0.72)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.16)",
+    borderColor: "rgba(255,255,255,0.18)",
   },
-  pressed: {
-    opacity: 0.72,
-    transform: [{ scale: 0.96 }],
-  },
-  imageError: {
-    width,
-    height: HERO_HEIGHT,
-    alignItems: "center",
+  titleContainer: {
+    flex: 1,
+    marginLeft: 11,
+    minHeight: 42,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
     justifyContent: "center",
-    backgroundColor: theme.surface,
+    borderRadius: 14,
+    backgroundColor: "rgba(109,24,37,0.68)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
   },
-  imageErrorText: {
-    marginTop: 10,
-    fontSize: 11,
-    fontWeight: "600",
-    color: theme.textMuted,
+  heroContent: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    bottom: 30,
+  },
+  
+  badges: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    marginBottom: 9,
+  },
+  
+  categoryBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: theme.primaryLight,
+  },
+  
+  categoryBadgeText: {
+    fontSize: 9.5,
+    fontWeight: "800",
+    color: "#fff",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  
+  levelBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.22)",
+  },
+  
+  levelBadgeText: {
+    fontSize: 9.5,
+    fontWeight: "700",
+    color: "#fff",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  
+  title: {
+    fontSize: 29,
+    lineHeight: 34,
+    fontWeight: "800",
+    color: "#fff",
+    letterSpacing: -0.8,
+  },
+
+  topTitle: {
+    fontSize: 15,
+    lineHeight: 19,
+    fontWeight: "800",
+    color: "#fff",
+    letterSpacing: -0.2,
   },
   pagination: {
     position: "absolute",
@@ -566,6 +596,23 @@ const styles = StyleSheet.create({
   inactiveDot: {
     width: 5,
     backgroundColor: "rgba(255,255,255,0.55)",
+  },
+  pressed: {
+    opacity: 0.72,
+    transform: [{ scale: 0.96 }],
+  },
+  imageError: {
+    width,
+    height: HERO_HEIGHT,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.surface,
+  },
+  imageErrorText: {
+    marginTop: 10,
+    fontSize: 11,
+    fontWeight: "600",
+    color: theme.textMuted,
   },
   infoScroll: {
     flex: 1,
@@ -591,9 +638,9 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.accentWash,
+    backgroundColor: "rgba(139,30,45,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(16,185,129,0.15)",
+    borderColor: "rgba(139,30,45,0.14)",
   },
   introText: {
     flex: 1,
@@ -641,7 +688,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.accentWash,
+    backgroundColor: "rgba(139,30,45,0.08)",
   },
   equipmentText: {
     flex: 1,
@@ -662,9 +709,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: theme.accentWash,
+    backgroundColor: "rgba(139,30,45,0.07)",
     borderWidth: 1,
-    borderColor: "rgba(16,185,129,0.16)",
+    borderColor: "rgba(139,30,45,0.14)",
   },
   muscleText: {
     fontSize: 10.5,
@@ -693,12 +740,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: 18,
+    paddingHorizontal: 15,
     paddingTop: 10,
     paddingBottom: 12,
-    backgroundColor: "rgba(11,13,16,0.96)",
-    borderTopWidth: 1,
-    borderColor: theme.border,
   },
   youtubeButton: {
     minHeight: 56,
@@ -748,9 +792,9 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.accentWash,
+    backgroundColor: "rgba(139,30,45,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(16,185,129,0.16)",
+    borderColor: "rgba(139,30,45,0.14)",
     marginBottom: 14,
   },
   emptyTitle: {

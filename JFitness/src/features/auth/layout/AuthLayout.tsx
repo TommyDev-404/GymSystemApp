@@ -6,7 +6,8 @@ import {
   StatusBar as RNStatusBar,
   Platform,
   Keyboard,
-  Dimensions
+  Dimensions,
+  Image
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -113,6 +114,12 @@ export function AuthLayout({
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
+        <Animated.Image
+          source={require("@/assets/images/bear-lifting.png")}
+          style={[styles.headerMascot, headerStyle]}
+          resizeMode="contain"
+        />
+        
         <Animated.View
           style={[styles.headerContent, headerStyle]}
           pointerEvents="none"
@@ -177,7 +184,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
-    zIndex: 1,
+    zIndex: 3,
+    marginTop: 150,
+  },
+  
+  headerMascot: {
+    position: "absolute",
+    top: 55,
+    alignSelf: "center",
+    width: 150,
+    height: 150,
+    zIndex: 2,
   },
 
   brandName: {

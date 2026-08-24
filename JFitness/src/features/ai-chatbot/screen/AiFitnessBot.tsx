@@ -1,19 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  BackHandler,
   FlatList,
   Keyboard,
-  BackHandler,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
-
-import { AppBackground } from "@/components/shared/AppBackground";
+import { StackWrapper } from "@/components/shared/StackWrapper";
 import { theme } from "@/utils/theme";
-
 import AiHeader from "../components/AiHeader";
 import AiMessage from "../components/AiMessages";
 import AiSuggestions from "../components/AiSuggestions";
@@ -21,10 +17,7 @@ import ChatInput from "../components/ChatInput";
 
 export default function ChatbotScreen() {
   const [input, setInput] = useState("");
-  const [behaviour, setBehaviour] = useState<
-    "height" | undefined
-  >("height");
-
+  const [behaviour, setBehaviour] = useState<"height" | undefined>("height");
   const [messages, setMessages] = useState([
     {
       id: "1",
@@ -36,19 +29,13 @@ export default function ChatbotScreen() {
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    const showListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        setBehaviour("height");
-      }
-    );
+    const showListener = Keyboard.addListener("keyboardDidShow", () => {
+      setBehaviour("height");
+    });
 
-    const hideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        setBehaviour(undefined);
-      }
-    );
+    const hideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setBehaviour(undefined);
+    });
 
     return () => {
       showListener.remove();
@@ -92,19 +79,12 @@ export default function ChatbotScreen() {
       isTyping: true,
     };
 
-    setMessages((prev) => [
-      ...prev,
-      userMessage,
-      typingMessage,
-    ]);
-
+    setMessages((prev) => [...prev, userMessage, typingMessage]);
     setInput("");
 
     setTimeout(() => {
       setMessages((prev) => {
-        const filtered = prev.filter(
-          (msg) => msg.id !== "typing"
-        );
+        const filtered = prev.filter((msg) => msg.id !== "typing");
 
         return [
           ...filtered,
@@ -118,72 +98,62 @@ export default function ChatbotScreen() {
     }, 1500);
   };
 
+  const header = <AiHeader />;
+
   return (
-    <AppBackground>
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar style="light" />
+    <StackWrapper
+      title="GymBot AI"
+      showDefaultHeader={false}
+      headerContent={header}
+      horizontalPadding={0}
+      paddingTop={0}
+      paddingBottom={0}
+      gap={0}
+      useScrollView={false}
+    >
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === "ios" ? "padding" : behaviour}
+      >
+        <View style={styles.chatContainer}>
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <AiMessage item={item} />}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.messageContent}
+          />
 
-        <KeyboardAvoidingView
-          style={styles.keyboardContainer}
-          behavior={
-            Platform.OS === "ios"
-              ? "padding"
-              : behaviour
-          }
-        >
-          <AiHeader />
+          <AiSuggestions visible={messages.length === 1} />
 
-          <View style={styles.chatContainer}>
-            <FlatList
-              ref={flatListRef}
-              data={messages}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <AiMessage item={item} />
-              )}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={styles.messageContent}
+          <View style={styles.inputContainer}>
+            <ChatInput
+              input={input}
+              setInput={setInput}
+              sendMessage={sendMessage}
             />
-
-            <AiSuggestions
-              visible={messages.length === 1}
-            />
-
-            <View style={styles.inputContainer}>
-              <ChatInput
-                input={input}
-                setInput={setInput}
-                sendMessage={sendMessage}
-              />
-            </View>
           </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </AppBackground>
+        </View>
+      </KeyboardAvoidingView>
+    </StackWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-
   keyboardContainer: {
     flex: 1,
   },
-
   chatContainer: {
     flex: 1,
   },
-  
   messageContent: {
     flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 10,
   },
-
   inputContainer: {
     paddingHorizontal: 12,
     paddingTop: 8,

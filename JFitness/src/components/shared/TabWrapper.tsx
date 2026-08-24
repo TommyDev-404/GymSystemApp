@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import {
   ActivityIndicator,
   ScrollView,
+  StatusBar,
   StyleProp,
   StyleSheet,
   View,
@@ -83,6 +84,8 @@ export function TabWrapper({
 
   return (
     <AppBackground>
+      <StatusBar barStyle="dark-content" />
+      
       {useScrollView ? (
         <ScrollView
           scrollEnabled={scrollEnabled}

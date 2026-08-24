@@ -1,31 +1,31 @@
 export const theme = {
-  bg: "#F5F6F8",
+  bg: "#F7F5F6",
   card: "#FFFFFF",
-  surface: "#FAFAFB",
-  surface3: "#F1F2F4",
+  surface: "#FCFAFB",
+  surface3: "#F3EFF1",
+  
+  border: "#E7DDE0",
+  borderStrong: "#D8C9CD",
+  borderAccent: "rgba(122, 31, 49, 0.18)",
 
-  border: "#E5E7EB",
-  borderStrong: "#D1D5DB",
-  borderAccent: "rgba(232, 93, 117, 0.20)",
+  primary: "#7A1F31",
+  primaryLight: "#963348",
+  primaryDark: "#5E1626",
 
-  primary: "#E85D75",
-  primaryLight: "#F27B90",
-  primaryDark: "#C9445C",
+  accent: "#8B2A3D",
+  accentWash: "#8B2A3D12",
 
-  accent: "#E85D75",
-  accentWash: "#E85D7512",
+  text: "#181416",
+  textSub: "#51474B",
+  textMuted: "#756B70",
 
-  text: "#17181A",
-  textSub: "#4B5563",
-  textMuted: "#6B7280",
-
-  loader: "#DDE1E6",
-  pending: "#DDE1E6",
+  loader: "#DED6D9",
+  pending: "#DED6D9",
 
   inputBg: "#FFFFFF",
-  inputBorder: "#DDE1E6",
-
+  inputBorder: "#DDD2D6",
+  
   errorBg: "#FEF2F2",
-  errorBorder: "#FCA5A5",
-  errorText: "#B42318",
+  errorBorder: "#F3A6AE",
+  errorText: "#A61B2B",
 };

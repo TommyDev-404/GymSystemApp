@@ -40,17 +40,19 @@ export default function WorkoutScreen() {
   };
 
   return (
-    <TabWrapper
-      loading={historyLoading || tutorialsLoading}
-      gap={22}
-    >
-      <WorkoutHeader onAddPress={openSheet} />
+    <>
+      <TabWrapper
+        loading={historyLoading || tutorialsLoading}
+        gap={22}
+      >
+        <WorkoutHeader onAddPress={openSheet} />
 
-      <WorkoutHistory workouts={personalWorkoutHistory} />
+        <WorkoutHistory workouts={personalWorkoutHistory} />
 
-      <WorkoutTutorials tutorials={tutorials} />
+        <WorkoutTutorials tutorials={tutorials} />
 
-      <BeginnerGuide />
+        <BeginnerGuide />
+      </TabWrapper>
 
       <Pressable
         onPress={() => router.push("/timer")}
@@ -73,7 +75,7 @@ export default function WorkoutScreen() {
           console.log("Saved workout:", data);
         }}
       />
-    </TabWrapper>
+    </>
   );
 }
 

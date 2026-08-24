@@ -1,26 +1,13 @@
 import { useEffect, useState } from "react";
-import {
-  FlatList,
-  Text,
-  Pressable,
-  StyleSheet,
-  View,
-} from "react-native";
+import { FlatList, Text, Pressable, StyleSheet, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import {
-  ChevronRight,
-  Dumbbell,
-  Search,
-} from "lucide-react-native";
-
+import { ChevronRight, Dumbbell, Search } from "lucide-react-native";
 import SearchHeader from "@/features/search/components/SearchHeader";
 import RecentSection from "@/features/search/components/RecentSection";
-
-import { AppBackground } from "@/components/shared/AppBackground";
-import { theme } from "@/utils/theme";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { StackWrapper } from "@/components/shared/StackWrapper";
+import { theme } from "@/utils/theme";
 import { useSearchExercises } from "@/features/workout/hook/useWorkout";
 
 const RECENT_EXERCISES_KEY = "@recent_exercises_searches";
@@ -33,21 +20,12 @@ interface RecentExercise {
 
 export default function ExerciseSearchScreen() {
   const router = useRouter();
-
   const [query, setQuery] = useState("");
-  const [recentExercises, setRecentExercises] =
-    useState<RecentExercise[]>([]);
+  const [recentExercises, setRecentExercises] = useState<RecentExercise[]>([]);
 
-  const {
-    data: exercises = [],
-    isLoading,
-  } = useSearchExercises(query);
+  const { data: exercises = [], isLoading } = useSearchExercises(query);
 
   const hasQuery = query.trim().length > 0;
-
-  // ==========================================
-  // LOAD RECENT EXERCISES
-  // ==========================================
 
   useEffect(() => {
     loadRecentExercises();
@@ -55,9 +33,7 @@ export default function ExerciseSearchScreen() {
 
   const loadRecentExercises = async () => {
     try {
-      const stored = await AsyncStorage.getItem(
-        RECENT_EXERCISES_KEY
-      );
+      const stored = await AsyncStorage.getItem(RECENT_EXERCISES_KEY);
 
       if (!stored) return;
 
@@ -77,25 +53,14 @@ export default function ExerciseSearchScreen() {
 
       setRecentExercises(valid);
     } catch (error) {
-      console.error(
-        "Failed to load recent exercises:",
-        error
-      );
+      console.error("Failed to load recent exercises:", error);
     }
   };
 
-  // ==========================================
-  // SAVE RECENT EXERCISE
-  // ==========================================
-
-  const saveRecentExercise = async (
-    exercise: RecentExercise
-  ) => {
+  const saveRecentExercise = async (exercise: RecentExercise) => {
     const updated = [
       exercise,
-      ...recentExercises.filter(
-        (item) => item.id !== exercise.id
-      ),
+      ...recentExercises.filter((item) => item.id !== exercise.id),
     ].slice(0, MAX_RECENT_EXERCISES);
 
     setRecentExercises(updated);
@@ -106,20 +71,13 @@ export default function ExerciseSearchScreen() {
         JSON.stringify(updated)
       );
     } catch (error) {
-      console.error(
-        "Failed to save recent exercise:",
-        error
-      );
+      console.error("Failed to save recent exercise:", error);
     }
   };
 
-  // ==========================================
-  // OPEN EXERCISE
-  // ==========================================
-
   const openExercise = async (exercise: RecentExercise) => {
     await saveRecentExercise(exercise);
-    
+
     router.push({
       pathname: "/(app)/workout-details",
       params: {
@@ -129,273 +87,190 @@ export default function ExerciseSearchScreen() {
     });
   };
 
-  // ==========================================
-  // RECENT CLICK
-  // ==========================================
-
-  const handleRecentPress = async (
-    name: string
-  ) => {
-    const exercise = recentExercises.find(
-      (item) => item.name === name
-    );
+  const handleRecentPress = async (name: string) => {
+    const exercise = recentExercises.find((item) => item.name === name);
 
     if (!exercise) return;
 
     await openExercise(exercise);
   };
 
-  // ==========================================
-  // RENDER
-  // ==========================================
+  const headerContent = (
+    <SearchHeader
+      query={query}
+      setQuery={setQuery}
+      onBack={() => router.back()}
+      placeholder="Search exercises..."
+    />
+  );
 
   return (
-    <AppBackground>
-      <SafeAreaView style={styles.container}>
-
-        {/* HEADER */}
-
-        <SearchHeader
-          query={query}
-          setQuery={setQuery}
-          onBack={() => router.back()}
-          placeholder="Search exercises..."
+    <StackWrapper
+      title=""
+      showDefaultHeader={false}
+      headerContent={headerContent}
+      useScrollView={false}
+      horizontalPadding={0}
+      paddingTop={0}
+      paddingBottom={0}
+      gap={0}
+    >
+      {!hasQuery ? (
+        <FlatList
+          data={[]}
+          renderItem={null}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.recentContent}
+          ListEmptyComponent={
+            <RecentSection
+              recent={recentExercises.map((item) => item.name)}
+              onRecentPress={handleRecentPress}
+            />
+          }
         />
-
-        {/* CONTENT */}
-
-        {!hasQuery ? (
-          /*
-           * RECENT SEARCHES
-           */
-          <FlatList
-            data={[]}
-            renderItem={null}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={styles.recentContent}
-            ListEmptyComponent={
-              <RecentSection
-                recent={recentExercises.map(
-                  (item) => item.name
-                )}
-                onRecentPress={handleRecentPress}
-              />
-            }
-          />
-        ) : (
-          /*
-           * SEARCH RESULTS
-           */
-          <FlatList
-            data={exercises}
-            keyExtractor={(item) =>
-              String(item.id)
-            }
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={[
-              styles.list,
-              exercises.length === 0 &&
-                styles.emptyList,
-            ]}
-            ListHeaderComponent={
-              exercises.length > 0 ? (
-                <Text style={styles.resultLabel}>
-                  {exercises.length}{" "}
-                  {exercises.length === 1
-                    ? "exercise"
-                    : "exercises"}{" "}
-                  found
+      ) : (
+        <FlatList
+          data={exercises}
+          keyExtractor={(item) => String(item.id)}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={[
+            styles.list,
+            exercises.length === 0 && styles.emptyList,
+          ]}
+          ListHeaderComponent={
+            exercises.length > 0 ? (
+              <Text style={styles.resultLabel}>
+                {exercises.length}{" "}
+                {exercises.length === 1 ? "exercise" : "exercises"} found
+              </Text>
+            ) : null
+          }
+          ListEmptyComponent={
+            isLoading ? (
+              <View style={styles.loadingContainer}>
+                <Text style={styles.loadingText}>
+                  Searching exercises...
                 </Text>
-              ) : null
-            }
-            ListEmptyComponent={
-              isLoading ? (
-                <View
-                  style={styles.loadingContainer}
-                >
-                  <Text
-                    style={styles.loadingText}
-                  >
-                    Searching exercises...
-                  </Text>
-                </View>
-              ) : (
-                <EmptyState
-                  icon={Search}
-                  title="No exercises found"
-                  subtitle={`We couldn't find an exercise matching "${query.trim()}". Try a different name.`}
-                />
-              )
-            }
-            renderItem={({ item }) => (
-              <Pressable
-                onPress={() =>
-                  openExercise({
-                    id: Number(item.id),
-                    name: item.name,
-                  })
-                }
-                style={({ pressed }) => [
-                  styles.exerciseCard,
-                  pressed &&
-                    styles.exercisePressed,
-                ]}
-              >
-                <View style={styles.exerciseIcon}>
-                  <Dumbbell
-                    size={18}
-                    color={theme.primaryLight}
-                    strokeWidth={2.2}
-                  />
-                </View>
-
-                <View style={styles.exerciseContent}>
-                  <Text
-                    style={styles.exerciseName}
-                  >
-                    {item.name}
-                  </Text>
-
-                  <Text
-                    style={styles.exerciseSubtitle}
-                  >
-                    View exercise details
-                  </Text>
-                </View>
-
-                <ChevronRight
+              </View>
+            ) : (
+              <EmptyState
+                icon={Search}
+                title="No exercises found"
+                subtitle={`We couldn't find an exercise matching "${query.trim()}". Try a different name.`}
+              />
+            )
+          }
+          renderItem={({ item }) => (
+            <Pressable
+              onPress={() =>
+                openExercise({
+                  id: Number(item.id),
+                  name: item.name,
+                })
+              }
+              style={({ pressed }) => [
+                styles.exerciseCard,
+                pressed && styles.exercisePressed,
+              ]}
+            >
+              <View style={styles.exerciseIcon}>
+                <Dumbbell
                   size={18}
-                  color={theme.textMuted}
-                  strokeWidth={2}
+                  color={theme.primaryLight}
+                  strokeWidth={2.2}
                 />
-              </Pressable>
-            )}
-          />
-        )}
+              </View>
 
-      </SafeAreaView>
-    </AppBackground>
+              <View style={styles.exerciseContent}>
+                <Text style={styles.exerciseName}>{item.name}</Text>
+                <Text style={styles.exerciseSubtitle}>
+                  View exercise details
+                </Text>
+              </View>
+
+              <ChevronRight
+                size={18}
+                color={theme.textMuted}
+                strokeWidth={2}
+              />
+            </Pressable>
+          )}
+        />
+      )}
+    </StackWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
-  /*
-   * RECENT
-   */
-
   recentContent: {
     flexGrow: 1,
   },
-
-  /*
-   * RESULTS
-   */
-
   list: {
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 30,
   },
-
   emptyList: {
     flexGrow: 1,
     justifyContent: "center",
   },
-
   resultLabel: {
     marginBottom: 10,
     marginLeft: 2,
-
     fontSize: 11,
     fontWeight: "600",
-
     color: theme.textMuted,
   },
-
-  /*
-   * LOADING
-   */
-
   loadingContainer: {
     alignItems: "center",
     justifyContent: "center",
     paddingTop: 40,
   },
-
   loadingText: {
     fontSize: 11,
     fontWeight: "500",
     color: theme.textMuted,
   },
-
-  /*
-   * EXERCISE CARD
-   */
-
   exerciseCard: {
     minHeight: 66,
-
     flexDirection: "row",
     alignItems: "center",
-
     paddingHorizontal: 14,
     paddingVertical: 10,
-
     marginBottom: 8,
-
     backgroundColor: theme.card,
-
     borderRadius: 16,
     borderWidth: 1,
     borderColor: theme.border,
   },
-
   exercisePressed: {
     backgroundColor: theme.surface,
     borderColor: theme.borderAccent,
-
-    transform: [
-      {
-        scale: 0.99,
-      },
-    ],
+    transform: [{ scale: 0.99 }],
   },
-
   exerciseIcon: {
     width: 40,
     height: 40,
-
     borderRadius: 12,
-
     alignItems: "center",
     justifyContent: "center",
-
     marginRight: 12,
-
     backgroundColor: theme.accentWash,
     borderWidth: 1,
     borderColor: theme.borderAccent,
   },
-
   exerciseContent: {
     flex: 1,
   },
-
   exerciseName: {
     fontSize: 13,
     fontWeight: "700",
     color: theme.text,
   },
-
   exerciseSubtitle: {
     marginTop: 3,
-
     fontSize: 10,
     fontWeight: "500",
     color: theme.textMuted,

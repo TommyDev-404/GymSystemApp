@@ -1,14 +1,24 @@
 import AppHeader from "@/components/shared/AppHeader";
+import { useAuth } from "@/context/AuthContext";
+import { useGetTabBadges } from "@/features/home/hook/useHome";
 import { ProfileSidebar } from "@/features/profile/screen/ProfileSidebar";
 import { theme } from "@/utils/theme";
 import { router, Tabs, usePathname } from "expo-router";
 import { Bell, Dumbbell, House, QrCode, Users } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { Pressable, StatusBar, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
+  const { member } = useAuth();
+  const { data: badges } = useGetTabBadges(member?.memberId!);
+
+  console.log("BADGES: ", badges);
   const [profileOpen, setProfileOpen] = useState(false);
+
+  const alertCount = badges?.notificationCount;
+  const communityCount =  badges?.communityCount;
+  
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
 
@@ -34,8 +44,6 @@ export default function TabLayout() {
         },
       ]}
     >
-      <StatusBar barStyle="dark-content" />
-
       <AppHeader
         pathname={pathname}
         onProfilePress={openProfile}
@@ -118,6 +126,8 @@ export default function TabLayout() {
           name="community"
           options={{
             title: "Community",
+            tabBarBadge: communityCount && communityCount > 0 ? communityCount : undefined,
+            tabBarBadgeStyle: styles.badge,
             tabBarIcon: ({ color, focused }) => (
               <Users
                 size={focused ? 23 : 22}
@@ -132,6 +142,8 @@ export default function TabLayout() {
           name="notifications"
           options={{
             title: "Alerts",
+            tabBarBadge: alertCount && alertCount > 0 ? alertCount : undefined,
+            tabBarBadgeStyle: styles.badge,
             tabBarIcon: ({ color, focused }) => (
               <Bell
                 size={focused ? 23 : 22}
@@ -141,6 +153,7 @@ export default function TabLayout() {
             ),
           }}
         />
+        
       </Tabs>
 
       <ProfileSidebar
@@ -175,5 +188,17 @@ const styles = StyleSheet.create({
     elevation: 8,
     borderWidth: 1.5,
     borderColor: theme.borderAccent,
+  },
+  badge: {
+    backgroundColor: theme.primary,
+    color: "#ffffff",
+    fontSize: 9,
+    fontWeight: "800",
+    minWidth: 18,
+    height: 18,
+    lineHeight: 18,
+    textAlign: "center",
+    borderRadius: 9,
+    overflow: "hidden",
   },
 });

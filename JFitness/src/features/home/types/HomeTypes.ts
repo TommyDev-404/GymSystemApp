@@ -50,3 +50,8 @@ export interface FitnessGoalHistory {
   progress_percentage:number;
   recorded_at:string;
 }
+
+export interface Badges {
+  notificationCount: number;
+  communityCount: number;
+}

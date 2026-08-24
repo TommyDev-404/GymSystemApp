@@ -9,6 +9,7 @@ import {
 	WeightGoal,
 	CreateFitnessGoalPayload,
 	UpdateFitnessGoalPayload,
+  Badges,
 } from "../types/HomeTypes";
 import * as api from "../api/home.api"
 
@@ -44,7 +45,14 @@ export const useGetFitnessGoalHistory = (memberId: number) => {
     queryFn: () => api.getFitnessGoalHistoryApi(memberId),
     enabled: !!memberId
   });
+};
 
+export const useGetTabBadges = (memberId: number) => {
+  return useQuery <Badges>({
+    queryKey: ["tab-badges", memberId],
+    queryFn: () => api.getTabBadgesApi(memberId),
+    enabled: !!memberId
+  });
 };
 
 export const useCreateFitnessGoal = () => {

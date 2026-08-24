@@ -36,7 +36,7 @@ export default function PrimaryButton({
       <LinearGradient
         colors={
           isDisabled
-            ? [theme.surface3, theme.surface3]
+            ? [theme.primaryLight, theme.primaryLight]
             : [theme.primaryDark, theme.primary]
         }
         start={{ x: 0, y: 0 }}

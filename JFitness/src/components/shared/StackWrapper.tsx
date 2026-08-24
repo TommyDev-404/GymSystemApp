@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import {
   ActivityIndicator,
   ScrollView,
+  StatusBar,
   StyleProp,
   StyleSheet,
   View,
@@ -18,6 +19,7 @@ interface StackWrapperProps {
   subtitle?: string;
   children: ReactNode;
   headerContent?: ReactNode;
+  showDefaultHeader?: boolean;
   loading?: boolean;
   loadingMinHeight?: number;
   contentStyle?: StyleProp<ViewStyle>;
@@ -35,6 +37,7 @@ export function StackWrapper({
   subtitle,
   children,
   headerContent,
+  showDefaultHeader = true,
   loading = false,
   loadingMinHeight = 400,
   contentStyle,
@@ -48,11 +51,13 @@ export function StackWrapper({
 }: StackWrapperProps) {
   const insets = useSafeAreaInsets();
 
-  const header = (
+  const header = showDefaultHeader ? (
     <>
       <ScreenHeader title={title} subtitle={subtitle} />
       {headerContent}
     </>
+  ) : (
+    headerContent
   );
 
   return (
@@ -66,6 +71,8 @@ export function StackWrapper({
           },
         ]}
       >
+        <StatusBar barStyle="dark-content" />
+
         {useScrollView ? (
           <>
             {header}

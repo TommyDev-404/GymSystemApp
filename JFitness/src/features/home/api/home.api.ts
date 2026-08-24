@@ -28,32 +28,6 @@ export const getMemberRecentActivityApi = async (memberId: number) => {
 	}
 };
 
-export const createFitnessGoalApi = async (member_id: number, data: CreateFitnessGoalPayload) => {
-	try {
-		const response = await api.post(`/home/create-fitness-goal/${member_id}`, data);
-
-		return response.data;
-	} catch (error: any) {
-		throw new Error(
-			error.response?.data?.message ||
-			"Failed to create fitness goal"
-		);
-	}
-};
-
-export const updateFitnessGoalApi = async (member_id:number, data:UpdateFitnessGoalPayload)=>{
-	try {
-		const response = await api.patch(`/home/update-fitness-goal/${member_id}`, data);
-
-		return response.data;
-	} catch (error: any) {
-		throw new Error(
-			error.response?.data?.message ||
-			"Failed to update fitness goal"
-		);
-	}
-};
-
 export const getFitnessGoalApi = async (memberId:number)=>{
 	try {
 		const response = await api.get(`/home/member-fitness-goal/${memberId}`);
@@ -76,6 +50,46 @@ export const getFitnessGoalHistoryApi = async (memberId:number )=>{
 		throw new Error(
 			error.response?.data?.message ||
 			"Failed to get fitness progress history"
+		);
+	}
+};
+
+export const getTabBadgesApi = async (memberId:number )=>{
+	try {
+	 const response = await api.get(`/home/tab-badges/${memberId}`);
+
+	 return response.data;
+ } catch (error: any) {
+	 throw new Error(
+		 error.response?.data?.message ||
+		 "Failed to get tab badges"
+	 );
+ }
+};
+
+
+export const createFitnessGoalApi = async (member_id: number, data: CreateFitnessGoalPayload) => {
+	try {
+		const response = await api.post(`/home/create-fitness-goal/${member_id}`, data);
+
+		return response.data;
+	} catch (error: any) {
+		throw new Error(
+			error.response?.data?.message ||
+			"Failed to create fitness goal"
+		);
+	}
+};
+
+export const updateFitnessGoalApi = async (member_id:number, data:UpdateFitnessGoalPayload)=>{
+	try {
+		const response = await api.patch(`/home/update-fitness-goal/${member_id}`, data);
+
+		return response.data;
+	} catch (error: any) {
+		throw new Error(
+			error.response?.data?.message ||
+			"Failed to update fitness goal"
 		);
 	}
 };

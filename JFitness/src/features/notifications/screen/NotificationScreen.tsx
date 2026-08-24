@@ -138,6 +138,7 @@ export default function NotificationsScreen() {
       loading={isLoading}
       loadingMinHeight={400}
       scrollEnabled={false}
+      useScrollView={false}
       horizontalPadding={0}
       paddingTop={0}
       paddingBottom={0}
