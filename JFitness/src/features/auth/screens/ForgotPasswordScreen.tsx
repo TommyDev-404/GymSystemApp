@@ -136,7 +136,18 @@ export default function ForgotPasswordScreen() {
   });
 
   return (
-    <AuthLayout title={getTitle()} subtitle={getSubtitle()}>
+    <AuthLayout
+      title={getTitle()}
+      subtitle={getSubtitle()}
+      image={step === 1 ?
+          require("@/assets/images/forgot-pass.png")
+        :
+        step === 2 ? 
+          require("@/assets/images/verify-email.png")
+        :
+          require("@/assets/images/change-pass.png")
+      }
+    >
       <View style={styles.container}>
         <EaseView {...animation(60)} style={styles.stepsContainer}>
           {[1, 2, 3].map((item, index) => {

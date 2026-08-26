@@ -19,7 +19,7 @@ export default function ActivateScreen() {
     if (error) setError("");
   };
 
-	const handleActivate = async () => {
+  const handleActivate = async () => {
     if (!code.trim()) {
       setError("Please enter your activation code.");
       return;
@@ -53,6 +53,7 @@ export default function ActivateScreen() {
     <AuthLayout
       title="Activate Membership"
       subtitle="Verify your membership before creating your account"
+      image={require("@/assets/images/activate-membership.png")}
     >
       <EaseView
         initialAnimate={{ opacity: 0, translateY: -20 }}

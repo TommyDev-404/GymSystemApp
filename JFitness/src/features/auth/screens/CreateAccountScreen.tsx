@@ -65,6 +65,7 @@ export default function CreateAccountScreen() {
     <AuthLayout
       title="Create Account"
       subtitle="Set your password to activate your membership"
+      image={require("@/assets/images/create-acc.png")}
     >
       <EaseView
         initialAnimate={{ opacity: 0, translateY: -20 }}

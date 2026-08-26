@@ -26,8 +26,7 @@ export default function LoginScreen() {
       setErrorMessage("");
       setIsLoading(true);
       await login(username, password);
-      
-      router.push('/(app)/(tabs)/home')
+      router.push("/(app)/(tabs)/home");
     } catch (error: any) {
       setErrorMessage(error?.message || "Login failed. Please try again.");
     } finally {
@@ -36,7 +35,11 @@ export default function LoginScreen() {
   };
 
   return (
-    <AuthLayout title="Welcome back" subtitle="Let's train!">
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Sign in to continue your fitness journey and keep reaching your goals."
+      image={require("@/assets/images/login.png")}
+    >
       <EaseView
         initialAnimate={{ opacity: 0, translateY: -20 }}
         animate={{ opacity: 1, translateY: 0 }}
@@ -135,6 +138,7 @@ export default function LoginScreen() {
                 <Text style={styles.checkMark}>✓</Text>
               ) : null}
             </View>
+
             <Text style={styles.checkboxLabel}>Show password</Text>
           </TouchableOpacity>
 
@@ -155,6 +159,7 @@ export default function LoginScreen() {
             delay: 280,
             easing: "easeOut",
           }}
+          style={styles.buttonWrapper}
         >
           <PrimaryButton
             title={isLoading ? "Signing in..." : "Login"}
@@ -165,33 +170,24 @@ export default function LoginScreen() {
         </EaseView>
 
         <EaseView
-          initialAnimate={{ opacity: 0, translateY: -20 }}
-          animate={{ opacity: 1, translateY: 0 }}
+          initialAnimate={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{
             type: "timing",
             duration: 450,
-            delay: 340,
+            delay: 360,
             easing: "easeOut",
           }}
+          style={styles.helper}
         >
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <TouchableOpacity
-            style={styles.activateButton}
-            onPress={() => router.push("/(auth)/account-activation")}
-            activeOpacity={0.75}
-          >
-            <Text style={styles.activateButtonText}>
-              Activate Membership
+          <Text style={styles.helperText}>
+            Don't have an account?{" "}
+            <Text
+              style={styles.helperHighlight}
+              onPress={() => router.push("/(auth)/account-activation")}
+            >
+              Activate your membership
             </Text>
-          </TouchableOpacity>
-
-          <Text style={styles.activateHint}>
-            Already a gym member? Use your membership code
           </Text>
         </EaseView>
       </EaseView>
@@ -201,16 +197,18 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   form: {
-    flex: 1,
+    width: "100%",
+    maxWidth: 420,
+    alignSelf: "center",
   },
   errorBox: {
     backgroundColor: theme.errorBg,
     borderWidth: 1,
     borderColor: theme.errorBorder,
     borderRadius: 10,
-    paddingVertical: 11,
+    paddingVertical: 10,
     paddingHorizontal: 13,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   errorText: {
     color: theme.errorText,
@@ -221,14 +219,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.05,
   },
   passwordField: {
-    marginTop: 6,
+    marginTop: 4,
   },
   optionsRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 8,
+    marginBottom: 16,
   },
   showPasswordRow: {
     flexDirection: "row",
@@ -267,47 +265,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 0.05,
   },
-  dividerRow: {
-    flexDirection: "row",
+  buttonWrapper: {
+    marginTop: 2,
+  },
+  helper: {
     alignItems: "center",
-    marginTop: 24,
-    marginBottom: 16,
-  },
-  dividerLine: {
-    flex: 1,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: theme.border,
-  },
-  dividerText: {
-    marginHorizontal: 12,
-    color: theme.textMuted,
-    fontSize: 10.5,
-    fontWeight: "600",
-    letterSpacing: 1,
-  },
-  activateButton: {
-    minHeight: 50,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: theme.borderAccent,
-    borderRadius: 12,
-    backgroundColor: theme.accentWash,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  activateButtonText: {
-    color: theme.primary,
-    fontSize: 14,
-    fontWeight: "700",
-    letterSpacing: 0.1,
-  },
-  activateHint: {
-    marginTop: 9,
+    marginTop: 16,
     paddingHorizontal: 10,
+  },
+  helperText: {
     color: theme.textMuted,
-    fontSize: 11.5,
-    fontWeight: "400",
-    lineHeight: 16,
+    fontSize: 12,
+    lineHeight: 18,
     textAlign: "center",
+  },
+  helperHighlight: {
+    color: theme.primary,
+    fontWeight: "700",
   },
 });

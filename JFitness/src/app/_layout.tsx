@@ -46,7 +46,13 @@ function RootNavigator() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "fade",
+        animationDuration: 550,
+      }}
+    >
       <Stack.Protected guard={!member}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>

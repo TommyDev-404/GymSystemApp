@@ -1,4 +1,3 @@
-import React from "react";
 import {
   TouchableOpacity,
   Text,
@@ -66,7 +65,7 @@ export default function PrimaryButton({
 
 const styles = StyleSheet.create({
   primaryBtn: {
-    borderRadius: 16,
+    borderRadius: 40,
     overflow: "hidden",
     marginTop: 8,
 

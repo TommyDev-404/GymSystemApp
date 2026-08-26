@@ -5,13 +5,16 @@ export default function AppLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
+        animation: "fade",
+        animationDuration: 550,
+        gestureEnabled: true,
       }}
     >
       <Stack.Screen
         name="qr-scanner"
         options={{
           presentation: "fullScreenModal",
-          animation: "slide_from_bottom",
+          animation: "fade_from_bottom",
           gestureEnabled: false,
         }}
       />
@@ -20,7 +23,7 @@ export default function AppLayout() {
         name="ai-assistant"
         options={{
           presentation: "modal",
-          animation: "slide_from_bottom",
+          animation: "fade_from_bottom",
         }}
       />
 

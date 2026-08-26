@@ -13,7 +13,6 @@ export default function TabLayout() {
   const { member } = useAuth();
   const { data: badges } = useGetTabBadges(member?.memberId!);
 
-  console.log("BADGES: ", badges);
   const [profileOpen, setProfileOpen] = useState(false);
 
   const alertCount = badges?.notificationCount;
