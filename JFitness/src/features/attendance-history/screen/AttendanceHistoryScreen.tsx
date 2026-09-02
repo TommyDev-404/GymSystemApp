@@ -8,15 +8,10 @@ import { AttendanceChart } from "../components/AttendanceChart";
 import { useAuth } from "@/context/AuthContext";
 
 export function AttendanceHistoryScreen() {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
 
-  const { data: attendanceData = [], isLoading: attendanceLoading } =
-    useGetMemberAttendanceHistory(Number(member?.memberId!));
-
-  const {
-    data: attendanceProgressData = [],
-    isLoading: progressLoading,
-  } = useGetMemberAttendanceProgress(Number(member?.memberId!));
+  const { data: attendanceData = [], isLoading: attendanceLoading } = useGetMemberAttendanceHistory(Number(memberIDs?.member_id!));
+  const { data: attendanceProgressData = [], isLoading: progressLoading } = useGetMemberAttendanceProgress(Number(memberIDs?.member_id!));
 
   const isLoading = attendanceLoading || progressLoading;
 

@@ -23,10 +23,11 @@ export function useMarkNotificationRead() {
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [
-          "member-notifications",
-          variables.memberId,
-        ],
+        queryKey: ["member-notifications", variables.memberId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["tab-badges", variables.memberId],
       });
     },
   });
@@ -45,10 +46,11 @@ export function useMarkAllNotificationRead() {
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [
-          "member-notifications",
-          variables.memberId,
-        ],
+        queryKey: ["member-notifications", variables.memberId],
+      });
+      
+      queryClient.invalidateQueries({
+        queryKey: ["tab-badges", variables.memberId],
       });
     },
   });

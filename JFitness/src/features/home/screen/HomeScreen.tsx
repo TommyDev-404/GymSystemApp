@@ -26,27 +26,19 @@ import {
   useGetMemberRecentActivity,
 } from "../hook/useHome";
 import { MemberDashboard, WeightGoal } from "../types/HomeTypes";
+import { useGetProfileInfo } from "@/features/profile/hook/useProfile";
 
 export default function HomeScreen() {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
+
   const [goal, setGoal] = useState<WeightGoal | null>(null);
   const goalSheetRef = useRef<BottomSheetModal>(null);
   const updateGoalSheetRef = useRef<BottomSheetModal>(null);
 
-  const {
-    data: dashboardData = {} as MemberDashboard,
-    isLoading: dashboardLoading,
-  } = useGetMemberDashboardData(member?.memberId!);
-
-  const {
-    data: recentActivity = [],
-    isLoading: recentLoading,
-  } = useGetMemberRecentActivity(member?.memberId!);
-
-  const {
-    data: memberWeightGoal,
-    isLoading: weightGoalLoading,
-  } = useGetFitnessGoal(member?.memberId!);
+  const { data: profileInfo, isLoading: profileLoading, } = useGetProfileInfo(memberIDs?.user_id!);
+  const { data: dashboardData = {} as MemberDashboard, isLoading: dashboardLoading } = useGetMemberDashboardData(profileInfo?.member_id!);
+  const { data: recentActivity = [], isLoading: recentLoading } = useGetMemberRecentActivity(profileInfo?.member_id!);
+  const { data: memberWeightGoal, isLoading: weightGoalLoading } = useGetFitnessGoal(profileInfo?.member_id!);
 
   useEffect(() => {
     setGoal(memberWeightGoal ?? null);
@@ -87,7 +79,7 @@ export default function HomeScreen() {
           router.push({
             pathname: "/(app)/referral",
             params: {
-              memberId: String(member?.memberId),
+              memberId: String(profileInfo?.member_id!),
             },
           }),
       },
@@ -100,7 +92,7 @@ export default function HomeScreen() {
           router.push({
             pathname: "/(app)/rewards",
             params: {
-              memberId: String(member?.memberId),
+              memberId: String(profileInfo?.member_id!),
             },
           }),
       },
@@ -115,10 +107,10 @@ export default function HomeScreen() {
           }),
       },
     ],
-    [member?.memberId]
+    [profileInfo?.member_id!]
   );
 
-  const loading = dashboardLoading || recentLoading || weightGoalLoading;
+  const loading = dashboardLoading || recentLoading || weightGoalLoading || profileLoading;
 
   return (
     <>
@@ -127,7 +119,7 @@ export default function HomeScreen() {
         horizontalPadding={15}
         gap={20}
       >
-        <GreetingHeader memberName={dashboardData?.username} />
+        <GreetingHeader username={profileInfo?.username!} />
 
         <MembershipCard
           plan={dashboardData?.plan}
@@ -170,7 +162,7 @@ export default function HomeScreen() {
 
       <GoalBottomSheet
         modalRef={goalSheetRef}
-        title="Set Weight Goal 🎯"
+        title="Set Weight Goal"
         subtitle="Define your target weight and start tracking progress"
         buttonText="Save Goal"
         onClose={() => {}}

@@ -12,19 +12,19 @@ import { useQueryClient } from "@tanstack/react-query";
 const SocketContext = createContext(socket);
 
 export function SocketProvider({ children }: { children: ReactNode }) {
-	const { member } = useAuth();
+	const { memberIDs } = useAuth();
 	const queryClient = useQueryClient();
 
 	// Socket connection
 	useEffect(() => {
-		if (!member?.memberId) return;
+		if (!memberIDs?.member_id) return;
 
 		const handleConnect = () => {
 			console.log("🟢 Socket connected:", socket.id);
 
-			socket.emit("join-member", member.memberId);
+			socket.emit("join-member", memberIDs.member_id);
 
-			console.log("👤 Joined:", `member-${member.memberId}`);
+			console.log("👤 Joined:", `member-${memberIDs.member_id}`);
 		};
 
 		const handleDisconnect = (reason: string) => {
@@ -43,25 +43,25 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 			socket.off("connect", handleConnect);
 			socket.off("disconnect", handleDisconnect);
 		};
-	}, [member?.memberId]);
+	}, [memberIDs?.member_id]);
 
 	
 	// Global member socket events	
 	useEffect(() => {
-		if (!member?.memberId) return;
+		if (!memberIDs?.member_id) return;
 
 		// Membership renewed & upgrade
 		const handleMembership = () => {
 			queryClient.invalidateQueries({
-				queryKey: ["member-dashboard-stat", member.memberId],
+				queryKey: ["member-dashboard-stat", memberIDs.member_id],
 			});
 
 			queryClient.invalidateQueries({
-				queryKey: ["member-recent-activity", member.memberId],
+				queryKey: ["member-recent-activity", memberIDs.member_id],
 			});
 
 			queryClient.invalidateQueries({
-				queryKey: ["notifications", member.memberId],
+				queryKey: ["notifications", memberIDs.member_id],
 			});
 		};
 
@@ -100,7 +100,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 			socket.off("reward:update", handleAvailableRewards);
 			socket.on("reward:remove", handleAvailableRewards);
 		};
-	}, [member?.memberId, queryClient]);
+	}, [memberIDs?.member_id, queryClient]);
 
 	return (
 		<SocketContext.Provider value={socket}>

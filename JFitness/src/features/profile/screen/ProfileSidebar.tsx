@@ -33,6 +33,7 @@ import { theme } from "@/utils/theme";
 
 import { LogoutConfirmationModal } from "@/features/profile/components/LogoutConfirmationModal";
 import { ProfileMenuSection } from "../components/ProfileMenuSection";
+import { useGetProfileInfo } from "../hook/useProfile";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -117,7 +118,9 @@ export function ProfileSidebar({
   onRequestClose,
   onClosed,
 }: ProfileSidebarProps) {
-  const { logout, member, } = useAuth();
+  const { logout, memberIDs } = useAuth();
+
+  const { data: profileInfo, isLoading: profileLoading, } = useGetProfileInfo(memberIDs?.user_id!);
 
   const translateX = useRef(
     new Animated.Value(-SIDEBAR_WIDTH)
@@ -205,7 +208,7 @@ export function ProfileSidebar({
   };
 
   const initials =
-    member?.username
+    profileInfo?.username
       ?.split(" ")
       .map((name) => name[0])
       .join("")
@@ -263,10 +266,10 @@ export function ProfileSidebar({
 
             <View style={styles.profileSection}>
               <View style={styles.avatarWrapper}>
-                {member?.profile ? (
+                {profileInfo?.profile ? (
                   <Image
                     source={{
-                      uri: member.profile,
+                      uri: profileInfo.profile,
                     }}
                     style={styles.avatar}
                   />
@@ -283,14 +286,14 @@ export function ProfileSidebar({
                 style={styles.username}
                 numberOfLines={1}
               >
-                {member?.username || "Unknown"}
+                {profileInfo?.username || "Unknown"}
               </Text>
 
               <Text
                 style={styles.email}
                 numberOfLines={1}
               >
-                {member?.email || "No email"}
+                {profileInfo?.email || "No email"}
               </Text>
 
               <View style={styles.memberBadge}>

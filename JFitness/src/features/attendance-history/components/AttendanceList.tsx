@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, View, Text, StyleSheet } from "react-native";
+import { FlatList, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { CheckCircle, History } from "lucide-react-native";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { theme } from "@/utils/theme";
@@ -15,58 +15,60 @@ interface Props {
 }
 
 export function AttendanceList({ history }: Props) {
+  const { height } = useWindowDimensions();
+  const listHeight = height * 0.45;
+
   return (
-    <FlatList
-      data={history}
-      keyExtractor={(item) => String(item.id)}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.container}
-      ListHeaderComponent={
-        <View>
-          <Text style={styles.title}>Recent Attendance</Text>
-          <Text style={styles.subtitle}>Your recent gym check-ins</Text>
-        </View>
-      }
-      renderItem={({ item }) => (
-        <View style={styles.card}>
-          <View style={styles.iconBox}>
-            <CheckCircle
-              size={18}
-              color={theme.primaryLight}
-              strokeWidth={2.2}
-            />
-          </View>
-          <View style={styles.info}>
-            <Text style={styles.checkInTitle}>Gym Check-in</Text>
-            <View style={styles.metaRow}>
-              <Text style={styles.date}>{item.date}</Text>
-              <Text style={styles.separator}>•</Text>
-              <Text style={styles.time}>{item.time}</Text>
+    <View style={{ height: listHeight }}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Recent Attendance</Text>
+        <Text style={styles.subtitle}>Your recent gym check-ins</Text>
+      </View>
+
+      <FlatList
+        data={history}
+        keyExtractor={(item) => String(item.id)}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <View style={styles.iconBox}>
+              <CheckCircle size={18} color={theme.primaryLight} strokeWidth={2.2} />
+            </View>
+            <View style={styles.info}>
+              <Text style={styles.checkInTitle}>Gym Check-in</Text>
+              <View style={styles.metaRow}>
+                <Text style={styles.date}>{item.date}</Text>
+                <Text style={styles.separator}>•</Text>
+                <Text style={styles.time}>{item.time}</Text>
+              </View>
+            </View>
+            <View style={styles.status}>
+              <Text style={styles.statusText}>✓ Done</Text>
             </View>
           </View>
-          <View style={styles.status}>
-            <Text style={styles.statusText}>✓ Done</Text>
+        )}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <EmptyState
+              icon={History}
+              title="No attendance records found"
+              subtitle="Your completed gym check-ins will be displayed here."
+            />
           </View>
-        </View>
-      )}
-      ListEmptyComponent={
-        <View style={styles.empty}>
-          <EmptyState
-            icon={History}
-            title="No attendance records found"
-            subtitle="Your completed gym check-ins will be displayed here."
-          />
-        </View>
-      }
-    />
+        }
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  header: {
+    marginBottom: 12,
+  },
   container: {
-    flexGrow: 1,
-    paddingBottom: 24,
     gap: 10,
+    paddingBottom: 24,
   },
   title: {
     fontSize: 15,

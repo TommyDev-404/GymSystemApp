@@ -30,19 +30,19 @@ export const referralRules = [
 ];
 
 export default function ReferralScreen() {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
 
   const {
     data: referralData = {} as ReferralData,
     isLoading: dataLoading,
-  } = useGetMemberReferralData(member?.memberId!);
+  } = useGetMemberReferralData(memberIDs?.member_id!);
 
   const {
     data: referralHistory = [],
     isLoading: historyLoading,
-  } = useGetMemberReferralRecords(member?.memberId!);
+  } = useGetMemberReferralRecords(memberIDs?.member_id!);
 
-  const isLoading = dataLoading || historyLoading;
+  const isLoading = dataLoading;
 
   return (
     <StackWrapper
@@ -59,7 +59,7 @@ export default function ReferralScreen() {
 
       <MilestonesSection data={referralRules} />
 
-      <ReferralList data={referralHistory} />
+      <ReferralList data={referralHistory} loading={historyLoading} />
      
     </StackWrapper>
   );

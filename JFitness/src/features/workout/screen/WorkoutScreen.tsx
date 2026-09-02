@@ -17,17 +17,10 @@ import { theme } from "@/utils/theme";
 import { useAuth } from "@/context/AuthContext";
 
 export default function WorkoutScreen() {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
 
-  const {
-    data: personalWorkoutHistory = [],
-    isLoading: historyLoading,
-  } = useGetPersonalWorkoutHistory(member?.memberId!);
-
-  const {
-    data: tutorials = [],
-    isLoading: tutorialsLoading,
-  } = useWorkoutTutorials({ limit: 3 });
+  const { data: personalWorkoutHistory = [], isLoading: historyLoading } = useGetPersonalWorkoutHistory(memberIDs?.member_id!);
+  const { data: tutorials = [], isLoading: tutorialsLoading } = useWorkoutTutorials({ limit: 3 });
 
   const sheetRef = useRef<BottomSheetModal>(null);
 

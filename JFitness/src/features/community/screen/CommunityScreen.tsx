@@ -13,8 +13,8 @@ import {
 import { useAuth } from "@/context/AuthContext";
 
 export function CommunityScreen() {
-  const { member } = useAuth();
-  const { data: posts = [], isLoading } = useGetPosts(member?.memberId!);
+  const { memberIDs } = useAuth();
+  const { data: posts = [], isLoading } = useGetPosts(memberIDs?.member_id!);
   const { mutate: createComment, isPending } = useCreateComment();
 
   const commentModalRef = useRef<BottomSheetModal>(null);
@@ -31,13 +31,13 @@ export function CommunityScreen() {
   };
 
   const handleSendComment = (comment: string) => {
-    if (!selectedPost || !member?.memberId) {
+    if (!selectedPost || !memberIDs?.member_id) {
       return;
     }
 
     createComment({
       post_id: selectedPost.id,
-      member_id: member.memberId,
+      member_id: memberIDs.member_id,
       comment,
     });
   };

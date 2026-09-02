@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { CalendarDays, TrendingDown, TrendingUp } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FitnessGoalHistory } from "@/features/home/types/HomeTypes";
@@ -7,13 +7,14 @@ import { theme } from "@/utils/theme";
 
 interface WeightHistoryProps {
   history: FitnessGoalHistory[];
+  loading: boolean;
 }
 
 const GREEN = theme.primary;
 const RED = "#EF4444";
 const BLUE = "#3B82F6";
 
-export function WeightHistory({ history }: WeightHistoryProps) {
+export function WeightHistory({ history, loading }: WeightHistoryProps) {
   return (
     <>
       <View style={styles.header}>
@@ -40,7 +41,12 @@ export function WeightHistory({ history }: WeightHistoryProps) {
         />
         <View style={styles.topGlow} pointerEvents="none" />
 
-        {history.length === 0 ? (
+        {loading ? (
+          <View style={styles.loading}>
+            <ActivityIndicator size="small" color={theme.primary} />
+            <Text style={styles.loadingText}>Loading weight history...</Text>
+          </View>
+        ) : history.length === 0 ? (
           <View style={styles.empty}>
             <View style={styles.emptyIcon}>
               <CalendarDays size={24} color={theme.textMuted} strokeWidth={1.8} />
@@ -149,7 +155,9 @@ export function WeightHistory({ history }: WeightHistoryProps) {
                           strokeWidth={2.5}
                         />
                       )}
-                      <Text style={[styles.changeText, { color: changeColor }]}>
+                      <Text
+                        style={[styles.changeText, { color: changeColor }]}
+                      >
                         {change > 0 ? "+" : ""}
                         {change.toFixed(1)} kg
                       </Text>
@@ -261,6 +269,16 @@ const styles = StyleSheet.create({
     right: -65,
     backgroundColor: theme.primaryLight,
     opacity: 0.045,
+  },
+  loading: {
+    minHeight: 220,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 10.5,
+    color: theme.textMuted,
   },
   row: {
     paddingVertical: 14,

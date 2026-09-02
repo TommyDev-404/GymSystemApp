@@ -16,8 +16,9 @@ import {
 } from "../hooks/useCommunity";
 
 export function YourPostsScreen() {
-  const { member } = useAuth();
-  const { data: postsData, isLoading } = useGetMyPosts(member?.memberId!);
+  const { memberIDs } = useAuth();
+
+  const { data: postsData, isLoading } = useGetMyPosts(memberIDs?.member_id!);
   const { mutate: createComment, isPending } = useCreateComment();
 
   const posts = postsData?.posts ?? [];
@@ -45,7 +46,7 @@ export function YourPostsScreen() {
 
     createComment({
       post_id: selectedPost.id,
-      member_id: member!.memberId,
+      member_id: memberIDs!.member_id,
       comment,
     });
   };

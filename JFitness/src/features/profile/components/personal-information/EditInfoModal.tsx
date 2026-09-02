@@ -21,6 +21,7 @@ import { Pencil } from "lucide-react-native";
 import { useUpdateProfileInfo } from "../../hook/useProfile";
 import { useAuth } from "@/context/AuthContext";
 import { theme } from "@/utils/theme";
+import Toast from "react-native-toast-message";
 
 interface Props {
 	modalRef: React.RefObject<BottomSheetModal | null>;
@@ -39,9 +40,9 @@ export function EditInfoModal({
 	onClose,
 	onSave,
 }: Props) {
-	const { setMember, member } = useAuth();
-	const { mutate: updateProfile, isPending } =
-		useUpdateProfileInfo();
+	const { memberIDs } = useAuth();
+	
+	const { mutate: updateProfile, isPending } = useUpdateProfileInfo();
 
 	const snapPoints = useMemo(() => ["50%"], []);
 
@@ -69,15 +70,16 @@ export function EditInfoModal({
 
 		updateProfile(
 			{
-				userId: member?.id!,
-				memberId: member?.memberId!,
+				userId: memberIDs?.user_id!,
+				memberId: memberIDs?.member_id!,
 				[field]: value,
 			},
 			{
-				onSuccess: () => {
-					setMember({
-						...member!,
-						[field]: value,
+				onSuccess: (data) => {
+					Toast.show({
+						type: "success",
+						text1: "Profile Updated",
+						text2: data.message,
 					});
 
 					onSave(value);
@@ -91,9 +93,8 @@ export function EditInfoModal({
 	}, [
 		value,
 		label,
-		member,
+		memberIDs,
 		updateProfile,
-		setMember,
 		onSave,
 		close,
 	]);

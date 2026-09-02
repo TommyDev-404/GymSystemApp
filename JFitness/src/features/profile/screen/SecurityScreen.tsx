@@ -7,13 +7,17 @@ import { useAuth } from "@/context/AuthContext";
 import { StackWrapper } from "@/components/shared/StackWrapper";
 import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { theme } from "@/utils/theme";
+import { useGetProfileInfo } from "../hook/useProfile";
 
 export default function SecurityScreen() {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
+
+  const { data: profileInfo, isLoading: profileLoading, } = useGetProfileInfo(memberIDs?.user_id!);
+
   const sheetRef = useRef<BottomSheetModal>(null);
 
-  const lastChanged = member?.pass_last_changed
-    ? new Date(member.pass_last_changed).toLocaleDateString("en-PH", {
+  const lastChanged = profileInfo?.pass_last_changed
+    ? new Date(profileInfo.pass_last_changed).toLocaleDateString("en-PH", {
         month: "short",
         day: "2-digit",
         year: "numeric",

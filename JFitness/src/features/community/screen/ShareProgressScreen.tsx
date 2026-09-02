@@ -18,9 +18,13 @@ import { useAuth } from "@/context/AuthContext";
 import LoadingOverlay from "@/components/shared/LoadingOverlay";
 import { StackWrapper } from "@/components/shared/StackWrapper";
 import { theme } from "@/utils/theme";
+import { useGetProfileInfo } from "@/features/profile/hook/useProfile";
 
 export default function ShareProgressScreen() {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
+
+  const { data: profileInfo } = useGetProfileInfo(memberIDs?.user_id!);
+
   const { mutate: createPost, isPending } = useCreatePost();
   const [text, setText] = useState("");
   const [images, setImages] = useState<string[]>([]);
@@ -92,7 +96,7 @@ export default function ShareProgressScreen() {
 
       createPost(
         {
-          member_id: member?.memberId!,
+          member_id: memberIDs?.member_id!,
           formData,
         },
         {
@@ -108,7 +112,7 @@ export default function ShareProgressScreen() {
   };
 
   const initials =
-    member?.username
+    profileInfo?.username
       ?.split(" ")
       .map((name) => name[0])
       .join("")
@@ -172,9 +176,9 @@ export default function ShareProgressScreen() {
           <View style={styles.postCard}>
             <View style={styles.identityRow}>
               <View style={styles.avatar}>
-                {member?.profile ? (
+                {profileInfo?.profile ? (
                   <Image
-                    source={{ uri: member.profile }}
+                    source={{ uri: profileInfo.profile }}
                     style={styles.avatarImage}
                   />
                 ) : (
@@ -184,7 +188,7 @@ export default function ShareProgressScreen() {
 
               <View style={styles.identityInfo}>
                 <Text style={styles.username}>
-                  {member?.username || "You"}
+                  {profileInfo?.username || "You"}
                 </Text>
                 <Text style={styles.postingText}>Posting publicly</Text>
               </View>

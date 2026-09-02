@@ -27,6 +27,7 @@ import VerifyCodeModal from "./VerifyCodeModal";
 import { sendOtpApi } from "@/features/auth/api/auth.api";
 import { useAuth } from "@/context/AuthContext";
 import { theme } from "@/utils/theme";
+import { useGetProfileInfo } from "../../hook/useProfile";
 
 interface Props {
 	modalRef: React.RefObject<BottomSheetModal | null>;
@@ -37,7 +38,8 @@ export function ChangePasswordModal({
 	modalRef,
 	title,
 }: Props) {
-	const { member } = useAuth();
+	const { memberIDs } = useAuth();
+	const { data: profileInfo, isLoading: profileLoading, } = useGetProfileInfo(memberIDs?.user_id!);
 
 	const snapPoints = useMemo(() => ["62%"], []);
 
@@ -95,7 +97,7 @@ export function ChangePasswordModal({
 			return;
 		}
 
-		if (!member?.email) {
+		if (!profileInfo?.email) {
 			setPasswordError(
 				"Your email address could not be found."
 			);
@@ -105,7 +107,7 @@ export function ChangePasswordModal({
 		try {
 			setIsSendingCode(true);
 
-			const res = await sendOtpApi(member.email);
+			const res = await sendOtpApi(profileInfo.email);
 
 			if (!res.success) {
 				setPasswordError(
@@ -128,7 +130,7 @@ export function ChangePasswordModal({
 	}, [
 		newPassword,
 		confirmPassword,
-		member?.email,
+		profileInfo?.email,
 		isSendingCode,
 		close,
 	]);
@@ -317,7 +319,7 @@ export function ChangePasswordModal({
 			</BottomSheetModal>
 
 			<VerifyCodeModal
-				email={member?.email!}
+				email={profileInfo?.email!}
 				password={newPassword}
 				visible={showCodeModal}
 				onClose={() => setShowCodeModal(false)}

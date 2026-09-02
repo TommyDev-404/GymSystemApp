@@ -50,11 +50,7 @@ export const useRedeemReward = () => {
          queryClient.invalidateQueries({
             queryKey: ["member-recent-activity", variables.member_id]
         });
-       },
-
-    onError: (error) => {
-      console.log("Update profile failed:", error);
-    },
+       }
   });
 
 };
@@ -92,11 +88,11 @@ export const useCancelRedeemReward = () => {
         queryClient.invalidateQueries({
           queryKey: ["member-recent-activity", variables.member_id]
         });
-       },
 
-    onError: (error) => {
-      console.log("Update profile failed:", error);
-    },
+        queryClient.invalidateQueries({
+          queryKey: ["tab-badges", variables.member_id]
+       });
+       }
   });
 
 };

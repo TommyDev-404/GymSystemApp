@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 const ONBOARDING_KEY = "onboarding_completed";
 
 export default function Index() {
-  const { member, loading } = useAuth();
+  const { authenticated, loading } = useAuth();
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
 
@@ -25,7 +25,7 @@ export default function Index() {
     return null;
   }
 
-  if (member) {
+  if (authenticated) {
     return <Redirect href="/(app)/(tabs)/home" />;
   }
 

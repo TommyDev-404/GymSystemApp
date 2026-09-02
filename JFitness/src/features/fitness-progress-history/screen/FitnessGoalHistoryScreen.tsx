@@ -17,40 +17,17 @@ import { theme } from "@/utils/theme";
 const GREEN = theme.primary;
 
 export function FitnessGoalHistoryScreen() {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
+  
+  const { data: memberWeightGoal } = useGetFitnessGoal(memberIDs?.member_id!);
+  const { data: history = [], isLoading } = useGetFitnessGoalHistory(Number(memberIDs?.member_id!));
 
-  const {
-    data: history = [],
-    isLoading,
-  } = useGetFitnessGoalHistory(Number(member?.memberId!));
-
-  const {
-    data: memberWeightGoal,
-    isLoading: weightGoalLoading,
-  } = useGetFitnessGoal(member?.memberId!);
-
-  const startingWeight = Number(
-    memberWeightGoal?.start_weight ?? 0
-  );
-
-  const currentWeight = Number(
-    memberWeightGoal?.current_weight ?? 0
-  );
-
-  const targetWeight = Number(
-    memberWeightGoal?.target_weight ?? 0
-  );
-
-  const percentage = Number(
-    memberWeightGoal?.progress_percentage ?? 0
-  );
-
+  const startingWeight = Number(memberWeightGoal?.start_weight ?? 0);
+  const currentWeight = Number(memberWeightGoal?.current_weight ?? 0);
+  const targetWeight = Number(memberWeightGoal?.target_weight ?? 0);
+  const percentage = Number(memberWeightGoal?.progress_percentage ?? 0);
   const isMovingAway = percentage < 0;
-
-  const remainingWeight = Math.abs(
-    currentWeight - targetWeight
-  );
-
+  const remainingWeight = Math.abs(currentWeight - targetWeight);
   const weightChange = currentWeight - startingWeight;
 
   const chartHistory = [...history].reverse();
@@ -65,7 +42,6 @@ export function FitnessGoalHistoryScreen() {
     <StackWrapper
       title="Progress Information"
       subtitle="View and track your progress"
-      loading={isLoading || weightGoalLoading}
     >
         <View style={styles.pageHeader}>
           <View style={styles.pageHeaderText}>
@@ -107,9 +83,13 @@ export function FitnessGoalHistoryScreen() {
           chartData={chartData}
           isMovingAway={isMovingAway}
           goal={memberWeightGoal}
+          loading={isLoading}
         />
 
-        <WeightHistory history={history} />
+      <WeightHistory
+        history={history}
+        loading={isLoading}
+      />
 
         <View style={styles.bottomSpace} />
     </StackWrapper>

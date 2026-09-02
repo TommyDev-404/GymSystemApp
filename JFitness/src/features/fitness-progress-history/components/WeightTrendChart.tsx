@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { Plus, TrendingUp } from "lucide-react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -11,6 +11,7 @@ interface WeightTrendChartProps {
   chartData: any[];
   isMovingAway: boolean;
   goal?: WeightGoal;
+  loading: boolean;
 }
 
 const GREEN = theme.primary;
@@ -21,6 +22,7 @@ export function WeightTrendChart({
   chartData,
   isMovingAway,
   goal,
+  loading,
 }: WeightTrendChartProps) {
   const updateGoalSheetRef = useRef<BottomSheetModal>(null);
   const chartColor = isMovingAway ? RED : GREEN;
@@ -59,13 +61,16 @@ export function WeightTrendChart({
         style={[
           styles.chartCard,
           {
-            borderColor: isMovingAway
-              ? `${RED}45`
-              : `${GREEN}45`,
+            borderColor: isMovingAway ? `${RED}45` : `${GREEN}45`,
           },
         ]}
       >
-        {chartData.length >= 2 ? (
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={chartColor} />
+            <Text style={styles.loadingText}>Loading weight trend...</Text>
+          </View>
+        ) : chartData.length >= 2 ? (
           <LineChart
             data={chartData}
             height={190}
@@ -119,9 +124,7 @@ export function WeightTrendChart({
                       },
                     ]}
                   >
-                    <Text style={styles.tooltipText}>
-                      {item?.value} kg
-                    </Text>
+                    <Text style={styles.tooltipText}>{item?.value} kg</Text>
                   </View>
                 );
               },
@@ -137,16 +140,10 @@ export function WeightTrendChart({
                 },
               ]}
             >
-              <TrendingUp
-                size={20}
-                color={GREEN}
-                strokeWidth={2}
-              />
+              <TrendingUp size={20} color={GREEN} strokeWidth={2} />
             </View>
 
-            <Text style={styles.emptyChartTitle}>
-              Not enough data yet
-            </Text>
+            <Text style={styles.emptyChartTitle}>Not enough data yet</Text>
 
             <Text style={styles.emptyChartText}>
               Update your weight at least twice to see your trend.
@@ -231,6 +228,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
+  },
+  loadingContainer: {
+    minHeight: 190,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 10.5,
+    fontWeight: "500",
+    color: theme.textMuted,
   },
   tooltip: {
     backgroundColor: theme.surface,

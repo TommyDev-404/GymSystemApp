@@ -24,9 +24,12 @@ import { theme } from "@/utils/theme";
 const { width, height } = Dimensions.get("window");
 
 export function PostCard({ post, onCommentPress }: any) {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
+
   const { mutate: toggleLikeApi } = useToggleLike();
+  
   const imageViewerRef = useRef<ScrollView>(null);
+
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [currentImage, setCurrentImage] = useState(0);
   const [liked, setLiked] = useState(post.liked);
@@ -43,7 +46,7 @@ export function PostCard({ post, onCommentPress }: any) {
     toggleLikeApi(
       {
         post_id: post.id,
-        member_id: member!.memberId,
+        member_id: memberIDs!.member_id,
       },
       {
         onSuccess: () => {

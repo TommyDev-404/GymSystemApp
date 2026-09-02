@@ -1,14 +1,15 @@
-import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Receipt } from "lucide-react-native";
-import { ReferralRecord } from "../types/ReferralTypes";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { theme } from "@/utils/theme";
+import { ReferralRecord } from "../types/ReferralTypes";
 
 interface ReferralListProps {
   data: ReferralRecord[];
+  loading: boolean;
 }
 
-export default function ReferralList({ data }: ReferralListProps) {
+export default function ReferralList({ data, loading }: ReferralListProps) {
   const getInitials = (name: string) =>
     name
       ?.split(" ")
@@ -16,11 +17,11 @@ export default function ReferralList({ data }: ReferralListProps) {
       .join("")
       .toUpperCase();
 
-  const renderItem = ({ item }: { item: ReferralRecord }) => {
+  const renderItem = (item: ReferralRecord) => {
     const isActive = item.status === "Active";
 
     return (
-      <View style={styles.card}>
+      <View key={item.name} style={styles.card}>
         <View style={styles.avatarContainer}>
           {item.profile ? (
             <Image source={{ uri: item.profile }} style={styles.img} resizeMode="cover" />
@@ -30,7 +31,6 @@ export default function ReferralList({ data }: ReferralListProps) {
             </View>
           )}
         </View>
-
         <View style={styles.info}>
           <Text style={styles.name} numberOfLines={1}>
             {item.name}
@@ -44,26 +44,10 @@ export default function ReferralList({ data }: ReferralListProps) {
             })}
           </Text>
         </View>
-
         <View style={styles.rewardContainer}>
-          <View
-            style={[
-              styles.statusBadge,
-              isActive ? styles.activeBadge : styles.pendingBadge,
-            ]}
-          >
-            <View
-              style={[
-                styles.statusDot,
-                isActive ? styles.activeDot : styles.pendingDot,
-              ]}
-            />
-            <Text
-              style={[
-                styles.status,
-                isActive ? styles.activeText : styles.pendingText,
-              ]}
-            >
+          <View style={[styles.statusBadge, isActive ? styles.activeBadge : styles.pendingBadge]}>
+            <View style={[styles.statusDot, isActive ? styles.activeDot : styles.pendingDot]} />
+            <Text style={[styles.status, isActive ? styles.activeText : styles.pendingText]}>
               {item.status}
             </Text>
           </View>
@@ -82,14 +66,12 @@ export default function ReferralList({ data }: ReferralListProps) {
         </Text>
       </View>
 
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => `${item.name}-${index}`}
-        scrollEnabled={false}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
+      <View style={styles.listContainer}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={theme.primary} />
+          </View>
+        ) : data.length === 0 ? (
           <View style={styles.emptyContainer}>
             <EmptyState
               icon={Receipt}
@@ -97,8 +79,16 @@ export default function ReferralList({ data }: ReferralListProps) {
               subtitle="Invite your friends to join the gym and earn points when they sign up."
             />
           </View>
-        }
-      />
+        ) : (
+          <ScrollView
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled
+            contentContainerStyle={styles.listContent}
+          >
+            {data.map(renderItem)}
+          </ScrollView>
+        )}
+      </View>
     </View>
   );
 }
@@ -118,8 +108,22 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     color: theme.textMuted,
   },
+  listContainer: {
+    height: 300,
+  },
+  loadingContainer: {
+    height: 300,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyContainer: {
+    height: 300,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   listContent: {
     gap: 10,
+    paddingBottom: 2,
   },
   card: {
     flexDirection: "row",
@@ -130,7 +134,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.borderAccent,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
     shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 3,
@@ -220,10 +227,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "700",
     color: theme.textSub,
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 20,
   },
 });

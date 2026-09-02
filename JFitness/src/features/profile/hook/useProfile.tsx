@@ -1,5 +1,21 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as api from "@/features/profile/api/profile.api";
+
+type ProfileInfo = {
+  user_id: number,
+  member_id: number,
+  username: string,
+  email: string,
+  profile: string,
+  pass_last_changed: Date
+};
+
+export const useGetProfileInfo = (user_id: number) => {
+   return useQuery<ProfileInfo>({
+      queryKey: ["profile-info", user_id],
+      queryFn: () => api.getProfileInfoApi(user_id),
+   });
+};
 
 export const useUpdateProfileInfo = () => {
    const queryClient = useQueryClient();
@@ -26,11 +42,12 @@ export const useUpdateProfileInfo = () => {
 
       onSuccess: (data, variables) => {
          queryClient.invalidateQueries({
-           queryKey: [
-             "member-dashboard-stat",
-             variables.memberId,
-           ],
+           queryKey: ["member-dashboard-stat", variables.memberId ],
          });
+        
+         queryClient.invalidateQueries({
+          queryKey: ["profile-info", variables.userId ],
+        });
        },
 
     onError: (error) => {
@@ -41,6 +58,7 @@ export const useUpdateProfileInfo = () => {
 };
 
 export const useUpdateProfileImage = () => {
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
@@ -54,7 +72,13 @@ export const useUpdateProfileImage = () => {
         userId,
         formData
       ),
-
+    
+    onSuccess: (_, variables) => {
+      
+      queryClient.invalidateQueries({
+       queryKey: ["profile-info", variables.userId ],
+     });
+    }
   });
 
 };

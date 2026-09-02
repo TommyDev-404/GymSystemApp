@@ -10,19 +10,26 @@ import ProfileCard from "@/features/profile/components/personal-information/Prof
 import InfoItem from "@/features/profile/components/personal-information/InfoItem";
 import ChangePhotoButton from "@/features/profile/components/personal-information/ChangePhotoButton";
 import { EditInfoModal } from "../components/personal-information/EditInfoModal";
-import { useUpdateProfileImage } from "../hook/useProfile";
+import {
+  useGetProfileInfo,
+  useUpdateProfileImage,
+} from "../hook/useProfile";
 
 export default function PersonalInformationScreen() {
-  const { member, setMember } = useAuth();
+  const { memberIDs } = useAuth();
+
+  const { data: profileInfo } = useGetProfileInfo(memberIDs?.user_id!);
   const { mutate: updateProfile, isPending } = useUpdateProfileImage();
+
   const sheetRef = useRef<BottomSheetModal>(null);
   const [selectedField, setSelectedField] = useState("Username");
   const [value, setValue] = useState("");
-  const [profileImage, setProfileImage] = useState<string | null>(
-    member?.profile ?? null
-  );
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const openEdit = (field: string, currentValue: string) => {
+  const openEdit = (
+    field: string,
+    currentValue: string
+  ) => {
     setSelectedField(field);
     setValue(currentValue);
     sheetRef.current?.present();
@@ -50,7 +57,7 @@ export default function PersonalInformationScreen() {
     if (result.canceled) return;
 
     const imageUri = result.assets[0].uri;
-    setProfileImage(imageUri);
+    setPreviewImage(imageUri);
 
     const formData = new FormData();
 
@@ -65,17 +72,12 @@ export default function PersonalInformationScreen() {
 
     updateProfile(
       {
-        userId: member?.id!,
+        userId: profileInfo?.user_id!,
         formData,
       },
       {
         onSuccess: (data) => {
-          setMember({
-            ...member!,
-            profile: data.image,
-          });
-
-          setProfileImage(data.image);
+          setPreviewImage(null);
 
           Toast.show({
             type: "success",
@@ -84,7 +86,7 @@ export default function PersonalInformationScreen() {
           });
         },
         onError: (error) => {
-          setProfileImage(member?.profile ?? null);
+          setPreviewImage(null);
 
           Toast.show({
             type: "error",
@@ -95,6 +97,8 @@ export default function PersonalInformationScreen() {
       }
     );
   };
+
+  const displayedImage = previewImage ?? profileInfo?.profile ?? "";
 
   const header = (
     <ScreenHeader
@@ -115,8 +119,8 @@ export default function PersonalInformationScreen() {
     >
       <View style={styles.profileCardWrapper}>
         <ProfileCard
-          username={member?.username ?? ""}
-          image={profileImage ?? ""}
+          username={profileInfo?.username ?? ""}
+          image={displayedImage}
           uploading={isPending}
         />
       </View>
@@ -124,17 +128,16 @@ export default function PersonalInformationScreen() {
       <View style={styles.infoSection}>
         <InfoItem
           label="Username"
-          value={member?.username ?? ""}
+          value={profileInfo?.username ?? ""}
           onPress={() =>
-            openEdit("Username", member?.username ?? "")
+            openEdit("Username", profileInfo?.username ?? "")
           }
         />
-
         <InfoItem
           label="Email"
-          value={member?.email ?? ""}
+          value={profileInfo?.email ?? ""}
           onPress={() =>
-            openEdit("Email", member?.email ?? "")
+            openEdit("Email", profileInfo?.email ?? "")
           }
         />
       </View>

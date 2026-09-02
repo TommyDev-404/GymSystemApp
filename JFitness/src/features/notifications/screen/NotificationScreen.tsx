@@ -94,15 +94,10 @@ function formatNotificationGroups(
 }
 
 export default function NotificationsScreen() {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
 
-  const {
-    data: notifications = [],
-    isLoading,
-  } = useGetMemberNotifications(member?.memberId!);
-
-  const { mutate: markAllRead, isPending } =
-    useMarkAllNotificationRead();
+  const { data: notifications = [], isLoading } = useGetMemberNotifications(memberIDs?.member_id!);
+  const { mutate: markAllRead, isPending } = useMarkAllNotificationRead();
 
   const groups = useMemo(
     () => formatNotificationGroups(notifications),
@@ -115,12 +110,12 @@ export default function NotificationsScreen() {
   );
 
   const handleMarkAllRead = () => {
-    if (!member?.memberId) {
+    if (!memberIDs?.member_id) {
       return;
     }
 
     markAllRead(
-      { memberId: member.memberId },
+      { memberId: memberIDs.member_id },
       {
         onSuccess: (data) => {
           Toast.show({
@@ -191,7 +186,7 @@ export default function NotificationsScreen() {
             color={item.color}
             bg={item.bg}
             items={item.items}
-            memberId={member?.memberId!}
+            memberId={memberIDs?.member_id!}
           />
         )}
         ListEmptyComponent={

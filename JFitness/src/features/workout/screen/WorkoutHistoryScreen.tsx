@@ -10,17 +10,11 @@ import {
 } from "../hook/useWorkout";
 
 export function WorkoutHistoryScreen() {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
 
-  const { data: chartData = [], isLoading: chartLoading } =
-    useWorkoutProgress(member?.memberId!);
-
-  const { data: personalWorkoutHistory = [], isLoading: historyLoading } =
-    useGetPersonalWorkoutHistory(member?.memberId!);
-
-  const { data: summary, isLoading: summaryLoading } = useWorkoutSummary(
-    Number(member?.memberId!)
-  );
+  const { data: chartData = [], isLoading: chartLoading } = useWorkoutProgress(memberIDs?.member_id!);
+  const { data: personalWorkoutHistory = [], isLoading: historyLoading } = useGetPersonalWorkoutHistory(memberIDs?.member_id!);
+  const { data: summary, isLoading: summaryLoading } = useWorkoutSummary(Number(memberIDs?.member_id!));
 
   const isLoading = chartLoading || historyLoading || summaryLoading;
 

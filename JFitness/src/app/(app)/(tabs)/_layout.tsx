@@ -10,8 +10,8 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
-  const { member } = useAuth();
-  const { data: badges } = useGetTabBadges(member?.memberId!);
+  const { memberIDs } = useAuth();
+  const { data: badges } = useGetTabBadges(memberIDs?.member_id!);
 
   const [profileOpen, setProfileOpen] = useState(false);
 

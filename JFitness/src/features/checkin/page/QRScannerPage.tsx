@@ -14,7 +14,8 @@ type CheckInResult = {
 };
 
 export default function QRScannerPage() {
-  const { member } = useAuth();
+  const { memberIDs } = useAuth();
+
   const router = useRouter();
 
   const [isScanning, setIsScanning] = useState(true);
@@ -47,7 +48,7 @@ export default function QRScannerPage() {
 
       checkIn(
         {
-          member_id: member?.memberId!,
+          member_id: memberIDs?.member_id!,
           sessionId: data.session_id,
         },
         {

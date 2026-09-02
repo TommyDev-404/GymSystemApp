@@ -34,6 +34,10 @@ export const useCheckIn = () => {
 			queryClient.invalidateQueries({
 				queryKey: ["member-notifications", variables.member_id]
 			});
+
+			queryClient.invalidateQueries({
+				queryKey: ["tab-badges", variables.member_id]
+			});
 		}
 	});
 };

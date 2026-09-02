@@ -56,13 +56,10 @@ import React, {
  }: GoalBottomSheetProps) {
 	const snapPoints = useMemo(() => ["55%"], []);
 	const isClosingRef = useRef(false);
-	const { member } = useAuth();
+	const { memberIDs } = useAuth();
  
-	const { mutate: createGoal, isPending: creating } =
-	  useCreateFitnessGoal();
- 
-	const { mutate: updateGoal, isPending: updating } =
-	  useUpdateFitnessGoal();
+	const { mutate: createGoal, isPending: creating } = useCreateFitnessGoal();
+	const { mutate: updateGoal, isPending: updating } = useUpdateFitnessGoal();
  
 	const [currentWeight, setCurrentWeight] = useState(
 	  initialCurrentWeight ? String(initialCurrentWeight) : ""
@@ -167,7 +164,7 @@ import React, {
 	  if (mode === "CREATE") {
 		 createGoal(
 			{
-			  member_id: member?.memberId!,
+			  member_id: memberIDs?.member_id!,
 			  data: {
 				 goal_type: goalType,
 				 current_weight: Number(currentWeight),
@@ -215,232 +212,232 @@ import React, {
 	  goalId,
 	  createGoal,
 	  updateGoal,
-	  member?.memberId,
+	  memberIDs?.member_id,
 	  close,
 	]);
  
 	return (
-	  <BottomSheetModal
-		 ref={modalRef}
-		 snapPoints={snapPoints}
-		 backdropComponent={renderBackdrop}
-		 enablePanDownToClose
-		 keyboardBehavior="extend"
-		 backgroundStyle={styles.sheetBackground}
-		 handleIndicatorStyle={styles.handleIndicator}
-		 onDismiss={() => {
+		<BottomSheetModal
+			ref={modalRef}
+			snapPoints={snapPoints}
+			backdropComponent={renderBackdrop}
+			enablePanDownToClose
+			keyboardBehavior="extend"
+			backgroundStyle={styles.sheetBackground}
+			handleIndicatorStyle={styles.handleIndicator}
+			onDismiss={() => {
 			isClosingRef.current = true;
- 
+
 			setTimeout(() => {
-			  isClosingRef.current = false;
+				isClosingRef.current = false;
 			}, 300);
-		 }}
-	  >
-		 <BottomSheetScrollView
-			contentContainerStyle={styles.container}
-			keyboardShouldPersistTaps="handled"
-			showsVerticalScrollIndicator={false}
-		 >
-			<View style={styles.header}>
-			  <View style={styles.headerContent}>
-				 <Text style={styles.title}>
-					{title}
-				 </Text>
- 
-				 <Text style={styles.subtitle}>
-					{subtitle}
-				 </Text>
-			  </View>
- 
-			  <Pressable
-				 onPress={close}
-				 style={({ pressed }) => [
-					styles.closeButton,
-					pressed && styles.closeButtonPressed,
-				 ]}
-				 hitSlop={8}
-			  >
-				 <X
-					size={19}
-					color={theme.textSub}
-					strokeWidth={2}
-				 />
-			  </Pressable>
-			</View>
- 
-			{mode === "CREATE" && (
-			  <>
-				 <Text style={styles.label}>
-					FITNESS GOAL
-				 </Text>
- 
-				 <Pressable
-					style={[
-					  styles.input,
-					  showGoalOptions && styles.inputFocused,
-					]}
-					onPress={() =>
-					  setShowGoalOptions(!showGoalOptions)
-					}
-				 >
-					<Text style={styles.dropdownText}>
-					  {goalType === "LOSE_WEIGHT"
-						 ? "Lose Weight"
-						 : "Gain Weight"}
-					</Text>
- 
-					<ChevronDown
-					  size={18}
-					  color={theme.textMuted}
-					  strokeWidth={2}
-					/>
-				 </Pressable>
- 
-				 {showGoalOptions && (
-					<View style={styles.dropdown}>
-					  <Pressable
-						 style={[
-							styles.option,
-							goalType === "LOSE_WEIGHT" &&
-							  styles.selectedOption,
-						 ]}
-						 onPress={() => {
-							setGoalType("LOSE_WEIGHT");
-							setDirtyFields((prev) => ({
-							  ...prev,
-							  goalType: true,
-							}));
-							setShowGoalOptions(false);
-						 }}
-					  >
-						 <View
-							style={[
-							  styles.optionIndicator,
-							  goalType === "LOSE_WEIGHT" &&
-								 styles.optionIndicatorActive,
-							]}
-						 />
- 
-						 <Text
-							style={[
-							  styles.optionText,
-							  goalType === "LOSE_WEIGHT" &&
-								 styles.selectedOptionText,
-							]}
-						 >
-							Lose Weight
-						 </Text>
-					  </Pressable>
- 
-					  <Pressable
-						 style={[
-							styles.option,
-							goalType === "GAIN_WEIGHT" &&
-							  styles.selectedOption,
-						 ]}
-						 onPress={() => {
-							setGoalType("GAIN_WEIGHT");
-							setDirtyFields((prev) => ({
-							  ...prev,
-							  goalType: true,
-							}));
-							setShowGoalOptions(false);
-						 }}
-					  >
-						 <View
-							style={[
-							  styles.optionIndicator,
-							  goalType === "GAIN_WEIGHT" &&
-								 styles.optionIndicatorActive,
-							]}
-						 />
- 
-						 <Text
-							style={[
-							  styles.optionText,
-							  goalType === "GAIN_WEIGHT" &&
-								 styles.selectedOptionText,
-							]}
-						 >
-							Gain Weight
-						 </Text>
-					  </Pressable>
+			}}
+		>
+			<BottomSheetScrollView
+				contentContainerStyle={styles.container}
+				keyboardShouldPersistTaps="handled"
+				showsVerticalScrollIndicator={false}
+			>
+				<View style={styles.header}>
+					<View style={styles.headerContent}>
+						<Text style={styles.title}>
+						{title}
+						</Text>
+
+						<Text style={styles.subtitle}>
+						{subtitle}
+						</Text>
 					</View>
-				 )}
-			  </>
-			)}
- 
-			<Text style={styles.label}>
-			  CURRENT WEIGHT (KG)
-			</Text>
- 
-			<BottomSheetTextInput
-			  value={currentWeight}
-			  onChangeText={(value) => {
-				 setCurrentWeight(value);
-				 setDirtyFields((prev) => ({
-					...prev,
-					currentWeight: true,
-				 }));
-			  }}
-			  keyboardType="decimal-pad"
-			  placeholder="Enter current weight"
-			  placeholderTextColor={theme.textMuted}
-			  style={styles.textInput}
-			/>
- 
-			<Text style={styles.label}>
-			  TARGET WEIGHT (KG)
-			</Text>
- 
-			<BottomSheetTextInput
-			  value={goalWeight}
-			  onChangeText={(value) => {
-				 setGoalWeight(value);
-				 setDirtyFields((prev) => ({
-					...prev,
-					goalWeight: true,
-				 }));
-			  }}
-			  keyboardType="decimal-pad"
-			  placeholder="Enter target weight"
-			  placeholderTextColor={theme.textMuted}
-			  style={styles.textInput}
-			/>
- 
-			<View style={styles.actions}>
-			  <Pressable
-				 onPress={close}
-				 style={({ pressed }) => [
-					styles.cancelBtn,
-					pressed && styles.cancelBtnPressed,
-				 ]}
-			  >
-				 <Text style={styles.cancelText}>
-					Cancel
-				 </Text>
-			  </Pressable>
- 
-			  <Pressable
-				 onPress={save}
-				 disabled={isLoading || !hasChanges}
-				 style={({ pressed }) => [
-					styles.saveBtn,
-					(isLoading || !hasChanges) &&
-					  styles.saveBtnDisabled,
-					pressed &&
-					  !isLoading &&
-					  hasChanges &&
-					  styles.saveBtnPressed,
-				 ]}
-			  >
-				 <Text style={styles.saveText}>
-					{isLoading ? "Saving..." : buttonText}
-				 </Text>
-			  </Pressable>
-			</View>
-		 </BottomSheetScrollView>
-	  </BottomSheetModal>
+
+					<Pressable
+						onPress={close}
+						style={({ pressed }) => [
+						styles.closeButton,
+						pressed && styles.closeButtonPressed,
+						]}
+						hitSlop={8}
+					>
+						<X
+						size={19}
+						color={theme.textSub}
+						strokeWidth={2}
+						/>
+					</Pressable>
+				</View>
+
+				{mode === "CREATE" && (
+					<>
+						<Text style={styles.label}>
+						FITNESS GOAL
+						</Text>
+
+						<Pressable
+						style={[
+							styles.input,
+							showGoalOptions && styles.inputFocused,
+						]}
+						onPress={() =>
+							setShowGoalOptions(!showGoalOptions)
+						}
+						>
+						<Text style={styles.dropdownText}>
+							{goalType === "LOSE_WEIGHT"
+								? "Lose Weight"
+								: "Gain Weight"}
+						</Text>
+
+						<ChevronDown
+							size={18}
+							color={theme.textMuted}
+							strokeWidth={2}
+						/>
+						</Pressable>
+
+						{showGoalOptions && (
+						<View style={styles.dropdown}>
+							<Pressable
+								style={[
+								styles.option,
+								goalType === "LOSE_WEIGHT" &&
+									styles.selectedOption,
+								]}
+								onPress={() => {
+								setGoalType("LOSE_WEIGHT");
+								setDirtyFields((prev) => ({
+									...prev,
+									goalType: true,
+								}));
+								setShowGoalOptions(false);
+								}}
+							>
+								<View
+								style={[
+									styles.optionIndicator,
+									goalType === "LOSE_WEIGHT" &&
+										styles.optionIndicatorActive,
+								]}
+								/>
+
+								<Text
+								style={[
+									styles.optionText,
+									goalType === "LOSE_WEIGHT" &&
+										styles.selectedOptionText,
+								]}
+								>
+								Lose Weight
+								</Text>
+							</Pressable>
+
+							<Pressable
+								style={[
+								styles.option,
+								goalType === "GAIN_WEIGHT" &&
+									styles.selectedOption,
+								]}
+								onPress={() => {
+								setGoalType("GAIN_WEIGHT");
+								setDirtyFields((prev) => ({
+									...prev,
+									goalType: true,
+								}));
+								setShowGoalOptions(false);
+								}}
+							>
+								<View
+								style={[
+									styles.optionIndicator,
+									goalType === "GAIN_WEIGHT" &&
+										styles.optionIndicatorActive,
+								]}
+								/>
+
+								<Text
+								style={[
+									styles.optionText,
+									goalType === "GAIN_WEIGHT" &&
+										styles.selectedOptionText,
+								]}
+								>
+								Gain Weight
+								</Text>
+							</Pressable>
+						</View>
+						)}
+					</>
+				)}
+
+				<Text style={styles.label}>
+					CURRENT WEIGHT (KG)
+				</Text>
+
+				<BottomSheetTextInput
+					value={currentWeight}
+					onChangeText={(value) => {
+						setCurrentWeight(value);
+						setDirtyFields((prev) => ({
+						...prev,
+						currentWeight: true,
+						}));
+					}}
+					keyboardType="decimal-pad"
+					placeholder="Enter current weight"
+					placeholderTextColor={theme.textMuted}
+					style={styles.textInput}
+				/>
+
+				<Text style={styles.label}>
+					TARGET WEIGHT (KG)
+				</Text>
+
+				<BottomSheetTextInput
+					value={goalWeight}
+					onChangeText={(value) => {
+						setGoalWeight(value);
+						setDirtyFields((prev) => ({
+						...prev,
+						goalWeight: true,
+						}));
+					}}
+					keyboardType="decimal-pad"
+					placeholder="Enter target weight"
+					placeholderTextColor={theme.textMuted}
+					style={styles.textInput}
+				/>
+
+				<View style={styles.actions}>
+					<Pressable
+						onPress={close}
+						style={({ pressed }) => [
+						styles.cancelBtn,
+						pressed && styles.cancelBtnPressed,
+						]}
+					>
+						<Text style={styles.cancelText}>
+						Cancel
+						</Text>
+					</Pressable>
+
+					<Pressable
+						onPress={save}
+						disabled={isLoading || !hasChanges}
+						style={({ pressed }) => [
+						styles.saveBtn,
+						(isLoading || !hasChanges) &&
+							styles.saveBtnDisabled,
+						pressed &&
+							!isLoading &&
+							hasChanges &&
+							styles.saveBtnPressed,
+						]}
+					>
+						<Text style={styles.saveText}>
+						{isLoading ? "Saving..." : buttonText}
+						</Text>
+					</Pressable>
+				</View>
+			</BottomSheetScrollView>
+		</BottomSheetModal>
 	);
  }
  

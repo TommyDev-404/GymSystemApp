@@ -31,6 +31,7 @@ import {
 } from "../types/WorkoutTypes";
 import { theme } from "@/utils/theme";
 import { useAuth } from "@/context/AuthContext";
+import Toast from "react-native-toast-message";
 
 interface Props {
   modalRef: React.RefObject<BottomSheetModal | null>;
@@ -42,11 +43,8 @@ export function AddWorkoutModal({
   modalRef,
   onClose,
 }: Props) {
-  const { member } = useAuth();
-  const {
-    mutate: addPersonalWorkout,
-    isPending,
-  } = useAddPersonalWorkout();
+  const { memberIDs } = useAuth();
+  const { mutate: addPersonalWorkout, isPending } = useAddPersonalWorkout();
 
   const snapPoints = useMemo(() => ["85%"], []);
   const [exercises, setExercises] = useState<ExerciseInput[]>([]);
@@ -160,7 +158,7 @@ export function AddWorkoutModal({
 
     addPersonalWorkout(
       {
-        member_id: member?.memberId!,
+        member_id: memberIDs?.member_id!,
         data: {
           name: data.name.trim(),
           duration: data.duration,
@@ -168,7 +166,13 @@ export function AddWorkoutModal({
         },
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
+          Toast.show({
+            type: data.success ? "success" : "error",
+            text1: data.success ? "Success" : "Unable to cancel",
+            text2: data.message,
+          });
+          
           closeModal();
           setExercises([]);
           setValue("name", "");

@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SocketProvider } from "@/context/SocketContext";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import Toast from "react-native-toast-message";
+import { toastConfig } from "@/components/shared/AppToast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,7 +28,7 @@ export default function RootLayout() {
               <AuthProvider>
                 <SocketProvider>
                   <RootNavigator />
-                  <Toast />
+                  <Toast config={toastConfig} />
                 </SocketProvider>
               </AuthProvider>
             </QueryClientProvider>
@@ -39,7 +40,7 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { member, loading } = useAuth();
+  const { authenticated, loading } = useAuth();
 
   if (loading) {
     return null;
@@ -53,11 +54,11 @@ function RootNavigator() {
         animationDuration: 550,
       }}
     >
-      <Stack.Protected guard={!member}>
+      <Stack.Protected guard={!authenticated}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
 
-      <Stack.Protected guard={!!member}>
+      <Stack.Protected guard={!!authenticated}>
         <Stack.Screen name="(app)" />
       </Stack.Protected>
     </Stack>

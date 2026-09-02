@@ -26,6 +26,7 @@ export default function LoginScreen() {
       setErrorMessage("");
       setIsLoading(true);
       await login(username, password);
+      
       router.push("/(app)/(tabs)/home");
     } catch (error: any) {
       setErrorMessage(error?.message || "Login failed. Please try again.");

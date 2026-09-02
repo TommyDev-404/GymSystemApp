@@ -5,7 +5,7 @@ import { Image, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 interface GreetingHeaderProps {
-  memberName: string;
+  username: string;
 }
 
 const messages = [
@@ -48,7 +48,7 @@ function getDate() {
     .toUpperCase();
 }
 
-export function GreetingHeader({ memberName }: GreetingHeaderProps) {
+export function GreetingHeader({ username }: GreetingHeaderProps) {
   const [messageIndex, setMessageIndex] = useState(0);
   const [greeting, setGreeting] = useState(getGreeting());
   const [date, setDate] = useState(getDate());
@@ -91,7 +91,7 @@ export function GreetingHeader({ memberName }: GreetingHeaderProps) {
           adjustsFontSizeToFit
         >
           {greeting},{" "}
-          <Text style={styles.name}>{memberName}.</Text>
+          <Text style={styles.name}>{username}.</Text>
         </Text>
       </View>
 
