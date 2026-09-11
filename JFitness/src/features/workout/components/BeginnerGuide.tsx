@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { ChevronRight } from "lucide-react-native";
 import { theme } from "@/utils/theme";
+import { router } from "expo-router";
 
 const programs = [
   {
@@ -55,20 +56,6 @@ export function BeginnerGuide({
           </Text>
         </View>
 
-        <Pressable
-          onPress={onViewAll}
-          style={({ pressed }) => [
-            styles.viewAllButton,
-            pressed && styles.pressed,
-          ]}
-        >
-          <Text style={styles.viewAllText}>View All</Text>
-          <ChevronRight
-            size={15}
-            color={theme.primaryLight}
-            strokeWidth={2.5}
-          />
-        </Pressable>
       </View>
 
       <ScrollView
@@ -79,6 +66,14 @@ export function BeginnerGuide({
         {programs.map((program) => (
           <Pressable
             key={program.id}
+            onPress={() =>
+              router.push({
+                pathname: "/(app)/program/[id]",
+                params: {
+                  id: program.id.toString(),
+                },
+              })
+            }
             style={({ pressed }) => [
               styles.card,
               pressed && styles.cardPressed,

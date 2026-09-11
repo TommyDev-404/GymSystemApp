@@ -148,6 +148,7 @@ export default function HomeScreen() {
               })
             }
             onNewGoalPress={() => goalSheetRef.current?.present()}
+            onGuidePress={() => router.push("/(app)/fitness-guide")}
           />
         ) : (
           <GoalStatusCard

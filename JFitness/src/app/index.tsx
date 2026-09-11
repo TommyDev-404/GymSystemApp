@@ -9,7 +9,7 @@ export default function Index() {
   const { authenticated, loading } = useAuth();
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
-
+  
   useEffect(() => {
     const checkOnboarding = async () => {
       const value = await AsyncStorage.getItem(ONBOARDING_KEY);

@@ -4,9 +4,9 @@
     "slug": "jfitness",
     "version": "1.0.0",
     "scheme": "jfitness",
-    "icon": "./assets/images/splash-icon.png",
+    "icon": "./assets/images/gymIcon.jpg",
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/images/gymSplashIcon.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#0B0D10"
     },

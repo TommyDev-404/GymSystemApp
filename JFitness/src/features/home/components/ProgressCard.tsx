@@ -24,6 +24,7 @@ interface ProgressCardProps {
   onPress: () => void;
   onHistoryPress: () => void;
   onNewGoalPress: () => void;
+  onGuidePress: () => void;
 }
 
 export function ProgressCard({
@@ -34,6 +35,7 @@ export function ProgressCard({
   percentage,
   onHistoryPress,
   onNewGoalPress,
+  onGuidePress,
 }: ProgressCardProps) {
   const isLoseWeight = goalType === "LOSE_WEIGHT";
   const rawProgress = Number(percentage) || 0;
@@ -294,6 +296,21 @@ export function ProgressCard({
         </LinearGradient>
       </Pressable>
 
+      <Pressable
+        onPress={onGuidePress}
+        style={({ pressed }) => [
+          styles.guideButton,
+          pressed && styles.guideButtonPressed,
+        ]}
+      >
+        <Text style={styles.guideButtonText}>See Guide</Text>
+        <ChevronRight
+          size={15}
+          color={PRIMARY}
+          strokeWidth={2.3}
+        />
+      </Pressable>
+
       {isGoalReached && (
         <View style={styles.newGoalSection}>
           <View style={styles.newGoalMessage}>
@@ -356,6 +373,30 @@ function WeightStat({
 }
 
 const styles = StyleSheet.create({
+  guideButton: {
+    marginHorizontal: 16,
+    marginTop: -6,
+    marginBottom: 16,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: theme.accentWash,
+    borderWidth: 1,
+    borderColor: theme.borderAccent,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+  },
+  
+  guideButtonPressed: {
+    opacity: 0.7,
+  },
+  
+  guideButtonText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: PRIMARY,
+  },
   card: {
     borderRadius: 20,
     backgroundColor: theme.card,

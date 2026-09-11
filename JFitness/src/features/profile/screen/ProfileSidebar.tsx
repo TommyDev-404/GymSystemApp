@@ -21,7 +21,6 @@ import {
   LogOut,
   Settings,
   Share2,
-  ShieldCheck,
   Users,
   X,
 } from "lucide-react-native";
@@ -34,9 +33,9 @@ import { theme } from "@/utils/theme";
 import { LogoutConfirmationModal } from "@/features/profile/components/LogoutConfirmationModal";
 import { ProfileMenuSection } from "../components/ProfileMenuSection";
 import { useGetProfileInfo } from "../hook/useProfile";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
 const SIDEBAR_WIDTH = Math.min(SCREEN_WIDTH * 0.84, 320);
 
 const menuSections = [
@@ -119,6 +118,7 @@ export function ProfileSidebar({
   onClosed,
 }: ProfileSidebarProps) {
   const { logout, memberIDs } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const { data: profileInfo, isLoading: profileLoading, } = useGetProfileInfo(memberIDs?.user_id!);
 
@@ -217,7 +217,12 @@ export function ProfileSidebar({
   return (
     <View
       pointerEvents={visible ? "auto" : "none"}
-      style={StyleSheet.absoluteFill}
+      style={[
+        StyleSheet.absoluteFill,
+        {
+          paddingBottom: insets.bottom,
+        }
+      ]}
     >
 
       <Animated.View
@@ -318,7 +323,12 @@ export function ProfileSidebar({
           </View>
         </ScrollView>
 
-        <View style={styles.footer}>
+        <View style={[
+          styles.footer,
+          {
+            paddingBottom: Math.max(insets.bottom, 12),
+          },
+        ]}>
           <Pressable
             onPress={() => setShowLogoutModal(true)}
             style={({ pressed }) => [
@@ -524,7 +534,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 12,
     backgroundColor: theme.card,
     borderTopWidth: 1,
     borderTopColor: theme.border,

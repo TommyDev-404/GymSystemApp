@@ -12,16 +12,27 @@ import { StackWrapper } from "@/components/shared/StackWrapper";
 import { theme } from "@/utils/theme";
 import AiHeader from "../components/AiHeader";
 import AiMessage from "../components/AiMessages";
-import AiSuggestions from "../components/AiSuggestions";
 import ChatInput from "../components/ChatInput";
+import { sendChatMessage } from "../api/ai.api";
+import { useAuth } from "@/context/AuthContext";
+
+type Message = {
+  id: string;
+  text: string;
+  sender: "user" | "bot";
+  isTyping?: boolean;
+};
 
 export default function ChatbotScreen() {
+  const { memberIDs } = useAuth();
+
   const [input, setInput] = useState("");
   const [behaviour, setBehaviour] = useState<"height" | undefined>("height");
-  const [messages, setMessages] = useState([
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "👋 Hi! I'm GymBot AI.\n\nAsk me about workouts, nutrition, weight loss, muscle gain, or gym programs 💪",
+      text: "👋 Hi! I'm GymBot AI.\n\nI'm your personal fitness coach. Ask me about workouts, nutrition, weight goals, or gym programs. 💪\n\nWhat would you like to work on today?",
       sender: "bot",
     },
   ]);
@@ -29,12 +40,14 @@ export default function ChatbotScreen() {
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    const showListener = Keyboard.addListener("keyboardDidShow", () => {
+    const showListener = Keyboard.addListener("keyboardDidShow", (event) => {
       setBehaviour("height");
+      setKeyboardOffset(event.endCoordinates.height);
     });
 
     const hideListener = Keyboard.addListener("keyboardDidHide", () => {
       setBehaviour(undefined);
+      setKeyboardOffset(0);
     });
 
     return () => {
@@ -51,7 +64,7 @@ export default function ChatbotScreen() {
 
     const sub = BackHandler.addEventListener(
       "hardwareBackPress",
-      backAction
+      backAction,
     );
 
     return () => sub.remove();
@@ -63,39 +76,69 @@ export default function ChatbotScreen() {
     });
   }, [messages]);
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
+  const sendMessage = async () => {
+    
+    const trimmedMessage = input.trim();
 
-    const userMessage = {
+    if (!trimmedMessage) return;
+
+    const userMessage: Message = {
       id: Date.now().toString(),
-      text: input.trim(),
+      text: trimmedMessage,
       sender: "user",
     };
 
-    const typingMessage = {
+    const typingMessage: Message = {
       id: "typing",
       text: "GymBot AI is typing...",
       sender: "bot",
       isTyping: true,
     };
 
-    setMessages((prev) => [...prev, userMessage, typingMessage]);
-    setInput("");
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+      typingMessage,
+    ]);
 
-    setTimeout(() => {
+    setInput("");
+    
+    console.log("Member id: ", memberIDs?.member_id);
+    try {
+      const { reply } = await sendChatMessage(memberIDs?.member_id!, trimmedMessage);
+
       setMessages((prev) => {
-        const filtered = prev.filter((msg) => msg.id !== "typing");
+        const filtered = prev.filter(
+          (message) => message.id !== "typing",
+        );
 
         return [
           ...filtered,
           {
-            id: Date.now().toString() + "bot",
-            text: "💪 Got it! Let me help you with that.",
+            id: `${Date.now()}-bot`,
+            text: reply,
             sender: "bot",
           },
         ];
       });
-    }, 1500);
+    } catch (error) {
+      console.error("GymBot API error:", error);
+
+      setMessages((prev) => {
+        const filtered = prev.filter(
+          (message) => message.id !== "typing",
+        );
+
+        return [
+          ...filtered,
+          {
+            id: `${Date.now()}-error`,
+            text: "Sorry, I couldn't connect to GymBot AI. Please try again.",
+            sender: "bot",
+          },
+        ];
+      });
+    }
   };
 
   const header = <AiHeader />;
@@ -112,7 +155,12 @@ export default function ChatbotScreen() {
       useScrollView={false}
     >
       <KeyboardAvoidingView
-        style={styles.keyboardContainer}
+        style={[
+          styles.keyboardContainer,
+          Platform.OS === "android" && {
+            paddingBottom: keyboardOffset - 185,
+          },
+        ]}
         behavior={Platform.OS === "ios" ? "padding" : behaviour}
       >
         <View style={styles.chatContainer}>
@@ -125,8 +173,6 @@ export default function ChatbotScreen() {
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.messageContent}
           />
-
-          <AiSuggestions visible={messages.length === 1} />
 
           <View style={styles.inputContainer}>
             <ChatInput
@@ -145,15 +191,18 @@ const styles = StyleSheet.create({
   keyboardContainer: {
     flex: 1,
   },
+
   chatContainer: {
     flex: 1,
   },
+
   messageContent: {
     flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 10,
   },
+
   inputContainer: {
     paddingHorizontal: 12,
     paddingTop: 8,

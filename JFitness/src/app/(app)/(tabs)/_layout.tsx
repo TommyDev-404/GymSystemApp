@@ -34,15 +34,12 @@ export default function TabLayout() {
   }, []);
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          paddingTop: insets.top,
-          paddingBottom: insets.bottom,
-        },
-      ]}
-    >
+    <View style={[
+      styles.container,
+      {
+        paddingTop: insets.top
+      }
+    ]}>
       <AppHeader
         pathname={pathname}
         onProfilePress={openProfile}
@@ -54,16 +51,20 @@ export default function TabLayout() {
           tabBarShowLabel: true,
           tabBarActiveTintColor: theme.primary,
           tabBarInactiveTintColor: theme.textSub,
+  
           tabBarLabelStyle: {
             fontSize: 11,
             fontWeight: "500",
             marginTop: -2,
           },
+  
           tabBarItemStyle: {
             paddingTop: 4,
           },
+  
           tabBarStyle: {
-            height: 60,
+            height: 60 + insets.bottom,
+            paddingBottom: insets.bottom,
             backgroundColor: theme.card,
             borderTopWidth: 1,
             borderTopColor: theme.border,
@@ -169,6 +170,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.card,
   },
+
   scanButton: {
     top: -14,
     width: 48,
@@ -188,6 +190,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: theme.borderAccent,
   },
+
   badge: {
     backgroundColor: theme.primary,
     color: "#ffffff",

@@ -62,12 +62,10 @@ export default function ChatInput({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 14,
-    paddingTop: 10,
+    paddingHorizontal: 4,
+    paddingTop: 5,
     paddingBottom: 12,
     backgroundColor: "transparent",
-    borderTopWidth: 1,
-    borderTopColor: theme.border,
   },
 
   inputWrapper: {
