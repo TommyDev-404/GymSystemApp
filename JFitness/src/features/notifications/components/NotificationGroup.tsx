@@ -4,17 +4,16 @@ import { useMarkNotificationRead } from "../hook/useNotification";
 import { NotificationGroupType } from "../types/NotifTypes";
 import { theme } from "@/utils/theme";
 
+interface NotificationGroupProps extends NotificationGroupType {
+  memberId: number;
+}
+
 export function NotificationGroup({
   label,
-  icon: Icon,
-  color,
-  bg,
   memberId,
   items,
-}: NotificationGroupType) {
+}: NotificationGroupProps) {
   const { mutate: markAsRead } = useMarkNotificationRead();
-
-  const unreadCount = items.filter((item) => item.unread).length;
 
   const handleMarkRead = (notificationId: number) => {
     markAsRead({
@@ -26,32 +25,11 @@ export function NotificationGroup({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View
-          style={[
-            styles.iconContainer,
-            {
-              backgroundColor: bg,
-              borderColor: theme.borderAccent,
-            },
-          ]}
-        >
-          <Icon size={13} color={color} />
-        </View>
+        <View style={styles.line} />
 
         <Text style={styles.label}>{label}</Text>
 
-        {unreadCount > 0 && (
-          <View
-            style={[
-              styles.badge,
-              {
-                backgroundColor: color,
-              },
-            ]}
-          >
-            <Text style={styles.badgeText}>{unreadCount}</Text>
-          </View>
-        )}
+        <View style={styles.line} />
       </View>
 
       <View style={styles.items}>
@@ -62,9 +40,7 @@ export function NotificationGroup({
             body={item.body}
             time={item.time}
             unread={item.unread}
-            icon={Icon}
-            iconColor={color}
-            iconBg={bg}
+            category={item.category}
             onMarkAsRead={() => handleMarkRead(item.id)}
           />
         ))}
@@ -81,35 +57,19 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    gap: 10,
+    marginBottom: 12,
   },
-  iconContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 9,
-    borderWidth: 1,
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: theme.border,
   },
   label: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: theme.textSub,
-  },
-  badge: {
-    minWidth: 20,
-    height: 20,
-    paddingHorizontal: 6,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 8,
-    borderRadius: 999,
-  },
-  badgeText: {
-    color: "#fff",
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "800",
+    color: theme.textMuted,
+    letterSpacing: 1.2,
   },
   items: {
     gap: 10,

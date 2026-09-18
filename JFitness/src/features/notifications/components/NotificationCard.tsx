@@ -1,16 +1,51 @@
-import { formatNotificationTime } from "@/utils/timeAgoFormatter";
+import { BadgeCheck, Bell, CreditCard, Flame, Star, User } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { formatNotificationTime } from "@/utils/timeAgoFormatter";
 import { theme } from "@/utils/theme";
+import type { NotificationCategory } from "../types/NotifTypes";
 
 type Props = {
   title: string;
   body: string;
   time: string;
   unread: boolean;
-  icon: any;
-  iconColor: string;
-  iconBg: string;
+  category: NotificationCategory;
   onMarkAsRead?: () => void;
+};
+
+const categoryConfig: Record<
+  NotificationCategory,
+  {
+    icon: typeof Bell;
+    color: string;
+    bg: string;
+  }
+> = {
+  REWARD: {
+    icon: Star,
+    color: "#f59e0b",
+    bg: "#fef3c7",
+  },
+  PAYMENT: {
+    icon: CreditCard,
+    color: "#8b5cf6",
+    bg: "#ede9fe",
+  },
+  MEMBERSHIP: {
+    icon: BadgeCheck,
+    color: "#f97316",
+    bg: "#fff7ed",
+  },
+  MEMBER: {
+    icon: User,
+    color: "#3b82f6",
+    bg: "#dbeafe",
+  },
+  ATTENDANCE: {
+    icon: Flame,
+    color: "#ef4444",
+    bg: "#fee2e2",
+  },
 };
 
 export function NotificationCard({
@@ -18,35 +53,61 @@ export function NotificationCard({
   body,
   time,
   unread,
-  icon: Icon,
-  iconColor,
-  iconBg,
+  category,
   onMarkAsRead,
 }: Props) {
+  const config = categoryConfig[category] ?? {
+    icon: Bell,
+    color: "#64748b",
+    bg: "#f1f5f9",
+  };
+
+  const Icon = config.icon;
+
   return (
-    <View style={[styles.card, unread ? styles.unreadCard : styles.readCard]}>
-      <View style={[styles.iconContainer, { backgroundColor: iconBg }]}>
-        <Icon size={17} color={iconColor} />
+    <View
+      style={[
+        styles.card,
+        unread ? styles.unreadCard : styles.readCard,
+      ]}
+    >
+      <View
+        style={[
+          styles.iconContainer,
+          { backgroundColor: config.bg },
+        ]}
+      >
+        <Icon size={17} color={config.color} />
       </View>
 
       <View style={styles.content}>
         <View style={styles.titleRow}>
           <Text
             numberOfLines={2}
-            style={[styles.title, unread ? styles.unreadTitle : styles.readTitle]}
+            style={[
+              styles.title,
+              unread ? styles.unreadTitle : styles.readTitle,
+            ]}
           >
             {title}
           </Text>
 
           {unread && (
-            <View style={[styles.unreadDot, { backgroundColor: iconColor }]} />
+            <View
+              style={[
+                styles.unreadDot,
+                { backgroundColor: config.color },
+              ]}
+            />
           )}
         </View>
 
         <Text style={styles.body}>{body}</Text>
 
         <View style={styles.footer}>
-          <Text style={styles.time}>{formatNotificationTime(time)}</Text>
+          <Text style={styles.time}>
+            {formatNotificationTime(time)}
+          </Text>
 
           {unread && onMarkAsRead && (
             <Pressable
@@ -56,7 +117,9 @@ export function NotificationCard({
                 pressed && styles.markReadPressed,
               ]}
             >
-              <Text style={styles.markReadText}>Mark as read</Text>
+              <Text style={styles.markReadText}>
+                Mark as read
+              </Text>
             </Pressable>
           )}
         </View>

@@ -8,8 +8,21 @@ interface PointsCardProps {
 }
 
 export default function PointsCard({ points }: PointsCardProps) {
-  const maxPoints = 1000;
-  const progress = Math.min((points / maxPoints) * 100, 100);
+  const step = 1000;
+  const isMilestone = points > 0 && points % step === 0;
+
+  const maxPoints = isMilestone
+    ? points
+    : (Math.floor(points / step) + 1) * step;
+
+  const previousMilestone = isMilestone
+    ? points - step
+    : Math.floor(points / step) * step;
+
+  const progress = isMilestone
+    ? 100
+    : ((points - previousMilestone) / (maxPoints - previousMilestone)) * 100;
+
   const remainingPoints = Math.max(maxPoints - points, 0);
 
   return (
@@ -33,7 +46,10 @@ export default function PointsCard({ points }: PointsCardProps) {
             </View>
 
             <View>
-              <Text style={styles.eyebrow}>REWARD POINTS</Text>
+              <Text style={styles.eyebrow}>
+                REWARD POINTS
+              </Text>
+
               <Text style={styles.points}>
                 {points.toLocaleString()}
               </Text>
@@ -42,17 +58,22 @@ export default function PointsCard({ points }: PointsCardProps) {
 
           <View style={styles.status}>
             <View style={styles.statusDot} />
+
             <Text style={styles.statusText}>
-              {points >= maxPoints ? "Unlocked" : "Active"}
+              {isMilestone ? "Unlocked" : "Active"}
             </Text>
           </View>
         </View>
 
         <View style={styles.pointsInfo}>
           <View>
-            <Text style={styles.label}>CURRENT POINTS</Text>
+            <Text style={styles.label}>
+              CURRENT POINTS
+            </Text>
+
             <Text style={styles.currentPoints}>
               {points.toLocaleString()}
+
               <Text style={styles.maxPoints}>
                 {" / "}
                 {maxPoints.toLocaleString()}
@@ -69,16 +90,18 @@ export default function PointsCard({ points }: PointsCardProps) {
           <View
             style={[
               styles.progressFill,
-              { width: `${progress}%` },
+              {
+                width: `${progress}%`,
+              },
             ]}
           />
         </View>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            {remainingPoints > 0
-              ? `${remainingPoints.toLocaleString()} points until next reward`
-              : "Next reward unlocked"}
+            {isMilestone
+              ? "🎉 Milestone reached!"
+              : `${remainingPoints.toLocaleString()} points to next milestone`}
           </Text>
 
           <Text style={styles.footerPoints}>

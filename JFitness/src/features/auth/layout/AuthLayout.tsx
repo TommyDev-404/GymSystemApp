@@ -1,8 +1,7 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useRef } from "react";
 import {
   Dimensions,
   ImageBackground,
-  Keyboard,
   Platform,
   Pressable,
   StatusBar as RNStatusBar,
@@ -14,11 +13,13 @@ import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withTiming,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import {
+  KeyboardAwareScrollView,
+  useKeyboardHandler,
+} from "react-native-keyboard-controller";
 import { ChevronLeft } from "lucide-react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -32,19 +33,8 @@ type Props = {
 };
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-
 const ONBOARDING_KEY = "onboarding_completed";
-
 const ANIMATION_EASING = Easing.out(Easing.cubic);
-
-const topImages = [
-  require("@/assets/images/gymBG2.jpg"),
-  require("@/assets/images/gymBG3.jpg"),
-  require("@/assets/images/gymBG4.jpg"),
-  require("@/assets/images/gymBG5.jpg"),
-  require("@/assets/images/gymBG6.jpg"),
-];
-
 
 export function AuthLayout({
   title = "JFitness Gym",
@@ -52,19 +42,20 @@ export function AuthLayout({
   image,
   children,
 }: Props) {
-  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+  const [onboardingCompleted, setOnboardingCompleted] = React.useState(false);
 
+  const sheetY = useSharedValue(0);
   const keyboardHeight = useSharedValue(0);
 
   const headerOpacity = useSharedValue(0);
   const headerY = useSharedValue(-8);
-
   const mascotOpacity = useSharedValue(0);
   const mascotScale = useSharedValue(0.82);
   const mascotY = useSharedValue(8);
-
   const titleOpacity = useSharedValue(0);
   const titleY = useSharedValue(14);
+
+  const sheetRef = useRef<View>(null);
 
   useEffect(() => {
     const checkOnboarding = async () => {
@@ -86,73 +77,47 @@ export function AuthLayout({
       easing: ANIMATION_EASING,
     });
 
-    mascotOpacity.value = withDelay(
-      180,
-      withTiming(1, {
-        duration: 450,
-        easing: ANIMATION_EASING,
-      })
-    );
-
-    mascotScale.value = withDelay(
-      180,
-      withTiming(1, {
-        duration: 600,
-        easing: Easing.out(Easing.back(1.15)),
-      })
-    );
-
-    mascotY.value = withDelay(
-      180,
-      withTiming(0, {
-        duration: 550,
-        easing: ANIMATION_EASING,
-      })
-    );
-
-    titleOpacity.value = withDelay(
-      280,
-      withTiming(1, {
-        duration: 500,
-        easing: ANIMATION_EASING,
-      })
-    );
-
-    titleY.value = withDelay(
-      280,
-      withTiming(0, {
-        duration: 550,
-        easing: ANIMATION_EASING,
-      })
-    );
-  }, []);
-
-  useEffect(() => {
-    const showEvent =
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-
-    const hideEvent =
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
-
-    const showSubscription = Keyboard.addListener(showEvent, (event) => {
-      keyboardHeight.value = withTiming(event.endCoordinates.height, {
-        duration: Platform.OS === "ios" ? 280 : 250,
-        easing: Easing.out(Easing.ease),
-      });
+    mascotOpacity.value = withTiming(1, {
+      duration: 450,
+      easing: ANIMATION_EASING,
     });
 
-    const hideSubscription = Keyboard.addListener(hideEvent, () => {
-      keyboardHeight.value = withTiming(0, {
-        duration: Platform.OS === "ios" ? 280 : 250,
-        easing: Easing.out(Easing.ease),
-      });
+    mascotScale.value = withTiming(1, {
+      duration: 600,
+      easing: Easing.out(Easing.back(1.15)),
     });
 
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
+    mascotY.value = withTiming(0, {
+      duration: 550,
+      easing: ANIMATION_EASING,
+    });
+
+    titleOpacity.value = withTiming(1, {
+      duration: 500,
+      easing: ANIMATION_EASING,
+    });
+
+    titleY.value = withTiming(0, {
+      duration: 550,
+      easing: ANIMATION_EASING,
+    });
   }, []);
+
+  useKeyboardHandler(
+    {
+      onMove: (event) => {
+        "worklet";
+
+        keyboardHeight.value = event.height;
+      },
+      onEnd: (event) => {
+        "worklet";
+
+        keyboardHeight.value = event.height;
+      },
+    },
+    [],
+  );
 
   const headerStyle = useAnimatedStyle(() => ({
     opacity: headerOpacity.value,
@@ -172,23 +137,9 @@ export function AuthLayout({
     transform: [{ translateY: titleY.value }],
   }));
 
-  const sheetStyle = useAnimatedStyle(() => {
-    const progress = Math.min(
-      1,
-      Math.max(0, keyboardHeight.value / 280)
-    );
-
-    return {
-      transform: [
-        {
-          translateY:
-            Platform.OS === "ios"
-              ? -progress * 8
-              : -progress * 28,
-        },
-      ],
-    };
-  });
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: sheetY.value }],
+  }));
 
   const handleBackToWelcome = () => {
     router.replace("/welcome");
@@ -241,7 +192,6 @@ export function AuthLayout({
               pointerEvents="none"
             >
               <Text style={styles.brandName}>JFitness</Text>
-
               <Text style={styles.brandTagline}>
                 TRAIN SMARTER. LIVE STRONGER.
               </Text>
@@ -250,35 +200,44 @@ export function AuthLayout({
         </ImageBackground>
       </View>
 
-      <Animated.View style={[styles.sheet, sheetStyle]}>
-        <Animated.View
-          style={[styles.sheetMascotContainer, mascotStyle]}
-        >
-          <Animated.Image
-            source={image}
-            resizeMode="contain"
-            style={styles.sheetMascot}
-          />
-        </Animated.View>
-
-        <Animated.View style={[styles.sheetHeader, titleStyle]}>
-          <Text style={styles.appTitle}>{title}</Text>
-
-          {subtitle ? (
-            <Text style={styles.appSubtitle}>{subtitle}</Text>
-          ) : null}
-        </Animated.View>
-
+      <Animated.View
+        ref={sheetRef}
+        style={[styles.sheet, sheetStyle]}
+      >
         <KeyboardAwareScrollView
           style={styles.keyboardScroll}
           contentContainerStyle={styles.keyboardContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          bottomOffset={12}
+          bottomOffset={20}
           extraKeyboardSpace={0}
           disableScrollOnKeyboardHide
         >
-          {children}
+          <Animated.View
+            style={[styles.sheetMascotContainer, mascotStyle]}
+          >
+            <Animated.Image
+              source={image}
+              resizeMode="contain"
+              style={styles.sheetMascot}
+            />
+          </Animated.View>
+
+          <Animated.View
+            style={[styles.sheetHeader, titleStyle]}
+          >
+            <Text style={styles.appTitle}>{title}</Text>
+
+            {subtitle ? (
+              <Text style={styles.appSubtitle}>
+                {subtitle}
+              </Text>
+            ) : null}
+          </Animated.View>
+
+          <View style={styles.formContainer}>
+            {children}
+          </View>
         </KeyboardAwareScrollView>
       </Animated.View>
 
@@ -300,23 +259,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.bg,
   },
-
   header: {
     height: SCREEN_HEIGHT * 0.25,
     zIndex: 0,
   },
-
   headerBackground: {
     flex: 1,
     width: "100%",
   },
-
   headerOverlay: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-
   backButton: {
     position: "absolute",
     top: Platform.OS === "ios" ? 54 : 42,
@@ -326,23 +281,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.35)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.10)",
-    zIndex: 20,
+    backgroundColor: "rgba(255,255,255,0.12)",
   },
-
   backButtonPressed: {
     opacity: 0.7,
     transform: [{ scale: 0.94 }],
   },
-
   headerContent: {
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
   },
-
   brandName: {
     color: "#FFFFFF",
     fontSize: 29,
@@ -350,21 +299,18 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
     textAlign: "center",
   },
-
   brandTagline: {
     marginTop: 7,
-    color: "rgba(255, 255, 255, 0.62)",
+    color: "rgba(255,255,255,0.62)",
     fontSize: 9,
     fontWeight: "700",
     letterSpacing: 1.8,
     textAlign: "center",
   },
-
   sheet: {
     flex: 1,
-    marginTop: -28,
+    marginTop: -70,
     paddingHorizontal: 24,
-    paddingTop: 38,
     backgroundColor: theme.surface,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
@@ -377,8 +323,16 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 12,
     zIndex: 10,
+    overflow: "hidden",
   },
-
+  keyboardScroll: {
+    flex: 1,
+  },
+  keyboardContent: {
+    width: "100%",
+    paddingTop: 38,
+    paddingBottom: 80,
+  },
   sheetMascotContainer: {
     position: "relative",
     alignSelf: "center",
@@ -387,12 +341,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   sheetMascot: {
     width: 120,
     height: 120,
   },
-
   sheetHeader: {
     alignItems: "center",
     justifyContent: "center",
@@ -401,7 +353,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     zIndex: 20,
   },
-
   appTitle: {
     color: theme.text,
     fontSize: 19,
@@ -410,7 +361,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     textAlign: "center",
   },
-
   appSubtitle: {
     marginTop: 5,
     color: theme.textSub,
@@ -419,16 +369,9 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     textAlign: "center",
   },
-
-  keyboardScroll: {
-    flex: 1,
-  },
-
-  keyboardContent: {
+  formContainer: {
     width: "100%",
-    paddingBottom: 80,
   },
-
   footer: {
     position: "absolute",
     bottom: Platform.OS === "ios" ? 18 : 12,
@@ -438,14 +381,12 @@ const styles = StyleSheet.create({
     zIndex: 30,
     pointerEvents: "none",
   },
-
   footerText: {
     color: theme.textMuted,
     fontSize: 11,
     fontWeight: "600",
     letterSpacing: 0.1,
   },
-
   footerSubtext: {
     marginTop: 3,
     color: theme.textMuted,

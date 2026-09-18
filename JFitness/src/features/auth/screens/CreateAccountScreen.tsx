@@ -25,9 +25,12 @@ export default function CreateAccountScreen() {
   const {
     control,
     handleSubmit,
+    clearErrors,
     setError,
     formState: { errors },
   } = useForm<CreateAccountForm>({
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       username: "",
       password: "",
@@ -38,18 +41,21 @@ export default function CreateAccountScreen() {
   const handleCreate = async (data: CreateAccountForm) => {
     try {
       setIsLoading(true);
+      clearErrors("root");
 
       await createAccount(
         Number(id),
         data.username,
-        data.confirm
+        data.confirm,
       );
 
       router.replace("/(app)/(tabs)/home");
-    } catch (err: any) {
+    } catch (error: unknown) {
       setError("root", {
         message:
-          err?.message || "Failed to create account. Please try again.",
+          error instanceof Error
+            ? error.message
+            : "Failed to create account. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -58,6 +64,7 @@ export default function CreateAccountScreen() {
 
   const errorMessage =
     errors.root?.message ||
+    errors.username?.message ||
     errors.password?.message ||
     errors.confirm?.message;
 
@@ -107,18 +114,17 @@ export default function CreateAccountScreen() {
             control={control}
             name="username"
             rules={{
-              required: "Please enter a username.",
-              minLength: {
-                value: 8,
-                message: "Username must be unique.",
-              },
+              required: "Please enter a username."
             }}
             render={({ field: { onChange, value } }) => (
               <FormField
                 label="USERNAME"
                 value={value}
                 placeholder="Username"
-                onChangeText={onChange}
+                onChangeText={(text) => {
+                  clearErrors("root");
+                  onChange(text);
+                }}
                 autoCapitalize="none"
               />
             )}
@@ -149,7 +155,10 @@ export default function CreateAccountScreen() {
               <FormField
                 label="PASSWORD"
                 value={value}
-                onChangeText={onChange}
+                onChangeText={(text) => {
+                  clearErrors("root");
+                  onChange(text);
+                }}
                 placeholder="Minimum 8 characters"
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
@@ -181,7 +190,10 @@ export default function CreateAccountScreen() {
               <FormField
                 label="CONFIRM PASSWORD"
                 value={value}
-                onChangeText={onChange}
+                onChangeText={(text) => {
+                  clearErrors("root");
+                  onChange(text);
+                }}
                 placeholder="Re-enter your password"
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
@@ -233,11 +245,7 @@ export default function CreateAccountScreen() {
           }}
         >
           <PrimaryButton
-            title={
-              isLoading
-                ? "Creating account..."
-                : "Create Account"
-            }
+            title={isLoading ? "Creating account..." : "Create Account"}
             onPress={handleSubmit(handleCreate)}
             loading={isLoading}
             disabled={isLoading}
@@ -252,7 +260,6 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
   },
-
   errorBox: {
     backgroundColor: theme.errorBg,
     borderWidth: 1,
@@ -262,7 +269,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 11,
     marginBottom: 10,
   },
-
   errorText: {
     color: theme.errorText,
     fontSize: 12,
@@ -270,7 +276,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "500",
   },
-
   showPasswordRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -279,7 +284,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingVertical: 3,
   },
-
   checkbox: {
     width: 18,
     height: 18,
@@ -290,18 +294,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   checkboxChecked: {
     backgroundColor: theme.primary,
     borderColor: theme.primary,
   },
-
   checkMark: {
     color: "#FFFFFF",
     fontSize: 11,
     fontWeight: "800",
   },
-
   checkboxLabel: {
     fontSize: 12.5,
     color: theme.textSub,

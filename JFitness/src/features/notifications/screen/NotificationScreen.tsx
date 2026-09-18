@@ -29,68 +29,78 @@ import { theme } from "@/utils/theme";
 import { Notification, NotificationGroupType } from "../types/NotifTypes";
 
 function formatNotificationGroups(
-  notifications: Notification[]
+  notifications: Notification[],
 ): NotificationGroupType[] {
-  const config: Record<string, any> = {
-    REWARD: {
-      label: "Rewards",
-      icon: Star,
-      color: "#f59e0b",
-      bg: "#fef3c7",
-    },
-    PAYMENT: {
-      label: "Payments",
-      icon: CreditCard,
-      color: "#8b5cf6",
-      bg: "#ede9fe",
-    },
-    MEMBERSHIP: {
-      label: "Membership",
-      icon: BadgeCheck,
-      color: "#f97316",
-      bg: "#fff7ed",
-    },
-    MEMBER: {
-      label: "Members",
-      icon: User,
-      color: "#3b82f6",
-      bg: "#dbeafe",
-    },
-    ATTENDANCE: {
-      label: "Attendance",
-      icon: Flame,
-      color: "#ef4444",
-      bg: "#fee2e2",
-    },
+  const grouped: Record<string, NotificationGroupType> = {};
+
+  const getDateKey = (date: string) => {
+    const parsed = new Date(date);
+
+    return `${parsed.getFullYear()}-${String(
+      parsed.getMonth() + 1,
+    ).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`;
   };
 
-  const grouped: Record<string, any> = {};
+  const getDateLabel = (date: string) => {
+    const parsed = new Date(date);
+    const today = new Date();
+    const yesterday = new Date();
+
+    yesterday.setDate(today.getDate() - 1);
+
+    const isToday =
+      parsed.getFullYear() === today.getFullYear() &&
+      parsed.getMonth() === today.getMonth() &&
+      parsed.getDate() === today.getDate();
+
+    const isYesterday =
+      parsed.getFullYear() === yesterday.getFullYear() &&
+      parsed.getMonth() === yesterday.getMonth() &&
+      parsed.getDate() === yesterday.getDate();
+
+    if (isToday) {
+      return "TODAY";
+    }
+
+    if (isYesterday) {
+      return "YESTERDAY";
+    }
+
+    return parsed
+      .toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+      .toUpperCase();
+  };
 
   notifications.forEach((notif) => {
-    const type = notif.category;
+    const key = getDateKey(notif.created_at);
 
-    if (!grouped[type]) {
-      grouped[type] = {
-        ...(config[type] ?? {
-          label: "Other",
-          icon: Bell,
-          color: "#64748b",
-          bg: "#f1f5f9",
-        }),
+    if (!grouped[key]) {
+      grouped[key] = {
+        label: getDateLabel(notif.created_at),
+        icon: Bell,
+        color: theme.primary,
+        bg: theme.primaryLight,
         items: [],
       };
     }
 
-    grouped[type].items.push({
+    grouped[key].items.push({
       id: notif.id,
       title: notif.title,
       body: notif.description,
       time: notif.created_at,
       unread: !notif.is_read,
+      category: notif.category,
     });
   });
 
-  return Object.values(grouped);
+  return Object.entries(grouped)
+    .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
+    .map(([, group]) => group);
 }
 
 export default function NotificationsScreen() {

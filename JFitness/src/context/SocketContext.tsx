@@ -36,7 +36,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
 		// Only connect if currently disconnected
 		if (!socket.connected) {
-			socket.connect();
+		 socket.connect();
 		}
 
 		return () => {
@@ -61,7 +61,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 			});
 
 			queryClient.invalidateQueries({
-				queryKey: ["notifications", memberIDs.member_id],
+				queryKey: ["member-notifications", memberIDs.member_id],
+			});
+		  
+			queryClient.invalidateQueries({
+				queryKey: ["tab-badges", memberIDs.member_id],
 			});
 		};
 
@@ -79,15 +83,63 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 		  });
 		};
 
+		// Referral Notifications
+		const handleReferralNotif = () => {
+			queryClient.invalidateQueries({
+				queryKey: ["member-notifications", memberIDs.member_id],
+			});
+		 
+			queryClient.invalidateQueries({
+			  queryKey: ["tab-badges", memberIDs.member_id],
+			});
+			
+			queryClient.invalidateQueries({
+			  queryKey: ["member-dashboard-stat", memberIDs.member_id],
+			});
+		};
+
+		// Checkout Notifications
+		const handleCheckoutNotif = () => {
+			queryClient.invalidateQueries({
+				queryKey: ["member-recent-activity", memberIDs.member_id],
+			});
+			
+			queryClient.invalidateQueries({
+				queryKey: ["member-notifications", memberIDs.member_id],
+			});
+		  
+			queryClient.invalidateQueries({
+				queryKey: ["tab-badges", memberIDs.member_id],
+			});
+		};
+
+		// Checkout Notifications
+		const handleRewardClaimed = () => {
+			queryClient.invalidateQueries({
+				queryKey: ["redeemed-rewards"],
+			});
+			
+			queryClient.invalidateQueries({
+			  queryKey: ["member-notifications", memberIDs.member_id],
+			});
+		 
+			queryClient.invalidateQueries({
+			  queryKey: ["tab-badges", memberIDs.member_id],
+			});
+		};
+		
 		// Register listeners
 		socket.on("membership:renew", handleMembership);
 		socket.on("membership:upgrade", handleMembership);
 		socket.on("tutorial:new", handleWorkoutTutorials);
 		socket.on("tutorial:update", handleWorkoutTutorials);
 		socket.on("tutorial:delete", handleWorkoutTutorials);
+		socket.on("reward:claimed", handleRewardClaimed);
 		socket.on("reward:new", handleAvailableRewards);
 		socket.on("reward:update", handleAvailableRewards);
 		socket.on("reward:remove", handleAvailableRewards);
+		socket.on("referral:notif", handleReferralNotif);
+		socket.on("attendance:checkout", handleCheckoutNotif);
 
 		// Cleanup listeners
 		return () => {
@@ -96,9 +148,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 			socket.off("tutorial:new", handleWorkoutTutorials);
 			socket.off("tutorial:update", handleWorkoutTutorials);
 			socket.off("tutorial:delete", handleWorkoutTutorials);
+			socket.on("reward:claimed", handleRewardClaimed);
 			socket.off("reward:new", handleAvailableRewards);
 			socket.off("reward:update", handleAvailableRewards);
 			socket.on("reward:remove", handleAvailableRewards);
+			socket.on("referral:notif", handleReferralNotif);
+			socket.on("attendance:checkout", handleCheckoutNotif);
 		};
 	}, [memberIDs?.member_id, queryClient]);
 

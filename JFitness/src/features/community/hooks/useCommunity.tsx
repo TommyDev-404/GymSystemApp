@@ -42,6 +42,10 @@ export const useCreatePost = () => {
 			queryClient.invalidateQueries({
 				queryKey: ["my-posts", variables.member_id],
 			});
+
+			queryClient.invalidateQueries({
+				queryKey: ["tab-badges", variables.member_id],
+			});
 		},
 	});
 };

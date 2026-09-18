@@ -18,17 +18,25 @@ export function LoginForm({ onForgotPassword }: Props) {
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleLogin = async () => {
+    
     if (!username.trim() || !password.trim()) {
       setErrorMessage("Please fill in all fields.");
       return;
     }
-
+    
     try {
       setErrorMessage("");
       setIsLoading(true);
       await login(username, password);
-    } catch (error: any) {
-      setErrorMessage(error?.message || "Login failed. Please try again.");
+
+    } catch (error: unknown) {
+      console.log("LOGIN FORM CATCH:", error);
+    
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Login failed. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +96,10 @@ export function LoginForm({ onForgotPassword }: Props) {
 
       <PrimaryButton
         title={isLoading ? "Signing in..." : "Login"}
-        onPress={handleLogin}
+        onPress={() => {
+          console.log("BUTTON CALLBACK");
+          handleLogin();
+        }}
         loading={isLoading}
         disabled={isLoading}
       />

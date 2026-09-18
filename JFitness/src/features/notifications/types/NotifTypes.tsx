@@ -1,3 +1,4 @@
+import { LucideIcon } from "lucide-react-native";
 
 export interface Notification {
   id: number;
@@ -26,11 +27,26 @@ export interface Notification {
   created_at: string;
 }
 
+export type NotificationCategory =
+  | "REWARD"
+  | "PAYMENT"
+  | "MEMBERSHIP"
+  | "MEMBER"
+  | "ATTENDANCE";
+  
+export type NotificationItem = {
+  id: number;
+  title: string;
+  body: string;
+  time: string;
+  unread: boolean;
+  category: NotificationCategory;
+};
+
 export type NotificationGroupType = {
   label: string;
-  icon: any;
+  icon: LucideIcon;
   color: string;
   bg: string;
-  memberId: number;
-  items: any[];
+  items: NotificationItem[];
 };

@@ -20,7 +20,10 @@ interface AuthContextType {
    login: (
       email: string,
       password: string
-   ) => Promise<void>;
+   ) => Promise<{
+      success: boolean;
+      message: string;
+   }>;
    createAccount: (
       member_id: number,
       username: string,
@@ -71,34 +74,40 @@ export function AuthProvider({
 
    const login = async (
       username: string,
-      password: string
-   ) => {
+      password: string,
+    ): Promise<{ message: string; success: boolean }> => {
       const res = await api.loginApi({
-         username,
-         password,
+        username,
+        password,
       });
-     
+    
+      if (!res.success) {
+       throw new Error(res.message)
+      }
+    
+      await AsyncStorage.setItem(TOKEN_KEY, res.token);
+    
       await AsyncStorage.setItem(
-         TOKEN_KEY,
-         res.token
+        USER_ID_KEY,
+        String(res.user.user_id),
       );
-
+    
       await AsyncStorage.setItem(
-         USER_ID_KEY,
-         String(res.user.user_id)
+        MEMBER_ID_KEY,
+        String(res.user.member_id),
       );
-
-      await AsyncStorage.setItem(
-         MEMBER_ID_KEY,
-         String(res.user.member_id)
-      );
-
+    
       setMemberIDs({
         user_id: res.user.user_id,
         member_id: res.user.member_id,
       });
-
+    
       setAuthenticated(true);
+    
+      return {
+        success: true,
+        message: "Login successful.",
+      };
    };
 
    const createAccount = async (
@@ -112,6 +121,10 @@ export function AuthProvider({
          password,
       });
 
+      if (!res.success) {
+       throw new Error(res.message)
+      }
+    
       await AsyncStorage.setItem(
          TOKEN_KEY,
          res.token

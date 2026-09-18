@@ -30,13 +30,13 @@ export default function ActivateScreen() {
       setIsLoading(true);
 
       const res = await api.verifyActivationCodeApi(code);
-		 
+      
       if (res.success) {
         router.push({
           pathname: "/(auth)/create-account",
           params: {
-            username: res.data.username,
-            id: res.data.memberId,
+            username: res.username,
+            id: res.memberId,
           },
         });
       } else {

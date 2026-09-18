@@ -22,6 +22,12 @@
       "expo-image",
       "expo-router",
       "expo-splash-screen"
-    ]
+    ],
+    "ios": {
+      "bundleIdentifier": "com.rustomg.jfitness",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
   }
 }

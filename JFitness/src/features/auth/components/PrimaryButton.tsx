@@ -6,6 +6,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "@/utils/theme";
+import { useEffect } from "react";
 
 interface PrimaryButtonProps {
   title: string;
@@ -20,11 +21,16 @@ export default function PrimaryButton({
   loading = false,
   disabled = false,
 }: PrimaryButtonProps) {
+  
   const isDisabled = disabled || loading;
 
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={() => {
+        console.log("PRessed...")
+        onPress();
+      }
+      }
       disabled={isDisabled}
       activeOpacity={0.85}
       style={[

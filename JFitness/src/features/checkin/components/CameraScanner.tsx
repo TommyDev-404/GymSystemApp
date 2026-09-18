@@ -107,7 +107,7 @@ export function CameraScanner({ onScanned, isScanning }: any) {
 			>
 				<X
 					size={21}
-					color={theme.text}
+					color="white"
 					strokeWidth={2.2}
 				/>
 			</Pressable>
@@ -399,13 +399,13 @@ const styles = StyleSheet.create({
 	statusTitle: {
 		fontSize: 13,
 		fontWeight: "700",
-		color: theme.text,
+		color: theme.primary,
 	},
 
 	statusSubtitle: {
 		marginTop: 2,
 		fontSize: 10,
-		color: theme.textSub,
+		color: "white",
 	},
 
 	statusDot: {
