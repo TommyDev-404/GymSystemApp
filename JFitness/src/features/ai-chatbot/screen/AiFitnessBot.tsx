@@ -32,7 +32,7 @@ export default function ChatbotScreen() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "👋 Hi! I'm GymBot AI.\n\nI'm your personal fitness coach. Ask me about workouts, nutrition, weight goals, or gym programs. 💪\n\nWhat would you like to work on today?",
+      text: "👋 Hi! I'm JFitness AI.\n\nI'm your personal fitness coach. Ask me about workouts, nutrition, weight goals, or gym programs. 💪\n\nWhat would you like to work on today?",
       sender: "bot",
     },
   ]);
@@ -90,7 +90,7 @@ export default function ChatbotScreen() {
 
     const typingMessage: Message = {
       id: "typing",
-      text: "GymBot AI is typing...",
+      text: "JFitness AI is typing...",
       sender: "bot",
       isTyping: true,
     };
@@ -145,7 +145,7 @@ export default function ChatbotScreen() {
 
   return (
     <StackWrapper
-      title="GymBot AI"
+      title="JFitness AI"
       showDefaultHeader={false}
       headerContent={header}
       horizontalPadding={0}

@@ -32,17 +32,41 @@ export default function HomeScreen() {
   const { memberIDs } = useAuth();
 
   const [goal, setGoal] = useState<WeightGoal | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
   const goalSheetRef = useRef<BottomSheetModal>(null);
   const updateGoalSheetRef = useRef<BottomSheetModal>(null);
 
-  const { data: profileInfo, isLoading: profileLoading, } = useGetProfileInfo(memberIDs?.user_id!);
-  const { data: dashboardData = {} as MemberDashboard, isLoading: dashboardLoading } = useGetMemberDashboardData(profileInfo?.member_id!);
-  const { data: recentActivity = [], isLoading: recentLoading } = useGetMemberRecentActivity(profileInfo?.member_id!);
-  const { data: memberWeightGoal, isLoading: weightGoalLoading } = useGetFitnessGoal(profileInfo?.member_id!);
+  const { data: profileInfo, isLoading: profileLoading, refetch: refetchProfile } = useGetProfileInfo(memberIDs?.user_id!);
+  const { data: dashboardData = {} as MemberDashboard, isLoading: dashboardLoading, refetch: refetchDashboard } = useGetMemberDashboardData(profileInfo?.member_id!);
+  const { data: recentActivity = [], isLoading: recentLoading, refetch: refetchRecentActivity } = useGetMemberRecentActivity(profileInfo?.member_id!);
+  const { data: memberWeightGoal, isLoading: weightGoalLoading, refetch: refetchWeightGoal } = useGetFitnessGoal(profileInfo?.member_id!);
 
   useEffect(() => {
     setGoal(memberWeightGoal ?? null);
   }, [memberWeightGoal]);
+
+  const handleRefresh = async () => {
+    console.log("🔄 Home refresh triggered");
+
+    setRefreshing(true);
+
+    try {
+      await refetchProfile();
+
+      await Promise.all([
+        refetchDashboard(),
+        refetchRecentActivity(),
+        refetchWeightGoal(),
+      ]);
+
+      console.log("✅ Home refresh finished");
+    } catch (error) {
+      console.error("❌ Home refresh failed:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const stats = useMemo(
     () => [
@@ -107,10 +131,14 @@ export default function HomeScreen() {
           }),
       },
     ],
-    [profileInfo?.member_id!]
+    [profileInfo?.member_id]
   );
 
-  const loading = dashboardLoading || recentLoading || weightGoalLoading || profileLoading;
+  const loading =
+    dashboardLoading ||
+    recentLoading ||
+    weightGoalLoading ||
+    profileLoading;
 
   return (
     <>
@@ -118,6 +146,8 @@ export default function HomeScreen() {
         loading={loading}
         horizontalPadding={15}
         gap={20}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
       >
         <GreetingHeader username={profileInfo?.username!} />
 

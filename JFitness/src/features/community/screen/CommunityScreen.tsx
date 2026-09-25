@@ -1,5 +1,10 @@
 import { useRef, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import {
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from "react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { MessageSquareDashed } from "lucide-react-native";
 import { TabWrapper } from "@/components/shared/TabWrapper";
@@ -11,13 +16,22 @@ import {
   useGetPosts,
 } from "../hooks/useCommunity";
 import { useAuth } from "@/context/AuthContext";
+import { theme } from "@/utils/theme";
 
 export function CommunityScreen() {
   const { memberIDs } = useAuth();
-  const { data: posts = [], isLoading } = useGetPosts(memberIDs?.member_id!);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const {
+    data: posts = [],
+    isLoading,
+    refetch: refetchPosts,
+  } = useGetPosts(memberIDs?.member_id!);
+
   const { mutate: createComment, isPending } = useCreateComment();
 
   const commentModalRef = useRef<BottomSheetModal>(null);
+
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [commentsOpen, setCommentsOpen] = useState(false);
 
@@ -42,6 +56,18 @@ export function CommunityScreen() {
     });
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await refetchPosts();
+    } catch (error) {
+      console.error("❌ Community refresh failed:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <TabWrapper
       loading={isLoading}
@@ -57,6 +83,14 @@ export function CommunityScreen() {
         keyExtractor={(item) => String(item.id)}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
+          />
+        }
         renderItem={({ item }) => (
           <PostCard
             post={item}

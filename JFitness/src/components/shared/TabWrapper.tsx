@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import {
   ActivityIndicator,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleProp,
@@ -24,6 +25,8 @@ interface TabScreenProps {
   paddingBottom?: number;
   gap?: number;
   useScrollView?: boolean;
+  refreshing?: boolean;
+  onRefresh?: () => void | Promise<void>;
 }
 
 export function TabWrapper({
@@ -38,8 +41,9 @@ export function TabWrapper({
   paddingBottom = 30,
   gap = 20,
   useScrollView = true,
+  refreshing = false,
+  onRefresh,
 }: TabScreenProps) {
-  
   const content = loading ? (
     <View
       style={[
@@ -85,11 +89,23 @@ export function TabWrapper({
   return (
     <AppBackground>
       <StatusBar barStyle="dark-content" />
-      
+
       {useScrollView ? (
         <ScrollView
           scrollEnabled={scrollEnabled}
           showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+          bounces
+          alwaysBounceVertical
+          refreshControl={
+            onRefresh ? (
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={theme.primary}
+                colors={[theme.primary]}
+              />
+            ) : undefined
+          }
           contentContainerStyle={styles.scrollContent}
         >
           {content}
@@ -109,7 +125,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   childrenContainer: {
-    flex: 1,
     width: "100%",
   },
   loaderContainer: {

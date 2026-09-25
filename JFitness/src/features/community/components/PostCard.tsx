@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -34,6 +34,11 @@ export function PostCard({ post, onCommentPress }: any) {
   const [currentImage, setCurrentImage] = useState(0);
   const [liked, setLiked] = useState(post.liked);
   const [likeCount, setLikeCount] = useState(post.like);
+  
+  useEffect(() => {
+    setLiked(post.liked);
+    setLikeCount(post.like);
+  }, [post.liked, post.like]);
 
   const toggleLike = () => {
     const newLiked = !liked;

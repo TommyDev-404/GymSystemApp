@@ -22,11 +22,10 @@ import { theme } from "@/utils/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const backgroundImages = [
-  require("@/assets/images/gymBG2.jpg"),
-  require("@/assets/images/gymBG3.jpg"),
-  require("@/assets/images/gymBG4.jpg"),
-  require("@/assets/images/gymBG5.jpg"),
-  require("@/assets/images/gymBG6.jpg"),
+  require("@/assets/images/gymBG2.png"),
+  require("@/assets/images/gymBG3.png"),
+  require("@/assets/images/gymBG5.png"),
+  require("@/assets/images/gymBG6.png"),
 ];
 
 const FADE_DURATION = 1400;

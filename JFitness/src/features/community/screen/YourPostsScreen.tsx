@@ -1,6 +1,7 @@
-import { FlatList, View, StyleSheet } from "react-native";
+// YourPostsScreen.tsx
+
+import { FlatList, RefreshControl, View, StyleSheet } from "react-native";
 import { MessageSquareDashed } from "lucide-react-native";
-import { router } from "expo-router";
 import { useRef, useState } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useAuth } from "@/context/AuthContext";
@@ -18,10 +19,20 @@ import {
 export function YourPostsScreen() {
   const { memberIDs } = useAuth();
 
-  const { data: postsData, isLoading } = useGetMyPosts(memberIDs?.member_id!);
+  const {
+    data: postsData,
+    isLoading,
+    refetch: refetchPosts,
+  } = useGetMyPosts(memberIDs?.member_id!);
+
   const { mutate: createComment, isPending } = useCreateComment();
 
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+
   const posts = postsData?.posts ?? [];
+
   const stats = postsData?.stats ?? {
     totalPosts: 0,
     totalLikes: 0,
@@ -29,8 +40,24 @@ export function YourPostsScreen() {
   };
 
   const commentModalRef = useRef<BottomSheetModal>(null);
-  const [selectedPost, setSelectedPost] = useState<any>(null);
-  const [commentsOpen, setCommentsOpen] = useState(false);
+
+  const handleRefresh = async () => {
+    console.log("🔄 Your posts refresh triggered");
+
+    setRefreshing(true);
+
+    try {
+      const result = await refetchPosts({
+        throwOnError: true,
+      });
+
+    } catch (error) {
+      console.error("❌ Your posts refresh failed:", error);
+    } finally {
+      setRefreshing(false);
+      console.log("✅ Your posts refresh finished");
+    }
+  };
 
   const openComments = (post: any) => {
     setSelectedPost(post);
@@ -54,12 +81,10 @@ export function YourPostsScreen() {
   return (
     <StackWrapper
       title="Your post"
-  		subtitle="Your community activity"
+      subtitle="Your community activity"
       headerContent={
         <View style={styles.headerWrapper}>
-          <YourPostsHeader
-            stats={stats}
-          />
+          <YourPostsHeader stats={stats} />
         </View>
       }
       loading={isLoading}
@@ -68,13 +93,21 @@ export function YourPostsScreen() {
       paddingTop={0}
       paddingBottom={24}
       gap={14}
+      useScrollView={false}
     >
       <FlatList
         data={posts}
         keyExtractor={(item) => String(item.id)}
         showsVerticalScrollIndicator={false}
-        scrollEnabled={false}
         contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
+          />
+        }
         renderItem={({ item }) => (
           <PostCard
             post={item}
@@ -108,8 +141,8 @@ export function YourPostsScreen() {
 }
 
 const styles = StyleSheet.create({
-	headerWrapper: {
-	  marginBottom: 20,
+  headerWrapper: {
+    marginBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: theme.borderAccent,
   },

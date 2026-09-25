@@ -1,24 +1,30 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import {
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { Receipt } from "lucide-react-native";
 import SummaryCard from "@/features/payment-history/components/SummaryCard";
 import TransactionItem from "@/features/payment-history/components/TransactionItem";
 import { useFetchPaymentHistory } from "../hook/usePayments";
 import { useAuth } from "@/context/AuthContext";
 import { PaymentStats } from "../types/PaymentTypes";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { Receipt } from "lucide-react-native";
 import { StackWrapper } from "@/components/shared/StackWrapper";
 import { theme } from "@/utils/theme";
-import { useWindowDimensions } from "react-native";
 
 export default function PaymentHistoryScreen() {
   const { memberIDs } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { height } = useWindowDimensions();
-  const transactionListHeight = height * 0.45;
-
-  const { data: paymentData, isLoading } = useFetchPaymentHistory(
-    memberIDs?.member_id!
-  );
+  const {
+    data: paymentData,
+    isLoading,
+    refetch,
+  } = useFetchPaymentHistory(memberIDs?.member_id!);
 
   const transactions = paymentData?.payments ?? [];
 
@@ -28,6 +34,18 @@ export default function PaymentHistoryScreen() {
     expires: new Date(),
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await refetch();
+    } catch (error) {
+      console.error("❌ Payment history refresh failed:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <StackWrapper
       title="Payment History"
@@ -35,72 +53,67 @@ export default function PaymentHistoryScreen() {
       loading={isLoading}
       useScrollView={false}
     >
-    
-        <SummaryCard summary={stats} />
-        
-        <View style={styles.listHeader}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionIcon}>
-              <Receipt
-                size={15}
-                color={theme.primaryLight}
-                strokeWidth={2.2}
-              />
-            </View>
+      <FlatList
+        data={transactions}
+        keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
+          />
+        }
+        ListHeaderComponent={
+          <View style={styles.headerContent}>
+            <SummaryCard summary={stats} />
 
-            <View>
-              <Text style={styles.sectionTitle}>Transactions</Text>
-              <Text style={styles.sectionSubtitle}>
-                Your recent membership activity
-              </Text>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIcon}>
+                <Receipt
+                  size={15}
+                  color={theme.primaryLight}
+                  strokeWidth={2.2}
+                />
+              </View>
+
+              <View>
+                <Text style={styles.sectionTitle}>Transactions</Text>
+                <Text style={styles.sectionSubtitle}>
+                  Your recent membership activity
+                </Text>
+              </View>
             </View>
           </View>
-      </View>
-
-      <View style={[styles.transactionList, { height: transactionListHeight }]}>
-        <FlatList
-          data={transactions}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
-          renderItem={({ item }) => (
-            <View style={styles.transactionItem}>
-              <TransactionItem txn={item} />
-            </View>
-          )}
-          ListEmptyComponent={
-            <View style={styles.emptyWrapper}>
-              <EmptyState
-                icon={Receipt}
-                title="No transactions found"
-                subtitle="Your payment history and membership transactions will appear here."
-              />
-            </View>
-          }
-        />
-      </View>
+        }
+        renderItem={({ item }) => (
+          <View style={styles.transactionItem}>
+            <TransactionItem txn={item} />
+          </View>
+        )}
+        ListEmptyComponent={
+          <View style={styles.emptyWrapper}>
+            <EmptyState
+              icon={Receipt}
+              title="No transactions found"
+              subtitle="Your payment history and membership transactions will appear here."
+            />
+          </View>
+        }
+      />
     </StackWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  transactionList: {
-    flex: 1,
-    marginTop: -15
-  },
   listContent: {
     flexGrow: 1,
+    paddingBottom: 20,
   },
-  listHeader: {
+  headerContent: {
     gap: 18,
-  },
-  transactionItem: {
-    marginTop: 10,
-  },
-  emptyWrapper: {
-    minHeight: 280,
-    justifyContent: "center",
-    alignItems: "center",
   },
   sectionHeader: {
     flexDirection: "row",
@@ -130,5 +143,13 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "500",
     color: theme.textMuted,
+  },
+  transactionItem: {
+    marginTop: 10,
+  },
+  emptyWrapper: {
+    minHeight: 280,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

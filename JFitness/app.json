@@ -4,30 +4,37 @@
     "slug": "jfitness",
     "version": "1.0.0",
     "scheme": "jfitness",
-    "icon": "./assets/images/gymIcon.jpg",
-    "splash": {
-      "image": "./assets/images/gymSplashIcon.jpg",
-      "resizeMode": "contain",
-      "backgroundColor": "#0B0D10"
-    },
+    "icon": "./assets/images/gymIcon.png",
     "android": {
       "package": "com.rustomg.jfitness"
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "ccb81b19-2753-4599-aafe-451e2452c388"
+        "projectId": "a0ad9d60-f582-43f1-bb25-9520dcd0136b"
       }
     },
     "plugins": [
       "expo-image",
       "expo-router",
-      "expo-splash-screen"
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/gymSplashIcon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#0B0D10"
+        }
+      ],
+      "expo-font",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "ios": {
       "bundleIdentifier": "com.rustomg.jfitness",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
-    }
+    },
+    "owner": "mang-tommy"
   }
 }

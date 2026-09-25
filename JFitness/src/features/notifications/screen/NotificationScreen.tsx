@@ -1,20 +1,18 @@
-import { useMemo } from "react";
+// NotificationsScreen.tsx
+
+import { useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  RefreshControl,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import {
-  BadgeCheck,
   Bell,
   BellOff,
-  CreditCard,
-  Flame,
-  Star,
-  User,
 } from "lucide-react-native";
 import Toast from "react-native-toast-message";
 import { TabWrapper } from "@/components/shared/TabWrapper";
@@ -27,6 +25,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { theme } from "@/utils/theme";
 import { Notification, NotificationGroupType } from "../types/NotifTypes";
+import { useGetTabBadges } from "@/features/home/hook/useHome";
 
 function formatNotificationGroups(
   notifications: Notification[],
@@ -105,19 +104,42 @@ function formatNotificationGroups(
 
 export default function NotificationsScreen() {
   const { memberIDs } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { data: notifications = [], isLoading } = useGetMemberNotifications(memberIDs?.member_id!);
+  const {
+    data: notifications = [],
+    isLoading,
+    refetch: refetchNotifications,
+  } = useGetMemberNotifications(memberIDs?.member_id!);
+  const { refetch: refetchTabBadges } = useGetTabBadges(memberIDs?.member_id!);
+
   const { mutate: markAllRead, isPending } = useMarkAllNotificationRead();
 
   const groups = useMemo(
     () => formatNotificationGroups(notifications),
-    [notifications]
+    [notifications],
   );
 
   const totalUnread = useMemo(
-    () => notifications.filter((notification: any) => !notification.is_read).length,
-    [notifications]
+    () =>
+      notifications.filter(
+        (notification: Notification) => !notification.is_read,
+      ).length,
+    [notifications],
   );
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await refetchNotifications();
+      await refetchTabBadges();
+    } catch (error) {
+      console.error("❌ Notifications refresh failed:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleMarkAllRead = () => {
     if (!memberIDs?.member_id) {
@@ -134,7 +156,7 @@ export default function NotificationsScreen() {
             text2: data.message,
           });
         },
-      }
+      },
     );
   };
 
@@ -175,9 +197,14 @@ export default function NotificationsScreen() {
               ]}
             >
               {isPending ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator
+                  size="small"
+                  color="#fff"
+                />
               ) : (
-                <Text style={styles.markAllText}>Mark all read</Text>
+                <Text style={styles.markAllText}>
+                  Mark all read
+                </Text>
               )}
             </Pressable>
           )}
@@ -189,6 +216,14 @@ export default function NotificationsScreen() {
         keyExtractor={(item, index) => `${item.label}-${index}`}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
+          />
+        }
         renderItem={({ item }) => (
           <NotificationGroup
             label={item.label}

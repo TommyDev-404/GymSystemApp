@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import {
   ActivityIndicator,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleProp,
@@ -30,6 +31,9 @@ interface StackWrapperProps {
   paddingBottom?: number;
   gap?: number;
   useScrollView?: boolean;
+  refreshing?: boolean;
+  onRefresh?: () => void;
+  refreshTintColor?: string;
 }
 
 export function StackWrapper({
@@ -48,6 +52,9 @@ export function StackWrapper({
   paddingBottom = 10,
   gap = 20,
   useScrollView = true,
+  refreshing = false,
+  onRefresh,
+  refreshTintColor = theme.primary,
 }: StackWrapperProps) {
   const insets = useSafeAreaInsets();
 
@@ -80,6 +87,15 @@ export function StackWrapper({
             <ScrollView
               scrollEnabled={scrollEnabled}
               showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+              refreshControl={
+                onRefresh ? (
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={refreshTintColor}
+                  />
+                ) : undefined
+              }
               contentContainerStyle={[
                 styles.content,
                 {
@@ -97,7 +113,10 @@ export function StackWrapper({
                     { minHeight: loadingMinHeight },
                   ]}
                 >
-                  <ActivityIndicator size="small" color={theme.primary} />
+                  <ActivityIndicator
+                    size="small"
+                    color={theme.primary}
+                  />
                 </View>
               ) : (
                 <EaseView
@@ -132,29 +151,35 @@ export function StackWrapper({
                   { minHeight: loadingMinHeight },
                 ]}
               >
-                <ActivityIndicator size="small" color={theme.primary} />
+                <ActivityIndicator
+                  size="small"
+                  color={theme.primary}
+                />
               </View>
             ) : (
               <EaseView
-						initialAnimate={{
-							opacity: 0,
-							translateY: 14,
-						}}
-						animate={{
-							opacity: 1,
-							translateY: 0,
-						}}
-						transition={{
-							type: "timing",
-							duration: 600,
-							easing: "easeOut",
-						}}
-						style={[styles.listContainer, {
-							paddingHorizontal: horizontalPadding,
-							paddingTop,
-							paddingBottom,
-							gap
-						}]}
+                initialAnimate={{
+                  opacity: 0,
+                  translateY: 14,
+                }}
+                animate={{
+                  opacity: 1,
+                  translateY: 0,
+                }}
+                transition={{
+                  type: "timing",
+                  duration: 600,
+                  easing: "easeOut",
+                }}
+                style={[
+                  styles.listContainer,
+                  {
+                    paddingHorizontal: horizontalPadding,
+                    paddingTop,
+                    paddingBottom,
+                    gap,
+                  },
+                ]}
               >
                 {children}
               </EaseView>

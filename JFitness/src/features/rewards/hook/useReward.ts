@@ -7,6 +7,7 @@ export function useFetchAvailableRewards() {
   return useQuery<Reward[]>({
     queryKey: ["available-rewards"],
     queryFn: api.getAvailableRewardsApi,
+    
   });
 }
 

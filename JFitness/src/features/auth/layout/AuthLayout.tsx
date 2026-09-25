@@ -155,7 +155,7 @@ export function AuthLayout({
 
       <View style={styles.header}>
         <ImageBackground
-          source={require("@/assets/images/gymBG.jpg")}
+          source={require("@/assets/images/gymBG.png")}
           resizeMode="cover"
           style={styles.headerBackground}
         >

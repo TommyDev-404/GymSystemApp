@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Star, Gift } from "lucide-react-native";
 import ReferralHero from "@/features/referral/components/ReferralHero";
 import MilestonesSection from "@/features/referral/components/ReferrralRules";
@@ -31,24 +32,44 @@ export const referralRules = [
 
 export default function ReferralScreen() {
   const { memberIDs } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
 
   const {
     data: referralData = {} as ReferralData,
     isLoading: dataLoading,
+    refetch: refetchReferralData,
   } = useGetMemberReferralData(memberIDs?.member_id!);
 
   const {
     data: referralHistory = [],
     isLoading: historyLoading,
+    refetch: refetchReferralHistory,
   } = useGetMemberReferralRecords(memberIDs?.member_id!);
 
   const isLoading = dataLoading;
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await Promise.all([
+        refetchReferralData(),
+        refetchReferralHistory(),
+      ]);
+    } catch (error) {
+      console.error("❌ Referral refresh failed:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   return (
     <StackWrapper
       title="Referral Program"
       subtitle="Invite friends. Earn rewards together."
       loading={isLoading}
+      refreshing={refreshing}
+      onRefresh={handleRefresh}
     >
       <ReferralHero
         code={referralData?.referral_code}
@@ -59,8 +80,10 @@ export default function ReferralScreen() {
 
       <MilestonesSection data={referralRules} />
 
-      <ReferralList data={referralHistory} loading={historyLoading} />
-     
+      <ReferralList
+        data={referralHistory}
+        loading={historyLoading}
+      />
     </StackWrapper>
   );
 }

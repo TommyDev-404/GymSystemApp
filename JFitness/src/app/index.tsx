@@ -25,13 +25,14 @@ export default function Index() {
     return null;
   }
 
+  if (!onboardingCompleted) {
+    return <Redirect href="/welcome" />;
+  }
+  
   if (authenticated) {
     return <Redirect href="/(app)/(tabs)/home" />;
   }
 
-  if (!onboardingCompleted) {
-    return <Redirect href="/welcome" />;
-  }
 
   return <Redirect href="/(auth)/login" />;
 }

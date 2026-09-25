@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { AlarmClock } from "lucide-react-native";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -18,9 +18,19 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function WorkoutScreen() {
   const { memberIDs } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { data: personalWorkoutHistory = [], isLoading: historyLoading } = useGetPersonalWorkoutHistory(memberIDs?.member_id!);
-  const { data: tutorials = [], isLoading: tutorialsLoading } = useWorkoutTutorials({ limit: 3 });
+  const {
+    data: personalWorkoutHistory = [],
+    isLoading: historyLoading,
+    refetch: refetchHistory,
+  } = useGetPersonalWorkoutHistory(memberIDs?.member_id!);
+
+  const {
+    data: tutorials = [],
+    isLoading: tutorialsLoading,
+    refetch: refetchTutorials,
+  } = useWorkoutTutorials({ limit: 3 });
 
   const sheetRef = useRef<BottomSheetModal>(null);
 
@@ -32,11 +42,28 @@ export default function WorkoutScreen() {
     sheetRef.current?.dismiss();
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await Promise.all([
+        refetchHistory(),
+        refetchTutorials(),
+      ]);
+    } catch (error) {
+      console.error("❌ Workout refresh failed:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <>
       <TabWrapper
         loading={historyLoading || tutorialsLoading}
         gap={22}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
       >
         <WorkoutHeader onAddPress={openSheet} />
 

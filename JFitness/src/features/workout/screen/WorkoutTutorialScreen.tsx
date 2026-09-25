@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import {
   Dumbbell,
   Flame,
@@ -8,11 +8,13 @@ import {
   Wind,
   Zap,
 } from "lucide-react-native";
+
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StackWrapper } from "@/components/shared/StackWrapper";
 import { CategoryFilter } from "@/features/workout/components/tutorial/CategoryFilter";
 import { WorkoutTutorialCard } from "@/features/workout/components/tutorial/WorkoutTutorialCard";
 import { useWorkoutTutorials } from "../hook/useWorkout";
+import { theme } from "@/utils/theme";
 
 const categories = [
   {
@@ -66,48 +68,74 @@ const categories = [
 ];
 
 export function WorkoutTutorialsScreen() {
-	const [activeCategory, setActiveCategory] = useState("All");
-	const { data: tutorials = [], isLoading } = useWorkoutTutorials({
-		category: activeCategory,
-	});
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [refreshing, setRefreshing] = useState(false);
 
-	return (
-		<StackWrapper
-			title="Workout Tutorials"
-			subtitle="Step-by-step exercise guides"
-			headerContent={
-				<View style={styles.categoryContainer}>
-					<CategoryFilter
-						categories={categories}
-						activeCategory={activeCategory}
-						setActiveCategory={setActiveCategory}
-					/>
-				</View>
-			}
-			loading={isLoading}
-			scrollEnabled={false}
-			useScrollView={false}
-		>
-			<FlatList
-			data={tutorials}
-			keyExtractor={(item: any) => String(item.id)}
-			showsVerticalScrollIndicator={false}
-			contentContainerStyle={styles.listContent}
-			renderItem={({ item }: { item: any }) => (
-				<WorkoutTutorialCard item={item} />
-			)}
-			ListEmptyComponent={
-				<View style={styles.emptyList}>
-					<EmptyState
-					icon={Dumbbell}
-					title="No workouts yet"
-					subtitle="Workout tutorials for this category will appear here when available."
-					/>
-				</View>
-			}
-			/>
-		</StackWrapper>
-	);
+  const {
+    data: tutorials = [],
+    isLoading,
+    refetch,
+  } = useWorkoutTutorials({
+    category: activeCategory,
+  });
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await refetch();
+    } catch (error) {
+      console.error("❌ Workout tutorials refresh failed:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  return (
+    <StackWrapper
+      title="Workout Tutorials"
+      subtitle="Step-by-step exercise guides"
+      headerContent={
+        <View style={styles.categoryContainer}>
+          <CategoryFilter
+            categories={categories}
+            activeCategory={activeCategory}
+            setActiveCategory={setActiveCategory}
+          />
+        </View>
+      }
+      loading={isLoading}
+      scrollEnabled={false}
+      useScrollView={false}
+    >
+      <FlatList
+        data={tutorials}
+        keyExtractor={(item: any) => String(item.id)}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
+          />
+        }
+        renderItem={({ item }: { item: any }) => (
+          <WorkoutTutorialCard item={item} />
+        )}
+        ListEmptyComponent={
+          <View style={styles.emptyList}>
+            <EmptyState
+              icon={Dumbbell}
+              title="No workouts yet"
+              subtitle="Workout tutorials for this category will appear here when available."
+            />
+          </View>
+        }
+      />
+    </StackWrapper>
+  );
 }
 
 const styles = StyleSheet.create({
