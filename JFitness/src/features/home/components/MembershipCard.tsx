@@ -67,7 +67,7 @@ export function MembershipCard({
               </Text>
 
               <Text style={styles.plan}>
-                {plan || "Standard Plan"}
+                {status === "Active" ? plan : "No Active Plan"}
               </Text>
             </View>
           </View>
@@ -76,7 +76,7 @@ export function MembershipCard({
             <View style={styles.statusDot} />
 
             <Text style={styles.statusText}>
-              {status || "Active"}
+              {status || "Inactive"}
             </Text>
           </View>
         </View>

@@ -6,8 +6,6 @@
  
  export interface PaymentStats {
    totalPaid: number;
-   plan: string;
-   expires: Date;
  }
  
  export interface PaymentHistoryItem {

@@ -150,7 +150,6 @@ export function AttendanceHistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    paddingHorizontal: 15,
     paddingBottom: 24,
     gap: 10,
   },
