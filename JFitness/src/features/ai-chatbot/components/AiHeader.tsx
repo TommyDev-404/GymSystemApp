@@ -37,7 +37,7 @@ export default function AiHeader() {
       <View style={styles.info}>
         <View style={styles.titleRow}>
           <Text style={styles.title}>
-            AI Fitness Coach
+            JFitness Coach
           </Text>
 
           <View style={styles.aiBadge}>

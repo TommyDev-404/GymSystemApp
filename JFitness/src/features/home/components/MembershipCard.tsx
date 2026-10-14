@@ -67,7 +67,7 @@ export function MembershipCard({
               </Text>
 
               <Text style={styles.plan}>
-                {status === "Active" ? plan : "No Active Plan"}
+                {status !== "Expired" ? plan : "No Active Plan"}
               </Text>
             </View>
           </View>

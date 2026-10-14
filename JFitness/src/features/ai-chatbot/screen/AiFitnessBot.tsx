@@ -32,7 +32,7 @@ export default function ChatbotScreen() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "👋 Hi! I'm JFitness AI.\n\nI'm your personal fitness coach. Ask me about workouts, nutrition, weight goals, or gym programs. 💪\n\nWhat would you like to work on today?",
+      text: "Hi! I'm JFitness Coach.\n\nI'm your personal fitness coach. Ask me about workouts, nutrition, weight goals, or gym programs. 💪\n\nWhat would you like to work on today?",
       sender: "bot",
     },
   ]);
@@ -90,7 +90,7 @@ export default function ChatbotScreen() {
 
     const typingMessage: Message = {
       id: "typing",
-      text: "JFitness AI is typing...",
+      text: "JFitness Coach is typing...",
       sender: "bot",
       isTyping: true,
     };
@@ -122,7 +122,7 @@ export default function ChatbotScreen() {
         ];
       });
     } catch (error) {
-      console.error("GymBot API error:", error);
+      console.error("JFitness Coach error:", error);
 
       setMessages((prev) => {
         const filtered = prev.filter(
@@ -133,7 +133,7 @@ export default function ChatbotScreen() {
           ...filtered,
           {
             id: `${Date.now()}-error`,
-            text: "Sorry, I couldn't connect to GymBot AI. Please try again.",
+            text: "Sorry, I couldn't connect to JFitness Coach. Please try again.",
             sender: "bot",
           },
         ];
@@ -145,7 +145,7 @@ export default function ChatbotScreen() {
 
   return (
     <StackWrapper
-      title="JFitness AI"
+      title="JFitness Coach"
       showDefaultHeader={false}
       headerContent={header}
       horizontalPadding={0}
