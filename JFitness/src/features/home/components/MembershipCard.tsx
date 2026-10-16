@@ -12,7 +12,8 @@ interface Props {
   plan: string;
   membership_start: string;
   expiry: string;
-  status: string;
+  membershipStatus: string;
+  engagementStatus: string;
   points?: number;
 }
 
@@ -20,7 +21,8 @@ export function MembershipCard({
   plan,
   membership_start,
   expiry,
-  status,
+  membershipStatus,
+  engagementStatus,
   points = 0,
 }: Props) {
   const step = 1000;
@@ -63,11 +65,11 @@ export function MembershipCard({
 
             <View>
               <Text style={styles.eyebrow}>
-                CURRENT MEMBERSHIP
+                MEMBERSHIP
               </Text>
 
               <Text style={styles.plan}>
-                {status !== "Expired" ? plan : "No Active Plan"}
+                {membershipStatus !== "Expired" ? plan : "No Active Plan"}
               </Text>
             </View>
           </View>
@@ -76,7 +78,14 @@ export function MembershipCard({
             <View style={styles.statusDot} />
 
             <Text style={styles.statusText}>
-              {status || "Inactive"}
+            {engagementStatus === "AT_RISK"
+              ? "At Risk"
+              : engagementStatus === "NO_ATTENDANCE"
+                ? "No Attendance Yet"
+                : engagementStatus === "ACTIVE"
+                  ? "Active"
+                    : "Inactive"
+              }
             </Text>
           </View>
         </View>

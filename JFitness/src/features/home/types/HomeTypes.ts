@@ -4,7 +4,8 @@ export type MemberDashboard = {
    membership_start: string | null;
    plan: string;
    expiry: string | null;
-   status: "Active" | "Inactive";
+  membershipStatus: string;
+  engagementStatus: string;
    points: number;
  
    stats: {

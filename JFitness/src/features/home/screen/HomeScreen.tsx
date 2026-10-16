@@ -155,7 +155,8 @@ export default function HomeScreen() {
           plan={dashboardData?.plan}
           membership_start={dashboardData?.membership_start!}
           expiry={dashboardData?.expiry!}
-          status={dashboardData?.status}
+          membershipStatus={dashboardData?.membershipStatus}
+          engagementStatus={dashboardData?.engagementStatus}
           points={dashboardData?.points}
         />
 

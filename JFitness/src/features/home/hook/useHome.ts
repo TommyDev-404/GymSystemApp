@@ -13,7 +13,6 @@ import {
 } from "../types/HomeTypes";
 import * as api from "../api/home.api"
 
-
 export function useGetMemberDashboardData(memberId: number) {
 	return useQuery<MemberDashboard>({
 		queryKey: ["member-dashboard-stat", memberId],
