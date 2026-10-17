@@ -14,17 +14,17 @@ import { StackWrapper } from "@/components/shared/StackWrapper";
 export const referralRules = [
   {
     title: "Invite a Friend",
-    reward: "+100 Points",
+    reward: "+25 Points",
     description:
-      "Earn 100 points every time a friend joins using your referral code.",
+      "Earn 25 points every time a friend joins using your referral code.",
     icon: Star,
     color: "#10b981",
   },
   {
     title: "Use a Referral Code",
-    reward: "+50 Points",
+    reward: "+10 Points",
     description:
-      "Enter a co-member's referral code during registration and earn 50 points.",
+      "Enter a co-member's referral code during registration and earn 10 points.",
     icon: Gift,
     color: "#3b82f6",
   },

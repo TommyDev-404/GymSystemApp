@@ -78,13 +78,13 @@ export function MembershipCard({
             <View style={styles.statusDot} />
 
             <Text style={styles.statusText}>
-            {engagementStatus === "AT_RISK"
-              ? "At Risk"
-              : engagementStatus === "NO_ATTENDANCE"
-                ? "No Attendance Yet"
-                : engagementStatus === "ACTIVE"
-                  ? "Active"
-                    : "Inactive"
+              {engagementStatus === "AT_RISK"
+                ? "At Risk"
+                : engagementStatus === "NO_ATTENDANCE"
+                  ? "No Attendance Yet"
+                  : engagementStatus === "ACTIVE"
+                    ? "Active"
+                      : "Inactive"
               }
             </Text>
           </View>
@@ -101,17 +101,34 @@ export function MembershipCard({
             </View>
 
             <View>
-              <Text style={styles.label}>
-                STARTED
-              </Text>
+              <Text style={styles.label}>STARTED</Text>
 
               <Text style={styles.date}>
-                {membership_start ||
-                  new Date().toLocaleDateString("en-PH", {
-                    month: "short",
-                    day: "2-digit",
-                    year: "numeric",
-                  })}
+                {membership_start
+                  ? new Date(membership_start).toLocaleDateString("en-PH", {
+                      month: "short",
+                      day: "2-digit",
+                      year: "numeric",
+                    })
+                  : new Date().toLocaleDateString("en-PH", {
+                      month: "short",
+                      day: "2-digit",
+                      year: "numeric",
+                    })}
+              </Text>
+
+              <Text style={styles.time}>
+                {membership_start
+                  ? new Date(membership_start).toLocaleTimeString("en-PH", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })
+                  : new Date().toLocaleTimeString("en-PH", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
               </Text>
             </View>
           </View>
@@ -133,17 +150,34 @@ export function MembershipCard({
             </View>
 
             <View>
-              <Text style={styles.label}>
-                EXPIRES
+              <Text style={styles.label}>EXPIRED</Text>
+
+              <Text style={styles.date}>
+                {expiry
+                  ? new Date(expiry).toLocaleDateString("en-PH", {
+                      month: "short",
+                      day: "2-digit",
+                      year: "numeric",
+                    })
+                  : new Date().toLocaleDateString("en-PH", {
+                      month: "short",
+                      day: "2-digit",
+                      year: "numeric",
+                    })}
               </Text>
 
-              <Text style={styles.expiry}>
-                {expiry ||
-                  new Date().toLocaleDateString("en-PH", {
-                    month: "short",
-                    day: "2-digit",
-                    year: "numeric",
-                  })}
+              <Text style={styles.time}>
+                {expiry
+                  ? new Date(expiry).toLocaleTimeString("en-PH", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })
+                  : new Date().toLocaleTimeString("en-PH", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
               </Text>
             </View>
           </View>
@@ -210,6 +244,11 @@ export function MembershipCard({
 }
 
 const styles = StyleSheet.create({
+  time: {
+    marginTop: 2,
+    fontSize: 12,
+    color: "#c7c2c2",
+  },
   card: {
     borderRadius: 20,
     overflow: "hidden",

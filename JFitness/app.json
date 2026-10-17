@@ -27,7 +27,8 @@
       ],
       "expo-font",
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-audio"
     ],
     "ios": {
       "bundleIdentifier": "com.rustomg.jfitness",

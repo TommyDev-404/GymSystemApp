@@ -10,41 +10,67 @@ import {
 } from "lucide-react-native";
 import { StackWrapper } from "@/components/shared/StackWrapper";
 import { theme } from "@/utils/theme";
+import { useAudioPlayer } from "expo-audio";
 
 export function WorkoutTimerScreen() {
   const [minutes, setMinutes] = useState(1);
   const [seconds, setSeconds] = useState(30);
-  const [timeLeft, setTimeLeft] = useState(minutes * 60 + seconds);
+  const [timeLeft, setTimeLeft] = useState(90);
   const [running, setRunning] = useState(false);
+  const [soundPlayed, setSoundPlayed] = useState(false);
+
+  const countdownPlayer = useAudioPlayer(
+    require("@/assets/sound/countdown.mp3")
+  );
 
   useEffect(() => {
     if (!running) return;
 
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          setRunning(false);
-          return 0;
-        }
-
-        return prev - 1;
-      });
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => Math.max(0, prev - 1));
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
   }, [running]);
+
+  useEffect(() => {
+    if (timeLeft === 0) {
+      setRunning(false);
+      return;
+    }
+
+    if (!running || timeLeft > 10 || soundPlayed) return;
+
+    setSoundPlayed(true);
+    countdownPlayer.seekTo(0);
+    countdownPlayer.play();
+  }, [timeLeft, running, soundPlayed, countdownPlayer]);
 
   const reset = () => {
     setRunning(false);
     setTimeLeft(minutes * 60 + seconds);
+    setSoundPlayed(false);
+    countdownPlayer.pause();
+    countdownPlayer.seekTo(0);
+  };
+
+  const toggleTimer = () => {
+    if (timeLeft <= 0) return;
+    setRunning((prev) => !prev);
   };
 
   const updateTime = (newMinutes: number, newSeconds: number) => {
     if (running) return;
 
+    const totalSeconds = newMinutes * 60 + newSeconds;
+
     setMinutes(newMinutes);
     setSeconds(newSeconds);
-    setTimeLeft(newMinutes * 60 + newSeconds);
+    setTimeLeft(totalSeconds);
+    setSoundPlayed(false);
+
+    countdownPlayer.pause();
+    countdownPlayer.seekTo(0);
   };
 
   const formatTime = (value: number) => {
@@ -85,7 +111,11 @@ export function WorkoutTimerScreen() {
           />
 
           <Text style={styles.statusText}>
-            {running ? "Timer running" : "Ready"}
+            {running
+              ? "Timer running"
+              : timeLeft === 0
+                ? "Time's up"
+                : "Ready"}
           </Text>
         </View>
       </View>
@@ -97,6 +127,8 @@ export function WorkoutTimerScreen() {
             styles.resetButton,
             pressed && styles.pressed,
           ]}
+          accessibilityRole="button"
+          accessibilityLabel="Reset timer"
         >
           <RotateCcw
             size={20}
@@ -106,13 +138,15 @@ export function WorkoutTimerScreen() {
         </Pressable>
 
         <Pressable
-          onPress={() => setRunning((prev) => !prev)}
+          onPress={toggleTimer}
           disabled={timeLeft === 0}
           style={({ pressed }) => [
             styles.playButton,
             timeLeft === 0 && styles.disabledButton,
             pressed && styles.playPressed,
           ]}
+          accessibilityRole="button"
+          accessibilityLabel={running ? "Pause timer" : "Start timer"}
         >
           {running ? (
             <Pause
@@ -134,7 +168,6 @@ export function WorkoutTimerScreen() {
         <View style={styles.settingsHeader}>
           <View>
             <Text style={styles.settingTitle}>Set Timer</Text>
-
             <Text style={styles.settingSubtitle}>
               Adjust your workout duration
             </Text>
@@ -148,17 +181,9 @@ export function WorkoutTimerScreen() {
           value={minutes}
           disabled={running}
           minus={() =>
-            updateTime(
-              Math.max(0, minutes - 1),
-              seconds
-            )
+            updateTime(Math.max(0, minutes - 1), seconds)
           }
-          plus={() =>
-            updateTime(
-              minutes + 1,
-              seconds
-            )
-          }
+          plus={() => updateTime(minutes + 1, seconds)}
         />
 
         <TimeAdjust
@@ -166,16 +191,10 @@ export function WorkoutTimerScreen() {
           value={seconds}
           disabled={running}
           minus={() =>
-            updateTime(
-              minutes,
-              Math.max(0, seconds - 5)
-            )
+            updateTime(minutes, Math.max(0, seconds - 5))
           }
           plus={() =>
-            updateTime(
-              minutes,
-              Math.min(55, seconds + 5)
-            )
+            updateTime(minutes, Math.min(55, seconds + 5))
           }
         />
       </View>
@@ -215,14 +234,12 @@ function TimeAdjust({
           ]}
           onPress={minus}
           disabled={disabled}
+          accessibilityRole="button"
+          accessibilityLabel={`Decrease ${label.toLowerCase()}`}
         >
           <Minus
             size={15}
-            color={
-              disabled
-                ? theme.textMuted
-                : theme.textSub
-            }
+            color={disabled ? theme.textMuted : theme.textSub}
           />
         </Pressable>
 
@@ -239,11 +256,10 @@ function TimeAdjust({
           ]}
           onPress={plus}
           disabled={disabled}
+          accessibilityRole="button"
+          accessibilityLabel={`Increase ${label.toLowerCase()}`}
         >
-          <Plus
-            size={15}
-            color="#fff"
-          />
+          <Plus size={15} color="#fff" />
         </Pressable>
       </View>
     </View>
